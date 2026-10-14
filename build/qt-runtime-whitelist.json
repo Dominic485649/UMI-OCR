@@ -1,0 +1,76 @@
+{
+  "qtVersion": "6.11.2",
+  "quickStyle": "Basic",
+  "pythonExtensions": [
+    "QtCore.pyd",
+    "QtGui.pyd",
+    "QtNetwork.pyd",
+    "QtOpenGL.pyd",
+    "QtQml.pyd",
+    "QtQuick.pyd",
+    "QtQuickControls2.pyd",
+    "QtWidgets.pyd"
+  ],
+  "requiredQmlModules": [
+    "Qt/labs/folderlistmodel",
+    "Qt/labs/platform",
+    "Qt/labs/qmlmodels",
+    "Qt5Compat/GraphicalEffects",
+    "Qt5Compat/GraphicalEffects/private",
+    "QtQml",
+    "QtQml/Models",
+    "QtQml/WorkerScript",
+    "QtQuick",
+    "QtQuick/Controls",
+    "QtQuick/Controls/Basic",
+    "QtQuick/Controls/Basic/impl",
+    "QtQuick/Controls/impl",
+    "QtQuick/Dialogs",
+    "QtQuick/Dialogs/quickimpl",
+    "QtQuick/Effects",
+    "QtQuick/Layouts",
+    "QtQuick/Shapes",
+    "QtQuick/Templates",
+    "QtQuick/Window"
+  ],
+  "excludedQmlPrefixes": [
+    "QtQuick/Controls/FluentWinUI3",
+    "QtQuick/Controls/Fusion",
+    "QtQuick/Controls/Imagine",
+    "QtQuick/Controls/Material",
+    "QtQuick/Controls/Universal",
+    "QtQuick/Controls/Windows",
+    "QtQuick/NativeStyle"
+  ],
+  "pluginFiles": [
+    "iconengines/qsvgicon.dll",
+    "imageformats/qgif.dll",
+    "imageformats/qico.dll",
+    "imageformats/qjpeg.dll",
+    "imageformats/qsvg.dll",
+    "imageformats/qtiff.dll",
+    "imageformats/qwebp.dll",
+    "networkinformation/qnetworklistmanager.dll",
+    "platforms/qwindows.dll",
+    "styles/qmodernwindowsstyle.dll",
+    "tls/qcertonlybackend.dll",
+    "tls/qschannelbackend.dll"
+  ],
+  "translationLocales": [
+    "en",
+    "ja",
+    "pt_BR",
+    "ru",
+    "zh_CN",
+    "zh_TW"
+  ],
+  "removeDirectories": [
+    "doc",
+    "glue",
+    "include",
+    "metatypes",
+    "resources",
+    "scripts",
+    "typesystems"
+  ]
+}

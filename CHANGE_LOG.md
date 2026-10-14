@@ -1,0 +1,413 @@
+# v3.0.0
+
+- 正式 Release tag 为 `v3.0.0`。
+- 本次范围为 Windows x64；共用 Python 3.13.16、Qt 6.11.2。Linux 留待后续考虑。
+- 公开范围为基础程序和 CUDA 插件；基础程序 Release 位于主仓库，CUDA 插件 Release 位于 `Dominic485649/UMI-OCR_plugins`。
+- CPU 与 CUDA 识别效果相同，CPU 较慢；PaddleOCR-VL 精度高、速度接近 CPU。CPU 和 VL 插件单独收费，联系 QQ 群【AWJ | Umi-OCR】：https://qm.qq.com/q/5XHoXCOU26。收费用于覆盖开发、测试、维护和持续投入；建议优先使用免费 CUDA 版本，不要求购买收费插件。
+- 归档使用 `.tar.xz` 与标准 LZMA2 默认压缩等级。
+- 第三方插件开发、接入和替换开放；本版本不保证任意插件或平台兼容。源码范围及对应源码义务见 [SOURCE-CODE.md](SOURCE-CODE.md)。
+- 修复任务工作线程收尾时新请求可能滞留的问题，后端与回调异常后结束错误队列并恢复后续处理。
+- 修复共享模型服务并发初始化重复实例的问题，避免健康检查与预启动同时创建多个服务。
+- 修正 HTTP 预检与请求输入校验，限制文档上传/下载路径，并阻止外部网页调用本机命令接口。
+
+# 2.8.1 本地候选
+
+- Python 3.13.16 / PySide6 6.11.2；文档处理与推理按需启动。
+- CPU、CUDA、VL 独立进程并行安装，修复 ONNX 与 QML 参数转换。
+- 设置自动应用、插件和语言/HTTP 热切换；识别记录保存设备与模型。
+- VL 文字定位与完整文档解析、区域失败保留结果、预览与主题布局修复。
+- ZIP/RCC 直接读取，按实测性能回退保留必需独立文件；本次不公开发布。
+
+# 分支使用说明
+
+点击后续列表的版本号链接，可前往对应备份分支页面。
+
+部分备份分支含有体积较大的二进制库，会让你花费长时间下载。因此，建议只下载你需要用的分支。
+
+方法1：将所需的分支，fork到你自己的账号下，然后clone你自己仓库。
+
+方法2：使用以下命令手动clone指定分支：
+
+```
+git clone --single-branch --branch [分支名] https://github.com/hiroi-sora/Umi-OCR.git
+```
+
+方法3：在本仓库手动下载指定分支的zip源码包。
+
+`[分支名]` 可以是 `main` 、`release/2.0.0` 等，详见下方列表。
+
+`main`、`dev` 等分支，可能含有开发中的不稳定的新功能。如果用于研究学习或二次开发，建议选择 `release` 开头的分支。
+
+# 更新日志 CHANGE LOG
+
+### v2.6.0 `2026.7.25`
+
+分支名：`main`
+
+- 修复 Windows 原生系统托盘启动链：使用 `QApplication` 承载 `Qt.labs.platform.SystemTrayIcon`，补齐 Qt Widgets Python 绑定，并保持最后窗口关闭后事件循环与托盘存活。
+- 加强发行审计：校验托盘图标、Qt/QML 模块、OCR 模型和原生 DLL 哈希闭包；仅清理 site-packages 中的测试目录、类型声明和构建开发文件。
+- 独立结构化文档适配器仍位于 `D:\Code\Python\Umi-OCR-Plugin`，其完整源码归档统一输出到本项目 `release/`，不嵌入基础包且不包含模型权重或外部模型服务器。
+- 完成 GPU OCR 插件化体积与接口评估；本版不迁移 CUDA/Paddle/PP-OCR，基础包仍是 CUDA 12.6 GPU 发行物且不提供 CPU fallback。
+
+### v2.5.1 `2026.7.22`
+
+分支名：`main`
+
+- 本 fork 的新增和修改代码，以及包含 PyMuPDF 的完整组合发行物，按 AGPL-3.0-or-later 发布；原 Umi-OCR 的 MIT `LICENSE`、hiroi-sora 版权和署名完整保留。发行包附带对应源码、构建脚本、依赖锁与第三方声明。
+- 保留通过 PyMuPDF `fitz` 实现的 PDF 预览、页面读取、文档 OCR 与单层、双层可搜索 PDF 输出。
+- 修复批量 OCR 拖入文件夹：本地 `QUrl` 保留目录路径，后台递归扫描现有支持的图片格式，并对空目录、不可访问路径、缺失路径和不支持文件给出可定位反馈。
+- 修复 Windows 系统托盘实际可见性和生命周期：启动后显示真实托盘图标，单击截屏、双击启动界面，右键提供左键提示、全局设置、模型操作、启动界面和退出。
+- 完整剥离旧的可选结构化文档适配器及其外部模型运行时引用；基础包审计拒绝残留内容，独立源码交付项目位于 `D:\Code\Python\Umi-OCR-Plugin`。
+
+### v2.5.0 `2026.7.21`
+
+分支名：`main`
+
+- 主窗口最大化、还原和横向缩放时保持用户拖动后的左右分栏比例，不再固定左栏像素宽度。
+- 系统托盘图标改为始终显示：单击截图、双击打开主窗口，右键可打开全局设置、预热或清理 OCR 模型、打开主窗口及退出。
+- 新增 OCR 模型生命周期设置：可在启动后延迟 `0–60` 分钟预热或首次使用时加载；可禁用自动清理、在系统内存超过 90% 时每 6 分钟检查，或在空闲 `5–120` 分钟后清理。任务运行时不会清理。
+- 模型预热成功后继续驻留所选 NVIDIA GPU；手动或自动清理会关闭 PaddleOCR、回收 Python 对象并清理 Paddle CUDA 缓存，不引入 CPU fallback。
+- 开发 staging 固定为 `build/staging/Umi-OCR_Windows_x64_CUDA12.6`，仅最终归档文件名携带 2.5.0 版本号；默认构建会清除 staging 中的旧版本目录。
+- 评估 CUDA 13：PaddlePaddle GPU 3.3.1 存在 cu130 Windows wheel，但尚无达到发布门槛的同模型性能收益数据；cu133 没有兼容 wheel，因此继续使用已完整验证的 CUDA 12.6 运行时。Scoop CUDA 13.3 缺少 cuDNN 且 DLL ABI 不匹配，不能替代便携包运行库。
+
+### v2.3.0 `2026.7.20`
+
+分支名：`main`
+
+- 修复 Qt6 下 OCR 四点框被 `Array.isArray()` 错误过滤的问题；图片文字叠加层恢复显示、悬停和跨框拖选，复杂多边形坐标保持不变。
+- 二元选项改为圆角滑块和主题色状态，不再显示对勾或横线；下拉项继续使用文字色与侧边标记表示当前选择。
+- 启动器和第三方依赖创建的 Windows 子进程统一隐藏控制台；发布测试同时校验 `Umi-OCR.exe` 必须为 Windows GUI 子系统。
+- 版本和基础 CUDA 包名称统一从 `about.json` 读取，避免发布脚本版本漂移。
+- 复核标题标签切换、托盘隐藏与重复启动唤回、2.1 秒首屏、D3D11 硬件渲染、鼠标锚点缩放和 PP-OCRv6 CUDA 显存驻留。
+
+### v2.2.0 `2026.7.16`
+
+分支名：`main`
+
+- Windows 发行版迁移到 Python 3.13.14 x64 embeddable、PySide6/Qt 6.11.1，并改为 Qt6 RHI/D3D11。保持 `Umi-OCR` 品牌、`Umi-OCR.exe` 和便携 `.settings` 不变。
+- 发行版仅支持 Windows 10/11 x64、NVIDIA CUDA 12.6 和驱动 560.76 以上；PaddlePaddle GPU 3.3.1 不提供 CPU、oneDNN、ONNX 或 DirectML fallback。CUDA 不可用时 OCR 明确失败，二维码等独立功能仍可用。
+- 删除当前发行包中的旧 PP-OCR V2-V5、旧语言模型和 PP-OCRv6 small/tiny；截图、批量图片、PDF、HTTP 和 CLI 默认使用 PP-OCRv6_medium 高精度流水线。
+- 集成文档方向、UVDoc 去扭曲和文本行方向辅助模型。UVDoc 派生只读网格输出，并将识别框逆映射回原输入坐标；派生前后图像输出逐像素一致。
+- 新增“速度优先”“均衡”“高精度”预设。手动修改受管参数后立即显示“自定义”；HTTP 主动选择预设也会展开对应参数。
+- 新增 Windows Graphics Capture + D3D11 HDR 截图：以浮点 scRGB 捕获，执行 BT.2390、色域压缩与 IEC sRGB OETF；按显示器失败时回退普通 SDR 截图。
+- 新增 AVIF（dav1d）、WebP、JPEG XL、JPEG XR/WDP/HDP 解码，并在 OCR 前统一转换为连续 BGR 8-bit 图像。
+- 新增可复现 wheel/模型锁、原生 DLL 清单、Qt `qmlimportscanner` 裁剪、CUDA 包审计、性能基准和 Windows 发行脚本。
+- 修复 Qt6 下 PDF 文字写入、QML 退出、命令行参数序列化、批量/PDF OCR 以及速度预设无文档变换时的坐标恢复。
+- 修复标题标签无法点击切页、首次截图窗口无法激活、复杂四点框错位和图片居中缩放；识别叠加层现在保留多边形与旋转，并以鼠标位置缩放。
+- 优化首屏启动：Paddle/OpenCV/PyMuPDF 等改为按需导入，CUDA 模型在首帧后后台预热并驻留复用；启动 UI 中位耗时由 5099.752 ms 降至 2151.293 ms。
+- 新增跟随系统主题、独立浅/深主题映射和 `rgb(24,24,24)` 中性深色；统一圆角菜单、下拉框、通知和选中态，并改善触摸板滚动。
+- 完善系统托盘：单击截图、双击打开主窗口、右键打开/退出；Windows UI 固定使用 Qt6 RHI/D3D11 硬件渲染。
+- 预处理线程默认改为逻辑核心少于 6 时全用，否则保留 4 个逻辑核心给界面和系统；该设置仅影响 CPU 图像预处理，不是 CPU OCR fallback。
+
+### v2.1.5 `2025.3.26`
+
+分支名：`main`
+
+- 新增：日志机制。在命令行中启动 Umi-OCR 可查看实时日志。指定级别以上（默认为ERROR）的日志被保存到 `Umi-OCR/UmiOCR-data/logs` 目录中，保存级别可以在全局设置标签页中更改。
+- 新增：大部分标签页能手动切换左右/上下双栏模式。 (#789)
+- 新增：Esc键隐藏主窗口。 (#652)
+- 新增：调整二维码生成相关参数后，自动刷新二维码生成。 (#690)
+- 新增：命令行指令 `--reload` ，用于重新加载配置文件。 👉 [文档](https://github.com/hiroi-sora/Umi-OCR/blob/main/docs/README_CLI.md#软件操控指令)
+- 修复：文档识别提取PDF自带的文本内容时，未考虑页面旋转的影响。 (#785)
+- 修复：文档识别生成单层PDF时，未写入原PDF自带的文本内容。
+- 修复：OCR结果展示列表的一些显示Bug和鼠标划选Bug。
+- 修复：调整标签页顺序或删除标签页后，未及时保存顺序信息。
+- 修复：HTTP接口 `/api/doc/download` 参数 `ignore_blank` 的错误。
+- 修复：Linux版本截图时，系统任务栏推移顶层窗口，导致截图位置偏移。 (#778)
+- 修复：Linux版本截图后，主窗口的位置与操作前不一致。
+- 优化：图片/文档的异步加载机制。现在可以流畅地加载含有数万个子文件的文件夹，且能预览加载进度。 (#710)
+- Windows 版本更新第三方依赖库：`PyMuPDF 1.24.11` ,`fontTools 4.56.0` ,`Pillow 10.4.0` ,`psutil 10.4.0` ,`pynput 1.8.0` ,`zxing-cpp 2.3.0`
+- 新增UI语言：俄语 `Русский` ，译者：[Вячеслав Анатольевич Малышев](https://hosted.weblate.org/user/1969)、[Muhammadyusuf Kurbonov](https://hosted.weblate.org/user/muhammadyusuf.kurbonov2002)。泰米尔语 `தமிழ்` ，译者：[தமிழ்நேரம்](https://hosted.weblate.org/user/TamilNeram/)。
+
+
+### [v2.1.4](https://github.com/hiroi-sora/Umi-OCR/tree/release/2.1.4) `2024.8.31`
+
+分支名：`release/2.1.4`
+
+- 修复：引擎原始输出项的"text"为空时，导致文本分析越界的错误。 (#625)
+- 新增UI语言：葡萄牙语 `Português` 。译者：[@杨鹏](https://hosted.weblate.org/user/ypf)
+- **PaddleOCR 插件相关**：
+  - 修复：布尔类型选项不生效的问题。
+  - 修复： `繁体中文` 配置文件错误的问题。
+  - 优化：调整默认线程/内存限制，默认内存占用不超过系统总内存的一半。
+  - 优化：调整识别语言库结构，精简不必要的文件。
+- **Linux 版本相关**：
+  - 修复：[Docker 部署](https://github.com/hiroi-sora/Umi-OCR_runtime_linux/blob/main/README-docker.md) 在部分旧系统中报错 `'code': 803` 的问题。(#621)
+  - 优化：`glibc` 依赖降级至 `2.31` ，兼容 Debian-11 、 Ubuntu-20 等发行版。
+
+### [v2.1.3](https://github.com/hiroi-sora/Umi-OCR/tree/release/2.1.3) `2024.7.23`
+
+分支名：`release/2.1.3`
+
+- 新兼容 Linux 平台。
+- 支持：[Docker 部署](https://github.com/hiroi-sora/Umi-OCR_runtime_linux/blob/main/README-docker.md) 。
+- 新增：HTTP 文档识别接口。👉 [文档](https://github.com/hiroi-sora/Umi-OCR/blob/main/docs/http/api_doc.md#/api/doc)
+- 修复：文档中宽高为0的异常图片会导致任务卡住。
+- 优化：排版解析的 **单栏-单行** 方案，对于间隔较大的两个相邻文本块，会添加空格作为间隔符。
+
+### [v2.1.2](https://github.com/hiroi-sora/Umi-OCR/tree/release/2.1.2) `2024.6.5`
+
+分支名：`release/2.1.2`
+
+- 新增：批量任务（图片、文档）支持 **暂停任务** 。只要不退出软件，在待机/休眠后可以恢复任务。 (#469)
+- 新增：批量文档任务，支持保存为 **单层纯文本PDF** 。
+- 新增：HTTP OCR接口 允许设置 **忽略区域** 参数。 (#525)
+- 新增：HTTP 二维码接口 允许设置 **图像预处理** 参数。 (#512)
+- 新增：命令行`--screenshot`允许指定屏幕范围，自动进行截图。 (#452)
+- 修复：文档内容提取和写入时的坐标旋转、比例适配问题。
+- 修复：截图预览 & 记录面板中，跨区块复制文本时，尾块的复制字数不正确。
+- 优化：批量文档标签页，拖入大量文件、提交大批任务时的性能和流畅度。 (#476)
+- UI：优化一些布局，美化一些视觉效果。
+
+### [v2.1.1](https://github.com/hiroi-sora/Umi-OCR/tree/release/2.1.1) `2024.3.29`
+
+分支名：`release/2.1.1`
+
+- 新增：批量文档识别允许指定忽略区域的页数范围。
+- 新增：命令行`--path`允许传入多个图片或文件夹。
+- 新增：新的命令行、HTTP接口：识别/生成二维码图像。
+- 新增：命令行新指令 `--output`, `--output_append`, `--clip` 。
+- 新增：清空全部识别记录的快捷键。 (#420)
+- 新增：截图预览 删除图片显示的选项和快捷键。 (#427)
+- 修复：Esc取消截图的消息传递错误。 (#402)
+- 修复：文档`整页强制OCR`模式下，提高小尺寸页面的渲染精度。
+- 修复：Windows7及低端CPU无法进行文档识别的Bug。
+- 优化：开始菜单/开机自启快捷方式，默认放置于用户目录下，避免请求管理员权限。
+- 优化：保存双层PDF，在没有新文本写入时的处理逻辑。 (#416)
+- 优化：PDF解析时，提取原有文本行的逻辑。
+- 优化：双栏面板会记忆左右折叠状态。
+- UI：优化一些提示，修复一些渲染问题，美化一些视觉效果。
+
+### [v2.1.0](https://github.com/hiroi-sora/Umi-OCR/tree/release/2.1.0) `2024.2.29`
+
+分支名：`release/2.1.0`
+
+- 新增：批量文档识别功能。支持 `pdf, epub, mobi` 等格式。
+- 新增：允许隐藏托盘图标。 (#338)
+- 新增：重复上一次截图区域的快捷键。 (#357)
+- 新增：用本地图片浏览器打开图片的快捷按钮。 (#335)
+- 更新：更强大的排版解析器。
+- 修复：避免系统环境变量`QMLSCENE_DEVICE`的影响。 (#270)
+
+### [v2.0.2](https://github.com/hiroi-sora/Umi-OCR/tree/release/2.0.2) `2024.1.15`
+
+分支名：`release/2.0.2`
+
+- 更新：全局设置可调节 图片文字叠加层`开启/关闭`默认显示状态。 (#264)
+- 优化：输出为`txt 单独文件`时，将应用`指定路径`参数。 (#269)
+- 优化：`段落合并-多行-代码段` 去除结尾多余换行符。 (#292)
+- 优化：渲染器不兼容时，减少渲染层级错误的影响。 (#259)
+- 修复：清理图片缓存前进行检查，避免空图错误。 (#279)
+- 修复：记录面板中，光标无法移到第1个字符前面。 (#264)
+- 修复：系统语言非简体中文时，软件启动异常。 (#274) (#306)
+- 修复：csv输出的字符编码兼容性问题。 (#284)
+- 修复：`段落合并参数不存在` 的误报。
+- 修复：组件`DefaultTips`不生效。
+
+### [v2.0.1](https://github.com/hiroi-sora/Umi-OCR/tree/release/2.0.1) `2023.12.8`
+
+分支名：`release/2.0.1`
+
+- 更新：重新设计了OCR HTTP接口，允许省略参数，允许指定段落合并。
+- 更新：命令行增加指令`-->`和`-->>`，将结果输出到文件。
+- 优化：调整图像数据的内部编码，减少英文空格丢失的几率。
+- 优化：调整部分UI文本和布局。
+- 优化：csv默认保存为ansi编码，以兼容Office Excel。 (#237)
+- 修复：开启“禁用美化效果”后，外部通知弹窗无法关闭。 (#234)
+- 修复：别的程序通过命令行调用Umi-OCR时，无法获取stdout输出。
+
+### [v2.0.0](https://github.com/hiroi-sora/Umi-OCR/tree/release/2.0.0) `2023.11.19`
+
+分支名：`release/2.0.0`
+
+- 优化：插件UI翻译机制。
+- 优化：下拉框UI。
+- 修复：段落合并-自然段合并的bug。
+
+### v2.0.0 dev `2023.11.14`
+
+- 新增：生成二维码功能。
+- 新增：所有图片预览窗口（如截图、二维码页），允许保存图片到指定路径。
+- 优化：二维码解析库改用性能更好、功能更丰富的zxingcpp。 ([v2 #47](https://github.com/hiroi-sora/Umi-OCR_v2/issues/47)) (感谢：@Byxs20)
+- 优化：截图预览面板中，文本框的位置更准确。
+- 修复：图片预览窗口，无法复制本地图片的Bug。
+- 修复：tbpu合并自然段时，垂直距离不准确的Bug。
+- 修复：HTTP API 的跨域问题。 [v2 #52](https://github.com/hiroi-sora/Umi-OCR_v2/issues/52)
+- 修复：HTTP API 传base64的大小限制问题。 [v2 #49](https://github.com/hiroi-sora/Umi-OCR_v2/issues/49)
+- 修复：其它少量报错。
+- 翻译：人工校对`繁体中文`和`英语`。 (贡献：@QZGao)
+
+### v2.0.0 dev `2023.11.5`
+
+- 新增：记忆窗口位置。 [v2 #44](https://github.com/hiroi-sora/Umi-OCR_v2/issues/44)
+- 新增：批量识图页增加图片预览窗口，单击图片条目打开。 [v2 #2](https://github.com/hiroi-sora/Umi-OCR_v2/issues/2)
+- 新增：检查软件是否有权限读写配置文件。 [v2 #30](https://github.com/hiroi-sora/Umi-OCR_v2/issues/30)
+- 新增：报错弹窗提供一键复制及打开issues的功能。
+- 新增：全局设置页添加左侧目录栏。
+- 新增：插件的多国语言UI机制。
+- 优化：截图预览面板中，文本框的位置更准确。
+- 优化：调整部分UI布置。
+- 修复：扫码模块添加导入异常检查。 [v2 #33](https://github.com/hiroi-sora/Umi-OCR_v2/issues/33)
+- 修复：补充扫码页的拖入图片功能。 [v2 #43](https://github.com/hiroi-sora/Umi-OCR_v2/issues/43)
+- 修复：输出到单独文件txt时，文件名去除原后缀。 [v2 #36](https://github.com/hiroi-sora/Umi-OCR_v2/issues/36)
+- 修复：一些小Bug。
+
+### v2.0.0 dev `2023.10.25`
+- 新增：命令行支持传入图片路径。 [v2 #28](https://github.com/hiroi-sora/Umi-OCR_v2/issues/28)
+- 新增：HTTP接口支持Base64传输图片。 [v2 #28](https://github.com/hiroi-sora/Umi-OCR_v2/issues/28)
+- 新增：忽略区域功能。
+- 新增：二维码识别页。支持识别多种格式的二维码、条形码。 ([Umi-OCR #95](https://github.com/hiroi-sora/Umi-OCR/issues/95))
+- 新增：提供备选启动器`UmiOCR-data/RUN_GUI.bat`，供`Umi-OCR.exe`不兼容时使用。 [v2 #21](https://github.com/hiroi-sora/Umi-OCR_v2/issues/21)
+- 优化：图片预览窗口，支持用`Tab`切换显示/隐藏文本。
+- 优化：记录面板，每条记录顶部添加复制按钮。 [v2 #32](https://github.com/hiroi-sora/Umi-OCR_v2/issues/32)
+- 优化：记录面板，拖拽过程中允许指针移出文本框区域。 [v2 #32](https://github.com/hiroi-sora/Umi-OCR_v2/issues/32)
+- 优化：重新设计截图缓存机制，避免Image组件销毁时的内存泄露。
+- 优化：标签页应用动态解析机制，小幅提高加载速度。
+- 优化：运行环境转为64位包。（计划不再提供对32位的兼容）
+- 修正：配置项中布尔值解析不正确的问题。 [v2 #30](https://github.com/hiroi-sora/Umi-OCR_v2/issues/30)
+- 修正：拖入非图片文件可能导致卡顿几秒的问题。
+- 修正：PaddleOCR插件的兼容性问题。 ([Umi-OCR #209](https://github.com/hiroi-sora/Umi-OCR/issues/209))
+
+### v2.0.0 dev `2023.10.18`
+- 新增：截图前自动隐藏窗口。 [v2 #26](https://github.com/hiroi-sora/Umi-OCR_v2/issues/26)
+- 新增：更改字体功能。 [v2 #25](https://github.com/hiroi-sora/Umi-OCR_v2/issues/25)
+- 新增：可爱的加载动画。
+- 新增：截图预览面板 支持显示结果文本、划选文本。
+- 新增：截图预览面板 支持将图片复制到剪贴板。
+- 新增：结果记录面板 支持跨文本框划选文本。 [v2 #18](https://github.com/hiroi-sora/Umi-OCR_v2/issues/18)
+- 新增：结果记录面板 支持删除一条或多条记录。 [v2 #10](https://github.com/hiroi-sora/Umi-OCR_v2/issues/10)
+- 新增：支持用Esc或右键中断截图。
+- 优化：更改插件目录结构和导入机制。
+- 修正：文件重复导致无法添加开机自启。 [v2 #27](https://github.com/hiroi-sora/Umi-OCR_v2/issues/27)
+
+
+### v2.0.0 dev `2023.10.10`
+- 新功能：第一次启动软件时，根据系统情况，选择最恰当的渲染器。解决截图闪烁问题。 [v2 #7](https://github.com/hiroi-sora/Umi-OCR_v2/issues/7)
+- 新功能：初步实现插件机制，切换引擎等组件更加便捷。
+- 新功能：支持调整界面比例（文字大小）。
+- 优化：调整截图页UI，提高屏占比。优化标签栏阴影。 [v2 #8](https://github.com/hiroi-sora/Umi-OCR_v2/issues/8)
+- 优化：双击通知弹窗可打开主窗口。 [v2 #10](https://github.com/hiroi-sora/Umi-OCR_v2/issues/10)
+- 优化：截图完成后，如果主窗口在前台，则不弹出成功提示。 [v2 #10](https://github.com/hiroi-sora/Umi-OCR_v2/issues/10)
+- 优化：禁用美化效果时，外部弹窗将不会渲染阴影区域。 [v2 #14](https://github.com/hiroi-sora/Umi-OCR_v2/issues/14)
+- 优化：Paddle引擎也支持win7系统了。
+
+### v2.0.0 dev `2023.9.25`
+
+### v2.0.0 dev `2023.9.8`
+- 支持多种界面语言（实验性）
+
+### v2.0.0 dev `2023.9.7`
+
+### v2.0.0 dev `2023.8.9`
+- 截图OCR
+- 兼容高分辨率屏幕和多屏幕系统
+- 更准确、智能的段落合并
+
+### v2.0.0 dev `2023.7.26`
+- 批量OCR
+- 现代化UI风格
+- 自定义标签页系统
+- 主题切换：明亮/深色
+
+---
+
+### [v1.3.7](https://github.com/hiroi-sora/Umi-OCR/tree/release/1.3.7) `2023.10.10`
+- Paddle引擎兼容Win7 x64 。
+
+### v1.3.6 `2023.9.26`
+- 新功能：更强大的段落合并方案-`单行/多行自然段/多行代码段`。支持自动判断中/英文段落，采取对应的合并规则。
+- 移除一些过时的段落合并方案。
+- 功能调整：`截图联动` 划分为独立的功能，不受常规截图OCR影响。
+
+### [v1.3.5](https://github.com/hiroi-sora/Umi-OCR/tree/release/1.3.5) `2023.6.20`
+<!-- 6.5k★ 撒花~ -->
+- 新功能：复制识别结果后，可发送指定按键，以便联动唤起翻译器等工具。
+- 新功能：命令行增加切换识别语言的指令。
+- 修Bug：低配置机器上有概率误报`OCR init timeout: 5s` 。[#154](https://github.com/hiroi-sora/Umi-OCR/issues/154) , [#156](https://github.com/hiroi-sora/Umi-OCR/issues/156)。
+- 调整：默认停止任务30秒后释放一次内存。
+
+### [v1.3.4](https://github.com/hiroi-sora/Umi-OCR/tree/release/1.3.4) `2023.4.26`
+<!-- 一周年纪念！ -->
+- 新功能：截图预览窗口。
+- 新功能：可用方向键微调截图框位置。
+- 修Bug：拖入图片时有几率卡退主窗口 [issue #126](https://github.com/hiroi-sora/Umi-OCR/issues/126) 。
+- 优化了一些处理流程。
+
+### [v1.3.3](https://github.com/hiroi-sora/Umi-OCR/tree/release/1.3.3) `2023.3.19`
+<!-- 4.5k★ 撒花~ -->
+- 新功能：命令行模式。
+- 新功能：识图完成的通知悬浮窗。
+- 新功能：自动清理引擎内存。
+- 修复了一些BUG，优化了一些UI表现。
+
+### [v1.3.2](https://github.com/hiroi-sora/Umi-OCR/tree/release/1.3.2) `2022.12.1`
+<!-- 3k★ 撒花~ -->
+- 新功能：创建开机启动项时，可选`不显示主窗口`。
+- 新功能：OCR结果输出到每个图片同名的单独txt文件。
+- 新功能：增加独立的设置语言窗口，可在多处点开，便于切换语言。
+- 新功能：合并段落添加`合并自然段-西文模式`，可在英文段落换行时补充空格。
+- 新功能：快捷识图可选`自动清空面板`，只显示本次识别结果，且隐藏时间信息。
+- 修复了一些BUG。
+
+### [v1.3.1](https://github.com/hiroi-sora/Umi-OCR/tree/release/1.3.1) `2022.11.4`
+<!-- 2k★ 撒花~ -->
+- 修Bug：快捷键模块重写，引入pynput库，舍弃keyboard库，解决几率失效、录制不正确等Bug。
+- 新功能：添加开机自启，桌面快捷方式，开始菜单快捷方式。
+- 新功能：多开软件时提示。
+- 新功能：截图时隐藏窗口。
+- 调整UI：使用频率极低的设置项设为隐藏的高级选项。
+- 优化：检查引擎组件是否存在。
+- 优化：`横排-合并多行-自然段` 优化逻辑，支持0~2全角空格首行缩进。
+
+### [v1.3.0](https://github.com/hiroi-sora/Umi-OCR/tree/release/1.3.0) `2022.9.29`
+- 新功能：框选截屏。
+- 新功能：系统托盘图标。
+- 新功能：引擎进程常驻。
+- 新功能：文本块后处理模块。
+- 新功能：自定义主输出栏字体。
+- 新功能：设置窗口弹出模式（保持置顶）。
+- 调整UI：自适应Win风格组件。
+- 修正了Bug：系统语言兼容性问题 [issue #16](https://github.com/hiroi-sora/Umi-OCR/issues/16) 。
+- 修正了Bug：微信图片粘贴问题 [issue #22](https://github.com/hiroi-sora/Umi-OCR/issues/22) 。
+- 更新PaddleOCR-json模块至`v1.2.1`，提供剪贴板支持。快捷识图通过剪贴板中转，无需再保存临时文件到硬盘。
+
+### [v1.2.6](https://github.com/hiroi-sora/Umi-OCR/tree/release/1.2.6) `2022.9.1`
+<!-- Takahara Umi酱生日快乐~ -->
+- 更新PaddleOCR-json模块至`v1.2.0`，提高识别速度、准确度。
+- 调整UI：更方便地用下拉框切换识别语言。
+- 调整UI：可以从主窗口任意位置/任意选项卡拖入图片。
+- 修正了Bug：提高程序健壮性，增加启动子进程时的更多异常处理情况。
+- 修正了Bug：彻底解决了对边缘过窄的图片，识别结果不准确的问题 [issue #7](https://github.com/hiroi-sora/Umi-OCR/issues/7) 。
+- 优化适配PP-OCRv3模型，彻底解决了v3版模型比v2慢、不准的问题 [issue #4](https://github.com/hiroi-sora/Umi-OCR/issues/4#issuecomment-1141735773) 。
+
+### v1.2.5 `2022.7.22`
+- 新功能：计划任务。识图完成后执行自动关机等任务。
+- 新功能：可选拖入文件夹时递归导入子文件夹中所有图片。
+- 调整UI：添加一些配置文件的快捷入口。
+
+### v1.2.4 `2022.6.4`
+- 新功能：可选识别剪贴板图片后自动复制识别的文本。
+- 补充功能：快捷键调用剪贴板识图时，若程序窗口被最小化，则恢复前台状态并挪到最前位置。
+  
+### v1.2.3 `2022.5.31`
+- 新功能：读取剪贴板图片。配置全局快捷键调用该功能。
+
+### v1.2.2 `2022.4.30`
+- 新功能：可选任务完成后自动打开输出文件或目录。
+
+### v1.2.1 `2022.4.16`
+- 更新PaddleOCR-json模块至`v1.1.1`，修正了可能得到错误包围盒的漏洞。
+
+### v1.2.0 `2022.4.8`
+- 可选生成图文链接.md文件，作为索引使用有更佳的观感。
+- 修改设置面板的样式，改为滚动面板以容纳更多设置选项。
+- 用户修改配置项后可自动保存。
+
+### v1.1.1 `2022.3.30`
+- 修正了Bug：退出忽略区域窗口时，OCR子进程未关闭。
+
+### v1.1.0 `2022.3.30`
+- 新功能：忽略区域窗口以虚线框 展示识别出的文字块。
+
+### v1.0.0 `2022.3.28`
+- “梦开始的地方”

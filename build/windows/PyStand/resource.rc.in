@@ -1,0 +1,32 @@
+#include <windows.h>
+
+IDI_ICON1 ICON DISCARDABLE "@PYSTAND_ICON_PATH@"
+
+1 VERSIONINFO
+FILEVERSION @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+PRODUCTVERSION @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+FILEFLAGS 0
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "hiroi-sora"
+            VALUE "FileDescription", "Umi-OCR"
+            VALUE "FileVersion", "@UMIOCR_VERSION@.0"
+            VALUE "InternalName", "Umi-OCR"
+            VALUE "LegalCopyright", "Copyright (c) 2023 hiroi-sora"
+            VALUE "OriginalFilename", "Umi-OCR.exe"
+            VALUE "ProductName", "Umi-OCR"
+            VALUE "ProductVersion", "@UMIOCR_VERSION@"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END

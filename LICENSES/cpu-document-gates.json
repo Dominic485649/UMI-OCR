@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "verification_date": "2026-10-14",
+  "cpu_ocr": {
+    "actual_inference_runtime": null,
+    "actual_runtime_version": null,
+    "artifact_scope": "actual staging only",
+    "artifact_plugin_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CPU",
+    "actual_model_artifacts": [],
+    "status": "NOT_INCLUDED",
+    "reason": "No CPU OCR plugin is present in this artifact; no CPU runtime/model distribution right is claimed."
+  },
+  "document_models": {
+    "status": "NOT_INCLUDED",
+    "artifact_scope": "actual staging only",
+    "artifact_plugin_path": "UmiOCR-data/plugins/win32_PaddleOCRVL_1_6",
+    "plugin_source_present": false,
+    "actual_model_artifacts": [],
+    "source_declaration": "The separate document-plugin source tree is not a release artifact. No PaddleOCR-VL/GGUF/mmproj/runtime binary is present in this staging, so no model right is claimed or redistributed.",
+    "official_candidate_survey": {
+      "repository": "https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.6-GGUF",
+      "license": "Apache-2.0",
+      "decision": "not included in this public release; this artifact contains no document plugin, model, or server-side runtime, and makes no redistribution claim for them"
+    }
+  }
+}

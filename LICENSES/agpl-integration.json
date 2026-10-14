@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "verification_date": "2026-10-14",
+  "project_license_facts": {
+    "root_LICENSE": {
+      "license": "MIT",
+      "SHA256": "28ed5282dcdac52385b8be355e450d8f0163d880366b762084bd09f5f533322d"
+    },
+    "COPYING": {
+      "document": "GNU Affero General Public License version 3 text",
+      "SHA256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "application_license_selection": "COPYING alone does not state whether the project selects only-v3 or any-later-version."
+    },
+    "about_json": {
+      "license": "AGPL-3.0-or-later",
+      "repository_path": "UmiOCR-data/about.json",
+      "SHA256": "ae73d36a5227e0808345b0a13cec22bb007d1e6c226de93a813bafd2de786fa8"
+    },
+    "combined_distribution": {
+      "license": "AGPL-3.0-or-later",
+      "artifact_path": "LICENSES/COMBINED_DISTRIBUTION.md",
+      "SHA256": "3088a3b626fc67bb6bffd9456389f6645cc45c697e33df8b548683234ed3a08d"
+    },
+    "declared_combined_release_license": "AGPL-3.0-or-later",
+    "scope": "The original upstream portions retain MIT; the fork additions and declared combined Windows release are AGPL-3.0-or-later when both independent release declarations match."
+  },
+  "integration_architecture": {
+    "type": "separate-worker-stdio-ipc",
+    "facts": [
+      "The host adapter contains only standard-library process/JSON code; it does not import Paddle, OpenCV, CUDA, or cuDNN.",
+      "The plugin manifest declares no host vendor_dirs or dll_dirs. worker.py alone registers private vendor DLL directories in the child process.",
+      "The host and worker exchange only JSON-lines requests (path/base64 image plus configuration) and JSON OCR result records; no pointers, shared memory, or private ABI cross the boundary."
+    ],
+    "evidence_paths": [
+      "UmiOCR-data/py_src/plugins_controller/plugins_controller.py",
+      "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/api.py",
+      "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/worker.py",
+      "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/umi-plugin.json"
+    ],
+    "checks": {
+      "worker_present_in_artifact": true,
+      "manifest_vendor_dirs_empty": true,
+      "manifest_dll_dirs_empty": true,
+      "manifest_process_boundary": true,
+      "host_has_no_proprietary_runtime_imports": true,
+      "host_starts_subprocess": true,
+      "host_uses_json_ipc": true,
+      "worker_loads_stack": true,
+      "worker_uses_simple_payloads": true
+    }
+  },
+  "agpl_network_interaction_obligation": "For any modified AGPL-covered deployment that lets users interact remotely, AGPLv3 section 13 requires a prominent offer of Corresponding Source. The release source mirror is separately audited; proprietary NVIDIA binaries are not asserted to be AGPL-covered source.",
+  "system_library_claim": "not made",
+  "additional_permission": "not used; the process boundary avoids a linking exception request",
+  "status": "PASS",
+  "resolution": "The NVIDIA/Paddle stack is confined to an independent worker executable/process. The AGPL-covered host (including its separately packaged PyMuPDF dependency) receives only stable JSON IPC data; the worker has its own runtime/vendor manifest and source mirror.",
+  "blocker": null
+}

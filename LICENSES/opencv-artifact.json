@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "verification_date": "2026-10-14",
+  "component": "opencv-contrib-python",
+  "version": "4.10.0.84",
+  "upstream_source": "https://pypi.org/project/opencv-contrib-python/4.10.0.84/",
+  "upstream_repository": "https://github.com/opencv/opencv-python",
+  "upstream_revision": "4.10.0.84",
+  "source_revision_note": "The distributed wheel identifies release 4.10.0.84 but does not embed a Git commit; this record uses the exact release version and artifact hashes rather than inventing one.",
+  "license": "Apache-2.0",
+  "license_evidence": {
+    "metadata": {
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/opencv_contrib_python-4.10.0.84.dist-info/METADATA",
+      "SHA256": "5f4c7d397dbc82ca5084cea55543b916aeeb4284995f7d534576089083bf570e"
+    },
+    "package_license": {
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE.txt",
+      "SHA256": "edef0fac1eb08d29d34563f724742e078da2513e196133a12c6ad9ff01e26107"
+    },
+    "third_party_license": {
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt",
+      "SHA256": "0b33c5be17819d10ecad11360c6f2bd5a7df7c0f80a3314a81e28070d93818e2"
+    }
+  },
+  "artifacts": [
+    {
+      "name": "cv2.pyd",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/cv2.pyd",
+      "SHA256": "3d45cec35e10e9889fe19fbe3ecf4459ea663009ed7bc998a9705322cc5db017"
+    },
+    {
+      "name": "opencv_videoio_ffmpeg backend",
+      "artifact_path": null,
+      "SHA256": null
+    },
+    {
+      "name": "LICENSE.txt",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE.txt",
+      "SHA256": "edef0fac1eb08d29d34563f724742e078da2513e196133a12c6ad9ff01e26107"
+    },
+    {
+      "name": "LICENSE-3RD-PARTY.txt",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt",
+      "SHA256": "0b33c5be17819d10ecad11360c6f2bd5a7df7c0f80a3314a81e28070d93818e2"
+    },
+    {
+      "name": "version.py",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/version.py",
+      "SHA256": "3d3d10dacade61e5840d11de6310ae0aa6dea94fe3f6e0a179ed4a32296d737a"
+    }
+  ],
+  "redistribution_basis": "Apache-2.0 for OpenCV 4.10.0; separately listed third-party components retain their own notices and FFmpeg has its own gate.",
+  "required_notices": [
+    "LICENSES/Apache-2.0.txt",
+    "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE.txt",
+    "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+  ],
+  "source_availability_obligation": "Retain OpenCV and third-party notices. FFmpeg source/build/relink obligations are tracked independently in ffmpeg-build.json.",
+  "modification_status": "unmodified binary wheel artifacts",
+  "third_party_components_in_actual_windows_wheel": [
+    {
+      "component": "FFmpeg",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    },
+    {
+      "component": "Flatbuffers library",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    },
+    {
+      "component": "Libjpeg-turbo",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    },
+    {
+      "component": "Libspng",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    },
+    {
+      "component": "libwebp and libwebpmux",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    },
+    {
+      "component": "OpenEXR library",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    },
+    {
+      "component": "OpenJPEG library",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    },
+    {
+      "component": "Protobuf library",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    },
+    {
+      "component": "QUIRC library",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    },
+    {
+      "component": "TIFF library",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    },
+    {
+      "component": "Vulkan headers",
+      "presence_basis": "The shipped OpenCV third-party notice states that this component is redistributed in all opencv-python packages.",
+      "required_notices": [
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/cv2/LICENSE-3RD-PARTY.txt"
+      ]
+    }
+  ],
+  "platform_scope": "Only notice entries that state they are redistributed in all opencv-python packages are treated as Windows wheel components; Linux/macOS-only notice entries are retained but not claimed as Windows payload.",
+  "status": "PASS",
+  "blockers": []
+}

@@ -1,0 +1,35 @@
+# Umi-OCR 基础包依赖锁（无 CUDA / 无 Paddle / 无 OCR 推理）
+# 由 build/tools/split_lock.py 从统一锁过滤派生，请勿手工编辑。
+--index-url https://pypi.org/simple
+--only-binary=:all:
+
+bottle==0.13.4 \
+    --hash=sha256:045684fbd2764eac9cdeb824861d1551d113e8b683d8d26e296898d3dd99a12e
+fonttools==4.63.0 \
+    --hash=sha256:ba04cb5891d4c0c21b6da95eda8d7b090021508a294fff33464fc7d241e0856b
+imagecodecs==2026.8.16 \
+    --hash=sha256:6444a421272665ebd0116b54ad96347b86b4a5e21b59ed184487145cd3937f4b
+numpy==2.3.5 \
+    --hash=sha256:00dc4e846108a382c5869e77c6ed514394bdeb3403461d25a829711041217d5b
+opencv-contrib-python==4.10.0.84 \
+    --hash=sha256:47ec3160dae75f70e099b286d1a2e086d20dac8b06e759f60eaf867e6bdecba7
+pillow==12.3.0 \
+    --hash=sha256:1cca606cd25738df4ed873d5ad46bbdb3d83b5cbca291f6b4ff13a4df6b0bbe8
+psutil==7.2.2 \
+    --hash=sha256:eb7e81434c8d223ec4a219b5fc1c47d0417b12be7ea866e24fb5ad6e84b3d988
+pymupdf==1.28.0 \
+    --hash=sha256:e01e90fd86abfeb37ceb921eddb951f988a11d45ff6ce6b7664f2039849068ec
+pynput==1.8.2 \
+    --hash=sha256:8cc38cf13a6ab2749cb375678be8a0fd705d7ce49c8001ff5db4007a723bbef1
+pyside6==6.11.2 \
+    --hash=sha256:3201d67e3c10be2eaedd3910ff0f02351eca7e88c95a291cde5e7f2f55ef207f
+pyside6-addons==6.11.2 \
+    --hash=sha256:f449ea4431da20e7b86752cca8d166f93434516fe417f981c27e5f8e1b554407
+pyside6-essentials==6.11.2 \
+    --hash=sha256:c8a29def77032773a30879f7f24415b5395ad08592d147c170824ef4c735dfc1
+shiboken6==6.11.2 \
+    --hash=sha256:6ab0eba1c904455df621f9a6df3ca2bb896bab8670572d2bc4e37804ae91f19a
+six==1.17.0 \
+    --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274
+zxing-cpp==3.1.1 \
+    --hash=sha256:29f98a91148171460b47a942d137ecc90c4b8097636f23cca65263a56bb025d3

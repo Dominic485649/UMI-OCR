@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "verification_date": "2026-10-14",
+  "models": [
+    {
+      "model_name": "PP-LCNet_x1_0_doc_ori_infer",
+      "upstream_owner": "PaddlePaddle",
+      "upstream_repository": "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_doc_ori",
+      "upstream_revision": "d3b95a6dff5fe8a94f2748e12b61cb26818a0df8",
+      "license": "Apache-2.0",
+      "license_evidence": "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_doc_ori/blob/d3b95a6dff5fe8a94f2748e12b61cb26818a0df8/README.md",
+      "local_filename": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/models/PP-LCNet_x1_0_doc_ori_infer/inference.pdiparams",
+      "SHA256": "e8d6e7c5d264507e40e58a655779059d616b20d7441ea22047d829eb3931989c",
+      "upstream_weight_SHA256": "e8d6e7c5d264507e40e58a655779059d616b20d7441ea22047d829eb3931989c",
+      "source_archive": "PP-LCNet_x1_0_doc_ori_infer.tar",
+      "source_archive_SHA256": "282337df5c41f7cdf8dacd5acf71fddfdc10218399f4b318463c17f4eae96c97",
+      "modified": false,
+      "modification_notice": null,
+      "redistribution_allowed": true,
+      "required_notices": [
+        "LICENSES/Apache-2.0.txt",
+        "PaddlePaddle attribution",
+        "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/models/PP-LCNet_x1_0_doc_ori_infer/README.md"
+      ],
+      "verification_date": "2026-10-14",
+      "evidence_snapshot_path": "LICENSES/model-rights.json",
+      "status": "PASS"
+    },
+    {
+      "model_name": "UVDoc_grid_infer",
+      "upstream_owner": "PaddlePaddle",
+      "upstream_repository": "https://huggingface.co/PaddlePaddle/UVDoc",
+      "upstream_revision": "16c3f0ea9c2f0c6a57e24160f7eeaa7574613fa3",
+      "license": "Apache-2.0",
+      "license_evidence": "https://huggingface.co/PaddlePaddle/UVDoc/tree/16c3f0ea9c2f0c6a57e24160f7eeaa7574613fa3",
+      "local_filename": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/models/UVDoc_grid_infer/inference.pdiparams",
+      "SHA256": "810488899520e0da843b9bd9769ba4949f1c81e357f0eceb12d4a7da459c3eca",
+      "upstream_weight_SHA256": "810488899520e0da843b9bd9769ba4949f1c81e357f0eceb12d4a7da459c3eca",
+      "source_archive": "UVDoc_infer.tar",
+      "source_archive_SHA256": "15d79c6bcbf738b7e132eedff6ed57c7e834c73cbc140a1fff8fd8ab9c2a35b9",
+      "modified": true,
+      "modification_notice": "inference.json is transformed by build/tools/derive_uvdoc_grid_model.py to add the grid output contract; inference.pdiparams remains byte-identical to the upstream artifact.",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "LICENSES/Apache-2.0.txt",
+        "PaddlePaddle attribution",
+        "UVDoc_grid_infer modification notice"
+      ],
+      "verification_date": "2026-10-14",
+      "evidence_snapshot_path": "LICENSES/model-rights.json",
+      "status": "PASS"
+    },
+    {
+      "model_name": "PP-LCNet_x1_0_textline_ori_infer",
+      "upstream_owner": "PaddlePaddle",
+      "upstream_repository": "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_textline_ori",
+      "upstream_revision": "cd237a44b0e359d4fe38310a416203cf7403faa5",
+      "license": "Apache-2.0",
+      "license_evidence": "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_textline_ori/tree/cd237a44b0e359d4fe38310a416203cf7403faa5",
+      "local_filename": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/models/PP-LCNet_x1_0_textline_ori_infer/inference.pdiparams",
+      "SHA256": "0de2bcf996cf553e2b848dd7b1769dafffc6917b1ccdf55c1d8efe7909fbf743",
+      "upstream_weight_SHA256": "0de2bcf996cf553e2b848dd7b1769dafffc6917b1ccdf55c1d8efe7909fbf743",
+      "source_archive": "PP-LCNet_x1_0_textline_ori_infer.tar",
+      "source_archive_SHA256": "6171f69605215a85624d650e9079fa45f7c3eaf944296181bcc5395bf3ddc7f6",
+      "modified": false,
+      "modification_notice": null,
+      "redistribution_allowed": true,
+      "required_notices": [
+        "LICENSES/Apache-2.0.txt",
+        "PaddlePaddle attribution"
+      ],
+      "verification_date": "2026-10-14",
+      "evidence_snapshot_path": "LICENSES/model-rights.json",
+      "status": "PASS"
+    },
+    {
+      "model_name": "PP-OCRv6_medium_det_infer",
+      "upstream_owner": "PaddlePaddle",
+      "upstream_repository": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_det",
+      "upstream_revision": "8e0f56fb2ef86b461d99cfc7ac5c137738985f61",
+      "license": "Apache-2.0",
+      "license_evidence": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_det/tree/8e0f56fb2ef86b461d99cfc7ac5c137738985f61",
+      "local_filename": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/models/PP-OCRv6_medium_det_infer/inference.pdiparams",
+      "SHA256": "85218d2e3d98f5a21c58b4220627be923a97aee5db3cc71f39536ab31ac53960",
+      "upstream_weight_SHA256": "85218d2e3d98f5a21c58b4220627be923a97aee5db3cc71f39536ab31ac53960",
+      "source_archive": "PP-OCRv6_medium_det_infer.tar",
+      "source_archive_SHA256": "144d0621e059566e5086e228829171591c144c2deb07b2dad4962214fbabfcf7",
+      "modified": false,
+      "modification_notice": null,
+      "redistribution_allowed": true,
+      "required_notices": [
+        "LICENSES/Apache-2.0.txt",
+        "PaddlePaddle attribution"
+      ],
+      "verification_date": "2026-10-14",
+      "evidence_snapshot_path": "LICENSES/model-rights.json",
+      "status": "PASS"
+    },
+    {
+      "model_name": "PP-OCRv6_medium_rec_infer",
+      "upstream_owner": "PaddlePaddle",
+      "upstream_repository": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_rec",
+      "upstream_revision": "e5a92bcbc5cc1b494628e458d267778f0704fd7c",
+      "license": "Apache-2.0",
+      "license_evidence": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_rec/tree/e5a92bcbc5cc1b494628e458d267778f0704fd7c",
+      "local_filename": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/models/PP-OCRv6_medium_rec_infer/inference.pdiparams",
+      "SHA256": "1b01c79a914587933f615569e75de54f2e638ebb5d3f3b3c1b38c24ede8c7319",
+      "upstream_weight_SHA256": "1b01c79a914587933f615569e75de54f2e638ebb5d3f3b3c1b38c24ede8c7319",
+      "source_archive": "PP-OCRv6_medium_rec_infer.tar",
+      "source_archive_SHA256": "4eecc1c6a4623765042e6fc15446da0da110b7d875b6b72b2d351d2b2dbd4da6",
+      "modified": false,
+      "modification_notice": null,
+      "redistribution_allowed": true,
+      "required_notices": [
+        "LICENSES/Apache-2.0.txt",
+        "PaddlePaddle attribution"
+      ],
+      "verification_date": "2026-10-14",
+      "evidence_snapshot_path": "LICENSES/model-rights.json",
+      "status": "PASS"
+    }
+  ],
+  "unexpected_model_weights": [],
+  "status": "PASS"
+}

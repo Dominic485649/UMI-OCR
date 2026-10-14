@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "verification_date": "2026-10-14",
+  "source_archives": [
+    {
+      "artifact_path": "source/third_party/certifi-2026.6.17.tar.gz",
+      "SHA256": "024c88eeec92ca068db80f02b8b07c9cef7b9fe261d1d535abfd5abd6f6af432",
+      "actual_SHA256": "024c88eeec92ca068db80f02b8b07c9cef7b9fe261d1d535abfd5abd6f6af432",
+      "size": 134594,
+      "upstream_source": "https://files.pythonhosted.org/packages/c9/c7/424b75da314c1045981bd9777432fad05a9e0c69daa4ed7e308bbaffe405/certifi-2026.6.17.tar.gz",
+      "upstream_repository": "https://github.com/certifi/python-certifi",
+      "upstream_revision": "d0ac52f3d93a514224197c7efb66c41b1beae5d1",
+      "license": "MPL-2.0",
+      "present_in_release_source": true,
+      "verified_in_build_cache": true
+    },
+    {
+      "artifact_path": "source/third_party/tqdm-4.68.4.tar.gz",
+      "SHA256": "19829c9673638f2a0b8617da4cdcb927e831cd88bcfcb6e78d42a4d1af131520",
+      "actual_SHA256": "19829c9673638f2a0b8617da4cdcb927e831cd88bcfcb6e78d42a4d1af131520",
+      "size": 792418,
+      "upstream_source": "https://files.pythonhosted.org/packages/ae/5f/57ff8b434839e70dab45601284ea413e947a63799891b7553e5960a793a8/tqdm-4.68.4.tar.gz",
+      "upstream_repository": "https://github.com/tqdm/tqdm",
+      "upstream_revision": "53d096e77c28005b4f9fe1e9d6274ae311bf87e7",
+      "license": "MPL-2.0 AND MIT",
+      "present_in_release_source": true,
+      "verified_in_build_cache": true
+    },
+    {
+      "artifact_path": "source/third_party/validate_pyproject-0.25.tar.gz",
+      "SHA256": "e68c12d1cb0d8ddc269ffc42875a81727ddb7865000aa6d2f77d833b55c53f0b",
+      "actual_SHA256": "e68c12d1cb0d8ddc269ffc42875a81727ddb7865000aa6d2f77d833b55c53f0b",
+      "size": 118662,
+      "upstream_source": "https://files.pythonhosted.org/packages/e7/d8/45a82408619c306d0083afcf6142617201b2647a82e9a7d4c902e837274c/validate_pyproject-0.25.tar.gz",
+      "upstream_repository": "https://github.com/abravalheri/validate-pyproject",
+      "upstream_revision": "4b2e70d08cb2ccd26d1fba73588de41c7a5d50b7",
+      "license": "MPL-2.0",
+      "present_in_release_source": true,
+      "verified_in_build_cache": true
+    },
+    {
+      "artifact_path": "source/third_party/setuptools-83.0.0.tar.gz",
+      "SHA256": "025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef",
+      "actual_SHA256": "025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef",
+      "size": 1154254,
+      "upstream_source": "https://files.pythonhosted.org/packages/34/26/f5d29e25ffdb535afef2d35cdb55b325298f96debd670da4c325e08d70f4/setuptools-83.0.0.tar.gz",
+      "upstream_repository": "https://github.com/pypa/setuptools",
+      "upstream_revision": "6519f728c6f23c992df81a5691ef7655184a20eb",
+      "license": "MIT",
+      "present_in_release_source": true,
+      "verified_in_build_cache": true
+    }
+  ],
+  "missing_source_lock_entries": [],
+  "components": [
+    {
+      "component": "certifi",
+      "version": "2026.6.17",
+      "files": [
+        {
+          "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/certifi/cacert.pem",
+          "SHA256": "bbc7e9c01d7551bb8a159b5dedd989b8ee3ce105aff522b68eb1b01bf854cab0",
+          "source_form": {
+            "member": "certifi-2026.6.17/certifi/cacert.pem",
+            "SHA256": "bbc7e9c01d7551bb8a159b5dedd989b8ee3ce105aff522b68eb1b01bf854cab0",
+            "matches_artifact": true
+          }
+        }
+      ],
+      "upstream": "https://github.com/certifi/python-certifi",
+      "upstream_revision": "d0ac52f3d93a514224197c7efb66c41b1beae5d1",
+      "license": "MPL-2.0",
+      "required_notices": [
+        "certifi-2026.6.17.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "source/third_party/certifi-2026.6.17.tar.gz provides the matching MPL-covered source form.",
+      "status": "PASS"
+    },
+    {
+      "component": "tqdm",
+      "version": "4.68.4",
+      "files": [
+        {
+          "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/tqdm-4.68.4.dist-info/licenses/LICENCE",
+          "SHA256": "fcff87c3a47ce8028a8512aa182d4fcf0ad1c90544ee75cf9b343684cac194de",
+          "source_form": {
+            "member": "tqdm-4.68.4/LICENCE",
+            "SHA256": "fcff87c3a47ce8028a8512aa182d4fcf0ad1c90544ee75cf9b343684cac194de",
+            "matches_artifact": true
+          }
+        }
+      ],
+      "upstream": "https://github.com/tqdm/tqdm",
+      "upstream_revision": "53d096e77c28005b4f9fe1e9d6274ae311bf87e7",
+      "license": "MPL-2.0 AND MIT",
+      "redistribution_basis": "MIT alternative is available; the matching source archive is retained for the MPL record.",
+      "required_notices": [
+        "tqdm-4.68.4.dist-info/licenses/LICENCE"
+      ],
+      "source_availability_obligation": "source/third_party/tqdm-4.68.4.tar.gz provides the matching source form.",
+      "status": "PASS"
+    },
+    {
+      "component": "validate-pyproject vendored by setuptools",
+      "version": "0.25",
+      "files": [
+        {
+          "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/setuptools/config/_validate_pyproject/extra_validations.py",
+          "SHA256": "9509eee7001204bf220d3a0e0e9c39b17db591ebf4d7f3e35081a576ed69ae86",
+          "source_form": {
+            "member": "setuptools-83.0.0/setuptools/config/_validate_pyproject/extra_validations.py",
+            "SHA256": "9509eee7001204bf220d3a0e0e9c39b17db591ebf4d7f3e35081a576ed69ae86",
+            "matches_artifact": true
+          },
+          "upstream_source": {
+            "member": "validate_pyproject-0.25/src/validate_pyproject/extra_validations.py",
+            "SHA256": "9509eee7001204bf220d3a0e0e9c39b17db591ebf4d7f3e35081a576ed69ae86"
+          }
+        },
+        {
+          "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/setuptools/config/_validate_pyproject/formats.py",
+          "SHA256": "2cd45a8e57ae66dc8ff015a131c6ee03dd803e9a5d888b6912911ea828c0e784",
+          "source_form": {
+            "member": "setuptools-83.0.0/setuptools/config/_validate_pyproject/formats.py",
+            "SHA256": "2cd45a8e57ae66dc8ff015a131c6ee03dd803e9a5d888b6912911ea828c0e784",
+            "matches_artifact": true
+          },
+          "upstream_source": {
+            "member": "validate_pyproject-0.25/src/validate_pyproject/formats.py",
+            "SHA256": "2cd45a8e57ae66dc8ff015a131c6ee03dd803e9a5d888b6912911ea828c0e784"
+          }
+        },
+        {
+          "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/setuptools/config/_validate_pyproject/error_reporting.py",
+          "SHA256": "e6319b720ef3402122100f1f02295291a5e711f5f20fb7eae421be3a49856669",
+          "source_form": {
+            "member": "setuptools-83.0.0/setuptools/config/_validate_pyproject/error_reporting.py",
+            "SHA256": "e6319b720ef3402122100f1f02295291a5e711f5f20fb7eae421be3a49856669",
+            "matches_artifact": true
+          },
+          "upstream_source": {
+            "member": "validate_pyproject-0.25/src/validate_pyproject/error_reporting.py",
+            "SHA256": "8a64ff77c4e835475092b870bf960e89b59a248dde61b19501a751e9ede86dc2"
+          }
+        },
+        {
+          "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/setuptools/config/_validate_pyproject/NOTICE",
+          "SHA256": "09c9bcea95ca086f8bc5bed174e40bc835b297d40fb5f86bbbb570fe0a5581a7",
+          "source_form": {
+            "member": "setuptools-83.0.0/setuptools/config/_validate_pyproject/NOTICE",
+            "SHA256": "09c9bcea95ca086f8bc5bed174e40bc835b297d40fb5f86bbbb570fe0a5581a7",
+            "matches_artifact": true
+          }
+        }
+      ],
+      "upstream": "https://github.com/abravalheri/validate-pyproject",
+      "upstream_revision": "4b2e70d08cb2ccd26d1fba73588de41c7a5d50b7",
+      "license": "MPL-2.0",
+      "exact_source_form": {
+        "component": "setuptools",
+        "version": "83.0.0",
+        "upstream": "https://github.com/pypa/setuptools",
+        "upstream_revision": "6519f728c6f23c992df81a5691ef7655184a20eb"
+      },
+      "modification_status": "modified",
+      "modification_notice": "Compared with validate-pyproject 0.25, error_reporting.py only replaces the fastjsonschema import with setuptools' vendored .fastjsonschema_exceptions import; the shipped files match the setuptools 83.0.0 source form.",
+      "required_notices": [
+        "setuptools/config/_validate_pyproject/NOTICE"
+      ],
+      "source_availability_obligation": "source/third_party/setuptools-83.0.0.tar.gz provides the exact shipped source form, and source/third_party/validate_pyproject-0.25.tar.gz provides its upstream provenance.",
+      "status": "PASS"
+    }
+  ],
+  "status": "PASS"
+}

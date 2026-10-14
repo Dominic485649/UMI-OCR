@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "id": "win32_PaddleOCRv6_CUDA",
+  "name": "PP-OCRv6 CUDA",
+  "version": "3.0.0",
+  "host_api": ">=2.7,<3.0",
+  "platform": [
+    "win32"
+  ],
+  "arch": [
+    "x86_64"
+  ],
+  "vendor": "Umi-OCR",
+  "license": "AGPL-3.0-or-later",
+  "homepage": "https://github.com/Dominic485649/UMI-OCR_plugins",
+  "description": "基于独立 worker 进程运行的 PaddlePaddle GPU PP-OCRv6 文字识别后端。仅支持 NVIDIA CUDA 12.6，不提供 CPU 回退。主程序通过 JSON-lines IPC 传递图片路径/字节与 OCR 结果。",
+  "conflicts": [],
+  "capabilities": [
+    {
+      "type": "ocr",
+      "entry": "api:Api",
+      "config": "config:CONFIG"
+    }
+  ],
+  "health": "health:check",
+  "runtime": {
+    "priority": "append",
+    "vendor_dirs": [],
+    "dll_dirs": [],
+    "closure_lock": "runtime.lock.json",
+    "process_boundary": {
+      "type": "separate-worker-stdio-ipc",
+      "entry": "worker.py",
+      "request_schema": "JSON lines: run_path(path) or run_bytes(base64)",
+      "response_schema": "JSON lines: OCR result {code,data} and timing"
+    }
+  }
+}

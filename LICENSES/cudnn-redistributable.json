@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "verification_date": "2026-10-14",
+  "package": "nvidia-cudnn-cu12",
+  "version": "9.9.0.52",
+  "license_type": "proprietary",
+  "license": "NVIDIA cuDNN Software License Agreement and cuDNN Supplement",
+  "current_evidence": "https://docs.nvidia.com/deeplearning/cudnn/latest/reference/eula.html",
+  "eula_snapshot": {
+    "artifact_path": "LICENSES/evidence/nvidia/cudnn-sla-2026-08-09.html",
+    "SHA256": "a8a92467aa1dc30f3b18eaee84b381169086841453ace5c4fa17ded31e9d7752",
+    "expected_SHA256": "a8a92467aa1dc30f3b18eaee84b381169086841453ace5c4fa17ded31e9d7752",
+    "revision": "NVIDIA current cuDNN EULA page snapshot retrieved 2026-08-09; page version v. February 22, 2022"
+  },
+  "legacy_wheel_license": {
+    "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/nvidia_cudnn_cu12-9.9.0.52.dist-info/licenses/License.txt",
+    "SHA256": "49cf79bdb35734b52fe6203013b3bd759f81e998cd32aa2c65c51db9a88c61d2",
+    "revision": "v. January 28, 2020"
+  },
+  "distribution_requirements": [
+    "The application has material additional functionality.",
+    "Redistributable portions are accessed only by the application.",
+    "NVIDIA proprietary notices remain intact.",
+    "Distribution terms remain consistent with the NVIDIA agreement."
+  ],
+  "distribution_requirements_satisfied": {
+    "material_additional_functionality": true,
+    "redistributable_portions_only_accessed_by_application": true,
+    "nvidia_proprietary_notices_intact": true,
+    "distribution_terms_consistent_with_sla": true
+  },
+  "redistributable_scope_check": {
+    "only_runtime_dll_or_so": true,
+    "non_runtime_files_excluded": true
+  },
+  "files": [
+    {
+      "name": "cudnn64_9.dll",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/nvidia/cudnn/bin/cudnn64_9.dll",
+      "SHA256": "89fcb0f37bb0983be7f5d98dba2a23de0539da9f7f0e1994deb0ef002abd764c",
+      "license_type": "proprietary",
+      "license": "NVIDIA cuDNN Software License Agreement and cuDNN Supplement",
+      "redistribution_basis": "cuDNN Supplement section 2: runtime .so and .dll files",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "Retain NVIDIA proprietary notices.",
+        "Distribute only as part of an application with material additional functionality."
+      ],
+      "source_availability_obligation": "Not an OSS source-distribution obligation.",
+      "modification_status": "unmodified"
+    },
+    {
+      "name": "cudnn_adv64_9.dll",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/nvidia/cudnn/bin/cudnn_adv64_9.dll",
+      "SHA256": "5a7c2caa43040e9146b5a0199554e41b6661fd8f986a215dbec2ab1f293db306",
+      "license_type": "proprietary",
+      "license": "NVIDIA cuDNN Software License Agreement and cuDNN Supplement",
+      "redistribution_basis": "cuDNN Supplement section 2: runtime .so and .dll files",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "Retain NVIDIA proprietary notices.",
+        "Distribute only as part of an application with material additional functionality."
+      ],
+      "source_availability_obligation": "Not an OSS source-distribution obligation.",
+      "modification_status": "unmodified"
+    },
+    {
+      "name": "cudnn_cnn64_9.dll",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/nvidia/cudnn/bin/cudnn_cnn64_9.dll",
+      "SHA256": "c70c58684d8e30930a298e6db26f5b934bbad543556c2e346aac9839247199d2",
+      "license_type": "proprietary",
+      "license": "NVIDIA cuDNN Software License Agreement and cuDNN Supplement",
+      "redistribution_basis": "cuDNN Supplement section 2: runtime .so and .dll files",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "Retain NVIDIA proprietary notices.",
+        "Distribute only as part of an application with material additional functionality."
+      ],
+      "source_availability_obligation": "Not an OSS source-distribution obligation.",
+      "modification_status": "unmodified"
+    },
+    {
+      "name": "cudnn_engines_precompiled64_9.dll",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/nvidia/cudnn/bin/cudnn_engines_precompiled64_9.dll",
+      "SHA256": "45c906324fbf9047338f43a0805a61a9400cb8809a3a203c42577303d75ef45c",
+      "license_type": "proprietary",
+      "license": "NVIDIA cuDNN Software License Agreement and cuDNN Supplement",
+      "redistribution_basis": "cuDNN Supplement section 2: runtime .so and .dll files",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "Retain NVIDIA proprietary notices.",
+        "Distribute only as part of an application with material additional functionality."
+      ],
+      "source_availability_obligation": "Not an OSS source-distribution obligation.",
+      "modification_status": "unmodified"
+    },
+    {
+      "name": "cudnn_engines_runtime_compiled64_9.dll",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/nvidia/cudnn/bin/cudnn_engines_runtime_compiled64_9.dll",
+      "SHA256": "6617e83d110486da93699662197444a400b6ddc40dda42a183dfec90d9139069",
+      "license_type": "proprietary",
+      "license": "NVIDIA cuDNN Software License Agreement and cuDNN Supplement",
+      "redistribution_basis": "cuDNN Supplement section 2: runtime .so and .dll files",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "Retain NVIDIA proprietary notices.",
+        "Distribute only as part of an application with material additional functionality."
+      ],
+      "source_availability_obligation": "Not an OSS source-distribution obligation.",
+      "modification_status": "unmodified"
+    },
+    {
+      "name": "cudnn_graph64_9.dll",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/nvidia/cudnn/bin/cudnn_graph64_9.dll",
+      "SHA256": "7cd32acd8f8b0ade2c8f2d78d1d8cc74581e88bd3284b59073e9774eba20af46",
+      "license_type": "proprietary",
+      "license": "NVIDIA cuDNN Software License Agreement and cuDNN Supplement",
+      "redistribution_basis": "cuDNN Supplement section 2: runtime .so and .dll files",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "Retain NVIDIA proprietary notices.",
+        "Distribute only as part of an application with material additional functionality."
+      ],
+      "source_availability_obligation": "Not an OSS source-distribution obligation.",
+      "modification_status": "unmodified"
+    },
+    {
+      "name": "cudnn_heuristic64_9.dll",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/nvidia/cudnn/bin/cudnn_heuristic64_9.dll",
+      "SHA256": "93ddc96ea2e72bf7d6454b450939a108e5b9634743d24b1bdaddf3baa4a2e2e6",
+      "license_type": "proprietary",
+      "license": "NVIDIA cuDNN Software License Agreement and cuDNN Supplement",
+      "redistribution_basis": "cuDNN Supplement section 2: runtime .so and .dll files",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "Retain NVIDIA proprietary notices.",
+        "Distribute only as part of an application with material additional functionality."
+      ],
+      "source_availability_obligation": "Not an OSS source-distribution obligation.",
+      "modification_status": "unmodified"
+    },
+    {
+      "name": "cudnn_ops64_9.dll",
+      "artifact_path": "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/vendor/nvidia/cudnn/bin/cudnn_ops64_9.dll",
+      "SHA256": "c5bcda5be16f6895edc5693fe3784821118abec0156a39cae5f2577482272cfd",
+      "license_type": "proprietary",
+      "license": "NVIDIA cuDNN Software License Agreement and cuDNN Supplement",
+      "redistribution_basis": "cuDNN Supplement section 2: runtime .so and .dll files",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "Retain NVIDIA proprietary notices.",
+        "Distribute only as part of an application with material additional functionality."
+      ],
+      "source_availability_obligation": "Not an OSS source-distribution obligation.",
+      "modification_status": "unmodified"
+    }
+  ],
+  "status": "PASS",
+  "blockers": []
+}

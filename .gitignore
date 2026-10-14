@@ -1,0 +1,70 @@
+开发工具
+命名规范.md
+Temp
+build/cache
+build/staging
+build/downloads
+build/wheels
+build/tmp
+build/package-*
+build/test-output
+build/importtime-before.log
+PyStand_for_UmiOCR/build
+.vscode
+*.exe
+*.txt
+!build/windows/PyStand/CMakeLists.txt
+# Release license texts are evidence, not disposable text files.
+!LICENSES/Apache-2.0.txt
+!LICENSES/GPL-3.0.txt
+!LICENSES/LGPL-2.1.txt
+!LICENSES/LGPL-3.0.txt
+!LICENSES/PyMuPDF-AGPL-3.0.txt
+
+# 发布
+release
+release.py
+
+# 开发工具
+!dev-tools/i18n/release
+!dev-tools/i18n/*.exe
+dev-tools/7z
+dev-tools/*.zip
+
+# 排除一级目录
+UmiOCR-data/*
+!UmiOCR-data/main.py
+!UmiOCR-data/version.py
+!UmiOCR-data/Help 帮助.txt
+# 允许二级目录
+!UmiOCR-data/**/
+# 排除运行环境目录
+UmiOCR-data/site-packages*
+UmiOCR-data/runtime
+UmiOCR-data/lib
+UmiOCR-data/plugins/*/
+!UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/
+UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/models/
+UmiOCR-data/temp
+UmiOCR-data/temp_doc
+# 允许运行环境压缩包
+!UmiOCR-data/*.7z
+!UmiOCR-data/*.zip
+# 排除缓存
+**__pycache__**
+UmiOCR-data/i18n/_
+.build-cache/
+
+# Local assistant instructions, sessions, and generated release products.
+**/.[Cc][Ll][Aa][Uu][Dd][Ee]/
+**/.[Cc][Oo][Dd][Ee][Xx]/
+**/.[Aa][Gg][Ee][Nn][Tt][Ss]/
+**/[Cc][Ll][Aa][Uu][Dd][Ee].[Mm][Dd]
+**/[Cc][Oo][Dd][Ee][Xx].[Mm][Dd]
+**/[Aa][Gg][Ee][Nn][Tt][Ss].[Mm][Dd]
+**/[Gg][Ee][Mm][Ii][Nn][Ii].[Mm][Dd]
+build/artifacts/
+build/audit/
+build/logs/
+$tmp/
+temp_doc/
