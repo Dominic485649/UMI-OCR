@@ -255,6 +255,9 @@ int PyStand::RunString()
     _py_argv.push_back(L"-I");
     _py_argv.push_back(L"-s");
     _py_argv.push_back(L"-S");
+    // 隔离模式忽略 PYTHONUTF8，必须在解释器初始化前显式启用。
+    _py_argv.push_back(L"-X");
+    _py_argv.push_back(L"utf8");
     _py_argv.push_back(_script);
     for (i = 1; i < (int)_argv.size(); i++)
     {

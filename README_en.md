@@ -1,8 +1,8 @@
-# Umi-OCR 3.0.0
+# Umi-OCR 3.0.1
 
 Main repository: https://github.com/Dominic485649/UMI-OCR
 
-Stable version: 3.0.0; Release tag: `v3.0.0`. This release publicly provides the base application and CUDA plugin.
+Stable version: 3.0.1; Release tag: `v3.0.1`. This release publicly provides the base application and CUDA plugin.
 
 Authors and provenance: Dominic485649 (author and maintainer of this fork); [hiroi-sora](https://github.com/hiroi-sora/Umi-OCR) (original Umi-OCR author and original copyright source).
 
@@ -69,7 +69,7 @@ Authors and provenance: Dominic485649 (author and maintainer of this fork); [hir
 
 <div align="center">
   <strong>Open-source, Batch Offline OCR Software</strong><br>
-  <sub>Umi-OCR 3.0.0: this release targets Windows 10/11 x64</sub>
+  <sub>Umi-OCR 3.0.1: this release targets Windows 10/11 x64</sub>
 </div><br>
 
 - **Public editions**: The base application and CUDA plugin are provided publicly at no charge; third-party plugin development and integration are open.
@@ -93,10 +93,10 @@ PDF preview, PDF page reading, document OCR, and single-layer and layered search
 
 ## Download Releases:
 
-This is the **3.0.0 Windows x64 stable Release**, tagged `v3.0.0`. Download the base application and CUDA plugin separately. CPU and PaddleOCR-VL plugins are not public assets in this release.
+This is the **3.0.1 Windows x64 stable Release**, tagged `v3.0.1`. Download the base application and CUDA plugin separately. CPU and PaddleOCR-VL plugins are not public assets in this release.
 
-- **Base application**: [Main repository v3.0.0 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.0).
-- **CUDA plugin**: [Plugin repository v3.0.0 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.0).
+- **Base application**: [Main repository v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1).
+- **CUDA plugin**: [Plugin repository v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.1).
 
 The host and CUDA worker share Python 3.13.16; Qt stays at 6.11.2. Archives use `.tar.xz` with standard LZMA2 at the tool's default compression level. Fully extract the base first, then extract the CUDA plugin into the application root. A CUDA 12.6-compatible NVIDIA GPU and driver are required; a system CUDA Toolkit is not required.
 

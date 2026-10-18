@@ -28,11 +28,19 @@ param(
     [ValidateSet("base", "plugin", "auto")][string]$Kind = "auto",
     [string]$CpuStagingRoot = "",
     [switch]$RequirePublicRelease,
-    [switch]$LocalCandidate
+    [switch]$LocalCandidate,
+    [string]$ReleaseGates = ""
 )
 
 $ErrorActionPreference = "Stop"
+if ($LocalCandidate -and ($RequirePublicRelease -or $ReleaseGates)) {
+    throw "-LocalCandidate is mutually exclusive with -RequirePublicRelease and -ReleaseGates."
+}
+if ($RequirePublicRelease -and -not $ReleaseGates) {
+    throw "-RequirePublicRelease requires an explicit -ReleaseGates JSON input."
+}
 $root = (Resolve-Path -LiteralPath $PackageRoot).Path
+$metadataRoot = $root
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $cpuEvidenceArgs = @()
 if ($CpuStagingRoot) {
@@ -88,32 +96,45 @@ if ($evidenceKind) {
     elseif (-not (Test-Path -LiteralPath $verifier -PathType Leaf)) {
         Fail "缺少 artifact evidence verifier: $verifier"
     }
-    elseif ($LocalCandidate) {
-        $reportPath = Join-Path $root "LICENSES\RELEASE_EVIDENCE.json"
-        if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
-            Fail "local-candidate 缺少已生成的 LICENSES/RELEASE_EVIDENCE.json"
+    else {
+        if ($evidenceKind -eq "gpu") {
+            $layoutHelper = Join-Path $RepoRoot "build\tools\release_gate_inputs.py"
+            if (-not (Test-Path -LiteralPath $layoutHelper -PathType Leaf)) {
+                throw "Missing release layout helper."
+            }
+            $layoutJson = & $evidencePython -I -B -S -X utf8 $layoutHelper --staging-root $root --kind gpu --describe-layout
+            if ($LASTEXITCODE -ne 0) { throw "CUDA overlay layout is unsafe or ambiguous." }
+            $layout = ($layoutJson -join "`n") | ConvertFrom-Json
+            $metadataRoot = [string]$layout.metadata_root
+        }
+        if ($LocalCandidate) {
+            $reportPath = Join-Path $metadataRoot "LICENSES\RELEASE_EVIDENCE.json"
+            if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
+                Fail "local-candidate 缺少已生成的 LICENSES/RELEASE_EVIDENCE.json"
+            }
+            else {
+                try {
+                    $candidateReport = Get-Content -Raw $reportPath | ConvertFrom-Json
+                    if (-not $candidateReport.local_candidate) { Fail "local-candidate evidence 未声明 local_candidate=true" }
+                    if ($candidateReport.public_prerelease_allowed) { Fail "local-candidate 不得声明 public_prerelease_allowed=true" }
+                    if (-not $candidateReport.source_delivery -or $candidateReport.source_delivery.status -ne "BLOCK") {
+                        Fail "local-candidate 必须明确记录公开源码地址为 PENDING/BLOCK"
+                    }
+                }
+                catch { Fail "无法读取 local-candidate evidence: $($_.Exception.Message)" }
+            }
         }
         else {
-            try {
-                $candidateReport = Get-Content -Raw $reportPath | ConvertFrom-Json
-                if (-not $candidateReport.local_candidate) { Fail "local-candidate evidence 未声明 local_candidate=true" }
-                if ($candidateReport.public_prerelease_allowed) { Fail "local-candidate 不得声明 public_prerelease_allowed=true" }
-                if (-not $candidateReport.source_delivery -or $candidateReport.source_delivery.status -ne "BLOCK") {
-                    Fail "local-candidate 必须明确记录公开源码地址为 PENDING/BLOCK"
-                }
-            }
-            catch { Fail "无法读取 local-candidate evidence: $($_.Exception.Message)" }
+            $evidenceArgs = @(
+                $verifier, "--repo-root", $RepoRoot, "--staging-root", $root,
+                "--kind", $evidenceKind, "--cache-root", (Join-Path $RepoRoot "build\cache")
+            )
+            $evidenceArgs += $cpuEvidenceArgs
+            if ($ReleaseGates) { $evidenceArgs += @("--release-gates", $ReleaseGates) }
+            if ($RequirePublicRelease) { $evidenceArgs += "--require-public-release" }
+            & $evidencePython -I -B -S -X utf8 @evidenceArgs
+            if ($LASTEXITCODE -ne 0) { Fail "artifact evidence verifier 未通过（kind=$evidenceKind）" }
         }
-    }
-    else {
-        $evidenceArgs = @(
-            $verifier, "--repo-root", $RepoRoot, "--staging-root", $root,
-            "--kind", $evidenceKind, "--cache-root", (Join-Path $RepoRoot "build\cache")
-        )
-        $evidenceArgs += $cpuEvidenceArgs
-        if ($RequirePublicRelease) { $evidenceArgs += "--require-public-release" }
-        & $evidencePython -I -S @evidenceArgs
-        if ($LASTEXITCODE -ne 0) { Fail "artifact evidence verifier 未通过（kind=$evidenceKind）" }
     }
 }
 
@@ -312,8 +333,6 @@ function Invoke-BaseAudit {
         "source\LICENSES\ffmpeg-build.json",
         "source\LICENSES\evidence\nvidia\cuda-toolkit-eula-2026-08-07.html",
         "source\LICENSES\evidence\nvidia\cudnn-sla-2026-08-09.html",
-        "source\LICENSES\RELEASE_EVIDENCE.json",
-        "source\LICENSES\RELEASE_EVIDENCE.md",
         "source\LICENSES\LGPL-2.1.txt",
         "source\LICENSES\LGPL-3.0.txt",
         "source\LICENSES\GPL-3.0.txt",
@@ -332,11 +351,8 @@ function Invoke-BaseAudit {
         $baseLicenseFiles += "SOURCE-CODE.md"
     }
     Test-Licenses $baseLicenseFiles
-    if (-not $LocalCandidate) {
-    # GPU 插件的源码即使不随基础包分发，也必须出现在对应源码镜像里
-    RequireFile "source\UmiOCR-data\plugins\win32_PaddleOCRv6_CUDA\api.py" "GPU 插件对应源码"
-    RequireFile "source\UmiOCR-data\plugins\win32_PaddleOCRv6_CUDA\worker.py" "GPU worker 对应源码"
-    }
+    # The base source boundary is the canonical host repository. CUDA adapter
+    # sources belong to the independently distributed plugin's source mirror.
 
     # --- 4. Qt 运行时闭包清单 -------------------------------------------
     $qtManifestPath = Join-Path $root "UmiOCR-data\qt-runtime-whitelist.json"
@@ -559,15 +575,15 @@ function Invoke-PluginAudit {
         )
         if ($pluginId -ne "win32_PaddleOCRv6_CPU") { $pluginLicenseFiles += "LICENSES\THIRD_PARTY_COMPONENTS.md" }
         foreach ($name in $pluginLicenseFiles) {
-            if (-not (Test-Path -LiteralPath (Join-Path $root $name) -PathType Leaf)) {
+            if (-not (Test-Path -LiteralPath (Join-Path $metadataRoot $name) -PathType Leaf)) {
                 Fail "插件归档缺少 $name"
             }
         }
 
-        $packagedSourceRequired = -not ($LocalCandidate -and $pluginId -eq "win32_PaddleOCRv6_CUDA")
-        # 对应源码不是只放在公开仓库里的链接。归档必须保留插件适配器、
-        # 构建入口和依赖锁；GPU 插件使用主仓库布局，独立插件使用自身布局。
-        $sourceRoot = Join-Path $root "source"
+        $packagedSourceRequired = ($metadataRoot -ne $root) -or -not ($LocalCandidate -and $pluginId -eq "win32_PaddleOCRv6_CUDA")
+        # The install overlay keeps the complete canonical source and notices
+        # under its plugin namespace; never copy them over host root records.
+        $sourceRoot = Join-Path $metadataRoot "source"
         if ($packagedSourceRequired -and -not (Test-Path -LiteralPath $sourceRoot -PathType Container)) {
             Fail "[$pluginId] 插件归档缺少 source 对应源码镜像"
         }
@@ -618,10 +634,14 @@ function Invoke-PluginAudit {
                                "LICENSES\mpl-components.json", "LICENSES\agpl-integration.json",
                                "LICENSES\cpu-document-gates.json", "LICENSES\RELEASE_EVIDENCE.json",
                                "LICENSES\RELEASE_EVIDENCE.md", "LICENSES\evidence\nvidia\cuda-toolkit-eula-2026-08-07.html", "LICENSES\evidence\nvidia\cudnn-sla-2026-08-09.html") {
-                if (-not (Test-Path -LiteralPath (Join-Path $root $name) -PathType Leaf)) {
+                if (-not (Test-Path -LiteralPath (Join-Path $metadataRoot $name) -PathType Leaf)) {
                     Fail "[$pluginId] 缺少 artifact evidence: $name"
                 }
-                if ($packagedSourceRequired -and -not (Test-Path -LiteralPath (Join-Path $sourceRoot $name) -PathType Leaf)) {
+                # Aggregate publication reports are derived after the public
+                # source commit exists. They must not be fabricated inside that
+                # immutable canonical source tree or required to equal its past.
+                $derivedAggregate = $name -in @("LICENSES\RELEASE_EVIDENCE.json", "LICENSES\RELEASE_EVIDENCE.md")
+                if ($packagedSourceRequired -and -not $derivedAggregate -and -not (Test-Path -LiteralPath (Join-Path $sourceRoot $name) -PathType Leaf)) {
                     Fail "[$pluginId] 对应源码镜像缺少 artifact evidence: $name"
                 }
             }
@@ -691,7 +711,7 @@ function Invoke-PluginAudit {
                 "LICENSES\RELEASE_EVIDENCE.json", "LICENSES\RELEASE_EVIDENCE.md"
             )
             foreach ($name in $cpuEvidence) {
-                if (-not (Test-Path -LiteralPath (Join-Path $root $name) -PathType Leaf)) { Fail "[$pluginId] 缺少 artifact evidence: $name" }
+                if (-not (Test-Path -LiteralPath (Join-Path $metadataRoot $name) -PathType Leaf)) { Fail "[$pluginId] 缺少 artifact evidence: $name" }
                 if (-not (Test-Path -LiteralPath (Join-Path $sourceRoot $name) -PathType Leaf)) { Fail "[$pluginId] 对应源码镜像缺少 artifact evidence: $name" }
             }
             foreach ($name in "cpu-source-closure.json", "third_party\certifi-2026.7.22.tar.gz", "third_party\python_bidi-0.6.11.tar.gz", "third_party\geos-3.13.1.tar.bz2",

@@ -193,6 +193,11 @@ Item {
             }
             localOptions[key] = lOpt ? lOpt : {"title":key, "type":"group"}
         }
+        if(globalOptions.api.optionsList.length === 0) {
+            // 可选后端缺席不是无效配置，刷新时也要移除旧接口枚举。
+            delete qmlapp.globalConfigs.configDict.document
+            return
+        }
         qmlapp.globalConfigs.configDict.document = globalOptions
     }
 

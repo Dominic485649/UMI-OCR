@@ -52,7 +52,7 @@ def readConfigs():
     if not os.path.exists(_FileName):
         return
     try:
-        with open(_FileName, "r") as file:
+        with open(_FileName, "r", encoding="utf-8") as file:
             data = json.load(file)
         for key in _Configs:
             _Configs[key] = data[key]

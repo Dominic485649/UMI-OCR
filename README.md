@@ -1,8 +1,8 @@
-# Umi-OCR 3.0.0
+# Umi-OCR 3.0.1
 
 主仓库：https://github.com/Dominic485649/UMI-OCR
 
-正式版本：3.0.0；Release tag：`v3.0.0`。本次公开提供基础程序和 CUDA 插件。
+正式版本：3.0.1；Release tag：`v3.0.1`。本次公开提供基础程序和 CUDA 插件。
 
 作者与来源：Dominic485649（本 fork 作者与维护者）；[hiroi-sora](https://github.com/hiroi-sora/Umi-OCR)（原 Umi-OCR 作者及原始版权来源）。
 
@@ -69,7 +69,7 @@
 
 <div align="center">
   <strong>开源、可批量的离线 OCR 软件</strong><br>
-  <sub>Umi-OCR 3.0.0：本次发行面向 Windows 10/11 x64</sub>
+  <sub>Umi-OCR 3.0.1：本次发行面向 Windows 10/11 x64</sub>
 </div><br>
 
 - **公开版本**：基础程序与 CUDA 插件免费公开提供；第三方插件开发与接入开放。
@@ -108,14 +108,14 @@ PDF 预览、PDF 页面读取、文档 OCR，以及单层和双层可搜索 PDF 
 
 ## 下载发行版
 
-本次为 **3.0.0 Windows x64 正式 Release**，标签为 `v3.0.0`。基础程序与 CUDA 插件分别下载，CPU 与 PaddleOCR-VL 不包含在公开资产中。
+本次为 **3.0.1 Windows x64 正式 Release**，标签为 `v3.0.1`。基础程序与 CUDA 插件分别下载，CPU 与 PaddleOCR-VL 不包含在公开资产中。
 
-- **基础程序**：[主仓库 v3.0.0 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.0)。
-- **CUDA 插件**：[插件仓库 v3.0.0 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.0)。
+- **基础程序**：[主仓库 v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1)。
+- **CUDA 插件**：[插件仓库 v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.1)。
 
 配套文档：
-- [3.0.0 主程序 Release 说明](docs/RELEASE_3.0.0_DRAFT.md)
-- [CUDA 插件 Release 说明](docs/RELEASE_CUDA_3.0.0_DRAFT.md)
+- [3.0.1 主程序 Release 说明](docs/RELEASE_3.0.1_DRAFT.md)
+- [CUDA 插件 Release 说明](docs/RELEASE_CUDA_3.0.1_DRAFT.md)
 - [CUDA 插件说明](docs/README_CUDA_PLUGIN.md)
 
 共用运行时为 Python 3.13.16、Qt 6.11.2。归档采用 `.tar.xz`，当前使用标准 LZMA2 默认压缩等级。完整解压基础程序，再将 CUDA 插件解压到主程序根目录；需要兼容 CUDA 12.6 的 NVIDIA 显卡与驱动，不需要系统 CUDA Toolkit。

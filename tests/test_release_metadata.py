@@ -65,6 +65,6 @@ def verify(root: Path, expected_version: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", type=Path, default=ROOT)
-    parser.add_argument("--version", default="3.0.0")
+    parser.add_argument("--version", default="3.0.1")
     args = parser.parse_args()
     verify(args.repo_root.resolve(), args.version)

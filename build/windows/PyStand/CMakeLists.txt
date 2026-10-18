@@ -31,6 +31,7 @@ if (CMAKE_GENERATOR MATCHES "Visual Studio")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
     target_compile_options(Umi-OCR
         PUBLIC
+        /utf-8
         $<$<CONFIG:Debug>:/MTd>
         $<$<CONFIG:Release>:/MT>
         $<$<CONFIG:MinSizeRel>:/MT>

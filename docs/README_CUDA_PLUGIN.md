@@ -1,4 +1,4 @@
-# Umi-OCR CUDA 插件 v3.0.0
+# Umi-OCR CUDA 插件 v3.0.1
 
 CUDA 插件仓库为 [Dominic485649/UMI-OCR_plugins](https://github.com/Dominic485649/UMI-OCR_plugins)。本仓库提供已审查的 CUDA 源码与必要构建、测试、依赖锁和许可材料。
 
@@ -8,8 +8,8 @@ CUDA 插件仓库为 [Dominic485649/UMI-OCR_plugins](https://github.com/Dominic4
 
 | 内容 | 下载位置 |
 | --- | --- |
-| Umi-OCR 主程序基础包 | [主仓库 v3.0.0 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.0) |
-| CUDA 插件 | [插件仓库 v3.0.0 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.0) |
+| Umi-OCR 主程序基础包 | [主仓库 v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1) |
+| CUDA 插件 | [插件仓库 v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.1) |
 
 本次公开提供 CUDA 插件，不提供 CPU 或 PaddleOCR-VL 下载资产。
 
@@ -34,7 +34,7 @@ CUDA 插件仓库为 [Dominic485649/UMI-OCR_plugins](https://github.com/Dominic4
 
 ## 版本与兼容
 
-插件产品版本为 `3.0.0`，与主程序正式发布标签 `v3.0.0` 对应。产品版本和 Host API 版本不是同一字段，宿主接口保留现有兼容路径。
+插件产品版本为 `3.0.1`，与主程序正式发布标签 `v3.0.1` 对应。产品版本和 Host API 版本不是同一字段，宿主接口保留现有兼容路径。
 
 本分支的旧版 CPU、CUDA 与 PaddleOCR-VL 插件不作为本版支持对象，请使用匹配的新实现。其他插件依据公开接口、平台、Python ABI 与依赖约束判定兼容性，不设置作者身份或付费来源门禁。
 
@@ -56,8 +56,8 @@ PaddleOCR-VL 精度高，速度与 CPU 接近，适合更看重精度或结构�
 
 原始 Umi-OCR MIT 声明与 hiroi-sora 版权保留。本分支新增和修改部分按 AGPL-3.0-or-later 提供。CUDA/cuDNN 和模型不因进程隔离而自动变成 AGPL 覆盖或免除其适用条款，具体以随包许可与来源声明为准。
 
-- [主程序 README](https://github.com/Dominic485649/UMI-OCR/blob/v3.0.0/README.md)
-- [Windows CUDA 构建说明](https://github.com/Dominic485649/UMI-OCR_plugins/blob/v3.0.0/docs/BUILD_WINDOWS_CUDA.md)
-- [插件接口](https://github.com/Dominic485649/UMI-OCR_plugins/blob/v3.0.0/docs/PLUGIN_API.md)
-- [组合发行许可说明](https://github.com/Dominic485649/UMI-OCR_plugins/blob/v3.0.0/LICENSES/COMBINED_DISTRIBUTION.md)
-- [主程序 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.0)
+- [主程序 README](https://github.com/Dominic485649/UMI-OCR/blob/v3.0.1/README.md)
+- [Windows CUDA 构建说明](https://github.com/Dominic485649/UMI-OCR_plugins/blob/v3.0.1/docs/BUILD_WINDOWS_CUDA.md)
+- [插件接口](https://github.com/Dominic485649/UMI-OCR_plugins/blob/v3.0.1/docs/PLUGIN_API.md)
+- [组合发行许可说明](https://github.com/Dominic485649/UMI-OCR_plugins/blob/v3.0.1/LICENSES/COMBINED_DISTRIBUTION.md)
+- [主程序 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1)

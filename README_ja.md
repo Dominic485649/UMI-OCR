@@ -1,8 +1,8 @@
-# Umi-OCR 3.0.0
+# Umi-OCR 3.0.1
 
 メインリポジトリ：https://github.com/Dominic485649/UMI-OCR
 
-正式版：3.0.0。Release tag は `v3.0.0` です。基本プログラムと CUDA プラグインを公開提供します。
+正式版：3.0.1。Release tag は `v3.0.1` です。基本プログラムと CUDA プラグインを公開提供します。
 
 作者と出典：Dominic485649（本 fork の作者・メンテナー）、[hiroi-sora](https://github.com/hiroi-sora/Umi-OCR)（Umi-OCR の原作者・原著作権の出典）。
 
@@ -48,7 +48,7 @@
 
 <div align="center">
   <strong>オープンソース、一括処理対応のオフライン OCR ソフトウェア</strong><br>
-  <sub>Umi-OCR 3.0.0：今回のリリースは Windows 10/11 x64 向けです</sub>
+  <sub>Umi-OCR 3.0.1：今回のリリースは Windows 10/11 x64 向けです</sub>
 </div><br>
 
 - **公開版**: 基本プログラムと CUDA プラグインを無料で公開します。サードパーティ製プラグインの開発・接続にも対応します。
@@ -70,10 +70,10 @@
 
 ## リリースのダウンロード:
 
-今回は tag `v3.0.0` の **Windows x64 正式 Release** です。基本プログラムと CUDA プラグインを別々にダウンロードします。CPU と PaddleOCR-VL は公開アセットに含まれません。
+今回は tag `v3.0.1` の **Windows x64 正式 Release** です。基本プログラムと CUDA プラグインを別々にダウンロードします。CPU と PaddleOCR-VL は公開アセットに含まれません。
 
-- **基本プログラム**：[メインリポジトリ v3.0.0 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.0)。
-- **CUDA プラグイン**：[プラグインリポジトリ v3.0.0 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.0)。
+- **基本プログラム**：[メインリポジトリ v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1)。
+- **CUDA プラグイン**：[プラグインリポジトリ v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.1)。
 
 本体と CUDA worker は Python 3.13.16 を共有し、Qt は 6.11.2 のままです。アーカイブは標準 LZMA2 のデフォルト圧縮レベルによる `.tar.xz` です。基本プログラムを完全に解凍してから、CUDA プラグインを本体のルートへ解凍してください。CUDA 12.6 対応の NVIDIA GPU とドライバーが必要ですが、システムの CUDA Toolkit は不要です。
 

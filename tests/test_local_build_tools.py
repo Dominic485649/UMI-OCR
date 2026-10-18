@@ -96,15 +96,27 @@ class LocalBuildToolsTests(unittest.TestCase):
             licenses = complete / "LICENSES/plugins/win32_PaddleOCRv6_CUDA"
             licenses.mkdir(parents=True)
             (licenses / "NOTICE.md").write_text("fixture notice\n", encoding="utf-8")
-            (complete / "UmiOCR-data/.settings").write_text("private", encoding="utf-8")
-            (complete / ".build").mkdir()
-            (complete / ".build/compiler.log").write_text("private", encoding="utf-8")
+            private = (
+                "UmiOCR-data/.settings", "UmiOCR-data/.pre_settings", "UmiOCR-data/themes.json",
+                "UmiOCR-data/plugins/.plugins_state", "UmiOCR-data/logs/session.txt",
+                "UmiOCR-data/temp/image.png", "UmiOCR-data/temp_doc/document.pdf",
+                "UmiOCR-data/py_src/__PyCache__/cached.pyc", "UmiOCR-data/py_src/loose.pyc",
+                ".build/compiler.log", "assembly.json", "prepared-products.json", "UmiOCR-data/startup_error.log",
+            )
+            for name in private:
+                path = complete / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("private fixture", encoding="utf-8")
             target = root / "base"
             products.prepare_base(complete, target)
-            self.assertFalse((target / "UmiOCR-data/.settings").exists())
+            for name in private:
+                self.assertFalse((target / name).exists(), name)
+                self.assertEqual((complete / name).read_text(encoding="utf-8"), "private fixture")
             self.assertFalse((target / ".build").exists())
+            self.assertFalse((target / "UmiOCR-data/py_src/__PyCache__").exists())
             self.assertFalse((target / plugin.relative_to(complete)).exists())
             self.assertFalse((target / "LICENSES/plugins").exists())
+            self.assertEqual(products.payload(target), products.payload(complete, exclude=products.base_excluded))
             self.assertTrue((target / "Umi-OCR.exe").is_file())
             self.assertTrue((plugin / "api.py").is_file())
 
@@ -129,22 +141,60 @@ class LocalBuildToolsTests(unittest.TestCase):
             plugin = complete / "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA"
             plugin.mkdir(parents=True)
             (plugin / "umi-plugin.json").write_text(json.dumps({"version": "3.0.0"}), encoding="utf-8")
+            (plugin / "api.py").write_text("# offline adapter fixture\n", encoding="utf-8")
             licenses = complete / "LICENSES/plugins/win32_PaddleOCRv6_CUDA"
             licenses.mkdir(parents=True)
-            (licenses / "NOTICE.md").write_text("small fixture", encoding="utf-8")
-            (complete / "LICENSE").write_text("fixture", encoding="utf-8")
+            (licenses / "THIRD_PARTY_NOTICES.md").write_text("CUDA fixture notices", encoding="utf-8")
+            (licenses / "RELEASE_EVIDENCE.json").write_text(json.dumps({"public_prerelease_allowed": False}), encoding="utf-8")
+            (complete / "LICENSES/THIRD_PARTY_NOTICES.md").write_text("host fixture notices", encoding="utf-8")
+            for name in ("COPYING", "LICENSE", "NOTICE.md", "SOURCE-CODE.md"):
+                (complete / name).write_text(f"host fixture {name}\n", encoding="utf-8")
+            (complete / "Umi-OCR.exe").write_bytes(b"not an executable")
+            private = (
+                "assembly.json", "prepared-products.json", "UmiOCR-data/.settings", "UmiOCR-data/themes.json",
+                "UmiOCR-data/logs/session.txt", "UmiOCR-data/py_src/__pycache__/host.pyc",
+                "UmiOCR-data/plugins/.plugins_state", "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/__pycache__/api.pyc",
+                "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/loose.pyc",
+            )
+            for name in private:
+                path = complete / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("private fixture", encoding="utf-8")
             source = repo / "small-public-source.py"
             source.write_text("VALUE = 300\n", encoding="utf-8")
             manifest = {"host/small-public-source.py": hashlib.sha256(source.read_bytes()).hexdigest()}
             snapshot.write_snapshot(complete, manifest, {"host": "fixture"}, {"version": "3.0.0", "scope": "public", "boundaries": ["fixture"], "repositories": {"host": repo}})
             output = repo / "build/products"
             args = ["--repo-root", str(repo), "--complete-root", str(complete), "--products-root", str(output)]
-            self.assertEqual(products.main(args), 0)
+            result = subprocess.run([sys.executable, "-I", "-B", "-S", str(REPO / "build/tools/prepare_products.py"), *args],
+                                    capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             report = json.loads((output / "prepared-products.json").read_text(encoding="utf-8"))
             self.assertEqual(set(report["products"]), {"base", "cuda"})
             self.assertFalse(report["public_release_allowed"])
             base = Path(report["products"]["base"]["path"])
+            overlay = Path(report["products"]["cuda"]["path"])
             self.assertFalse((base / "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA").exists())
+            for name in private:
+                self.assertFalse((base / name).exists(), name)
+                self.assertEqual((complete / name).read_text(encoding="utf-8"), "private fixture")
+            self.assertEqual(products.payload(base), products.payload(complete, exclude=products.base_excluded))
+            self.assertEqual({path.name for path in overlay.iterdir()}, {"UmiOCR-data", "LICENSES"})
+            overlay_plugin = overlay / plugin.relative_to(complete)
+            self.assertEqual(products.payload(overlay_plugin), products.payload(plugin, exclude=products.cuda_overlay.private_path))
+            records = overlay / "LICENSES/plugins/win32_PaddleOCRv6_CUDA"
+            for name in ("COPYING", "LICENSE", "NOTICE.md", "SOURCE-CODE.md", "source-snapshot.zip", "source-snapshot.json", "source-provenance.json"):
+                self.assertEqual((records / name).read_bytes(), (complete / name).read_bytes(), name)
+            self.assertEqual((records / "LICENSES/THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8"), "CUDA fixture notices")
+            self.assertFalse(json.loads((records / "LICENSES/RELEASE_EVIDENCE.json").read_text(encoding="utf-8"))["public_prerelease_allowed"])
+            host_records = {name: (base / name).read_bytes() for name in
+                            ("COPYING", "LICENSE", "NOTICE.md", "SOURCE-CODE.md", "source-snapshot.zip", "source-snapshot.json", "source-provenance.json", "LICENSES/THIRD_PARTY_NOTICES.md")}
+            shutil.copytree(overlay, base, dirs_exist_ok=True)
+            for name, expected in host_records.items():
+                self.assertEqual((base / name).read_bytes(), expected, name)
+            self.assertTrue((base / plugin.relative_to(complete) / "api.py").is_file())
+            self.assertFalse((base / plugin.relative_to(complete) / "__pycache__").exists())
+            self.assertFalse((base / plugin.relative_to(complete) / "loose.pyc").exists())
             self.assertEqual(products.main(args), 2)
 
     def test_missing_offline_inputs_stop_before_copy(self):

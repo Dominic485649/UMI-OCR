@@ -17,9 +17,12 @@ TOOLS = {
     "verify_release_evidence.py", "strip_optional_models_3_7.py",
     "derive_uvdoc_grid_model.py", "split_lock.py", "source_snapshot.py",
     "package_tar_xz.py", "export_cuda_source.py", "record_gpu_e2e.py", "verify_public_payload.py", "freeze_gpu_runtime.py", "prepare_cuda_overlay.py",
-    "staging_smoke.py", "measure_closure.py",
+    "staging_smoke.py", "measure_closure.py", "release_gate_inputs.py",
 }
-DOCS = {"BUILD_WINDOWS_CUDA.md", "BUILD_WINDOWS_CUDA_en.md", "PLUGIN_API.md", "README_CUDA_PLUGIN.md"}
+DOCS = {
+    "BUILD_WINDOWS_CUDA.md", "BUILD_WINDOWS_CUDA_en.md", "PLUGIN_API.md", "README_CUDA_PLUGIN.md",
+    "RELEASE_3.0.1_DRAFT.md", "RELEASE_CUDA_3.0.1_DRAFT.md", "RELEASE_3.0.1_ACCEPTANCE.md",
+}
 
 
 def selected_sources(repo: Path) -> list[Path]:
@@ -36,7 +39,8 @@ def selected_sources(repo: Path) -> list[Path]:
             name.startswith("docs/") and relative.name in DOCS or
             name.startswith("tests/") and relative.name in {
                 "test_cuda_worker_client.py", "test_ocr_workflows.py", "test_public_payload.py",
-                "test_release_evidence_status.py", "test_optional_model_strip.py", "test_cuda_overlay.py",
+                "test_release_evidence_status.py", "test_release_gate_inputs.py",
+                "test_optional_model_strip.py", "test_cuda_overlay.py",
             }):
             selected.append(relative)
     required = {"COPYING", "LICENSE", PLUGIN + "umi-plugin.json", PLUGIN + "api.py", PLUGIN + "worker.py",

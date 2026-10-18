@@ -16,6 +16,17 @@ import zipfile
 from pathlib import Path
 from datetime import date
 
+# -I deliberately omits the script directory. Load only our named, adjacent
+# helper, not a module from the current directory or a package being audited.
+import importlib.util
+
+_gate_spec = importlib.util.spec_from_file_location(
+    "umi_release_gate_inputs", Path(__file__).with_name("release_gate_inputs.py")
+)
+release_gate_inputs = importlib.util.module_from_spec(_gate_spec)
+_gate_spec.loader.exec_module(release_gate_inputs)
+metadata_path = release_gate_inputs.metadata_path
+
 
 VERIFY_DATE = date.today().isoformat()
 CUDA_EULA_URL = "https://docs.nvidia.com/cuda/eula/index.html"
@@ -156,7 +167,7 @@ def notice_files(info: Path, vendor: Path) -> list[str]:
 
 
 def ensure_apache_license(staging: Path, errors: list[str]) -> str:
-    target = staging / "LICENSES" / "Apache-2.0.txt"
+    target = metadata_path(staging, "LICENSES") / "Apache-2.0.txt"
     if not target.is_file():
         candidates = []
         for candidate in staging.rglob("*"):
@@ -334,7 +345,7 @@ def verify_models(staging: Path, plugin: Path, source_lock, apache_path: str, er
             "redistribution_allowed": bool(asset.get("redistribution_allowed")) and matches,
             "required_notices": list(dict.fromkeys(asset.get("required_notices", []) + [apache_path] + ([rel(local.parent / "README.md", staging)] if (local.parent / "README.md").is_file() else []))),
             "verification_date": VERIFY_DATE,
-            "evidence_snapshot_path": "LICENSES/model-rights.json",
+            "evidence_snapshot_path": rel(metadata_path(staging, "LICENSES/model-rights.json"), staging),
             "status": "PASS" if matches and asset["license"] == "Apache-2.0" else "BLOCK",
         }
         records.append(record)
@@ -368,10 +379,10 @@ def cpu_geos_version(vendor: Path) -> str | None:
 
 
 def cuda_eula_snapshot(staging: Path):
-    path = staging / CUDA_EULA_SNAPSHOT
+    path = metadata_path(staging, CUDA_EULA_SNAPSHOT)
     actual = sha256(path) if path.is_file() else None
     return {
-        "artifact_path": CUDA_EULA_SNAPSHOT,
+        "artifact_path": rel(path, staging),
         "SHA256": actual,
         "expected_SHA256": CUDA_EULA_SNAPSHOT_SHA256,
         "verified": actual == CUDA_EULA_SNAPSHOT_SHA256,
@@ -637,7 +648,7 @@ def verify_cudnn(staging: Path, vendor: Path):
                 "modification_status": "unmodified",
             }
         )
-    sla_snapshot = staging / CUDNN_SLA_SNAPSHOT
+    sla_snapshot = metadata_path(staging, CUDNN_SLA_SNAPSHOT)
     eula_text = sla_snapshot.read_text("utf-8", errors="replace") if sla_snapshot.is_file() else ""
     raw_e2e = staging / "UmiOCR-data" / "plugins" / "win32_PaddleOCRv6_CUDA" / "gpu-e2e-evidence.json"
     manifest_path = staging / "UmiOCR-data" / "plugins" / "win32_PaddleOCRv6_CUDA" / "umi-plugin.json"
@@ -650,7 +661,7 @@ def verify_cudnn(staging: Path, vendor: Path):
             and (manifest_data.get("runtime") or {}).get("vendor_dirs") == []
             and (manifest_data.get("runtime") or {}).get("dll_dirs") == []
         ) if isinstance(manifest_data, dict) else False,
-        "nvidia_proprietary_notices_intact": bool(license_file and license_file.is_file() and "NVIDIA" in license_file.read_text("utf-8", errors="replace")) and "NVIDIA" in (staging / "LICENSES" / "THIRD_PARTY_NOTICES.md").read_text("utf-8", errors="replace") if (staging / "LICENSES" / "THIRD_PARTY_NOTICES.md").is_file() else False,
+        "nvidia_proprietary_notices_intact": bool(license_file and license_file.is_file() and "NVIDIA" in license_file.read_text("utf-8", errors="replace")) and "NVIDIA" in (metadata_path(staging, "LICENSES") / "THIRD_PARTY_NOTICES.md").read_text("utf-8", errors="replace") if (metadata_path(staging, "LICENSES") / "THIRD_PARTY_NOTICES.md").is_file() else False,
         "distribution_terms_consistent_with_sla": "runtime files .so and .dll" in eula_text and "material additional functionality" in eula_text and "only be accessed by your application" in eula_text,
     }
     only_runtime_files = bool(files) and all(Path(item["artifact_path"]).suffix.lower() in {".dll", ".so"} for item in files)
@@ -663,7 +674,7 @@ def verify_cudnn(staging: Path, vendor: Path):
         "license_type": "proprietary",
         "license": "NVIDIA cuDNN Software License Agreement and cuDNN Supplement",
         "current_evidence": CUDNN_SLA_URL,
-        "eula_snapshot": {"artifact_path": CUDNN_SLA_SNAPSHOT, "SHA256": sha256(sla_snapshot) if sla_snapshot.is_file() else None, "expected_SHA256": CUDNN_SLA_SNAPSHOT_SHA256, "revision": "NVIDIA current cuDNN EULA page snapshot retrieved 2026-08-09; page version v. February 22, 2022"},
+        "eula_snapshot": {"artifact_path": rel(sla_snapshot, staging), "SHA256": sha256(sla_snapshot) if sla_snapshot.is_file() else None, "expected_SHA256": CUDNN_SLA_SNAPSHOT_SHA256, "revision": "NVIDIA current cuDNN EULA page snapshot retrieved 2026-08-09; page version v. February 22, 2022"},
         "legacy_wheel_license": {
             "artifact_path": rel(license_file, staging) if license_file and license_file.is_file() else None,
             "SHA256": sha256(license_file) if license_file and license_file.is_file() else None,
@@ -752,7 +763,7 @@ def verify_opencv(staging: Path, vendor: Path):
         "redistribution_basis": "Apache-2.0 for OpenCV 4.10.0; separately listed third-party components retain their own notices and FFmpeg has its own gate.",
         "required_notices": [
             path
-            for path in ("LICENSES/Apache-2.0.txt", rel(package_license, staging) if package_license.is_file() else None, rel(third_party_license, staging) if third_party_license.is_file() else None)
+            for path in (rel(metadata_path(staging, "LICENSES/Apache-2.0.txt"), staging), rel(package_license, staging) if package_license.is_file() else None, rel(third_party_license, staging) if third_party_license.is_file() else None)
             if path
         ],
         "source_availability_obligation": "Retain OpenCV and third-party notices. FFmpeg source/build/relink obligations are tracked independently in ffmpeg-build.json.",
@@ -790,7 +801,7 @@ def verify_ffmpeg(staging: Path, package_root: Path, source_lock, cache_root: Pa
             }
         )
     asset = next((entry for entry in source_lock.get("thirdPartySources", []) if entry.get("name") == "ffmpeg-4.4.4.tar.xz"), None)
-    source_in_archive = staging / "source" / "third_party" / "ffmpeg-4.4.4.tar.xz"
+    source_in_archive = metadata_path(staging, "source") / "third_party" / "ffmpeg-4.4.4.tar.xz"
     source_cache = cache_root / "sources" / "ffmpeg-4.4.4.tar.xz" if cache_root else None
     source_hash_ok = bool(asset and source_in_archive.is_file() and sha256(source_in_archive) == asset.get("sha256"))
     cache_hash_ok = bool(asset and source_cache and source_cache.is_file() and sha256(source_cache) == asset.get("sha256"))
@@ -837,7 +848,7 @@ def external_source_channel(staging: Path, repo: Path | None = None):
     checked with Git; this is deliberately separate from the public-source
     gate, which remains BLOCK while the public URL is PENDING.
     """
-    notice = staging / "SOURCE-CODE.md"
+    notice = metadata_path(staging, "SOURCE-CODE.md")
     text = notice.read_text("utf-8", errors="replace") if notice.is_file() else ""
     commit_match = re.search(r"Local (?:Git )?commit:\s*([0-9a-f]{40})", text, re.IGNORECASE)
     tag_match = re.search(r"Local tag:\s*([^\s]+)", text)
@@ -896,7 +907,7 @@ def external_source_channel(staging: Path, repo: Path | None = None):
         "verified": verified,
         "reason": (
             "Bundled source/ is available; no external source channel is required."
-            if (staging / "source").is_dir()
+            if (metadata_path(staging, "source")).is_dir()
             else "Complete source/ is intentionally omitted; SOURCE-CODE.md records the exact external source channel and the public URL remains pending."
             if public_pending
             else "An external source channel is not configured or could not be verified."
@@ -906,7 +917,7 @@ def external_source_channel(staging: Path, repo: Path | None = None):
 
 def verify_gpu_e2e(staging: Path, plugin: Path, models: dict, repo: Path | None = None):
     path = plugin / "gpu-e2e-evidence.json"
-    source_path = staging / "source" / "UmiOCR-data" / "plugins" / plugin.name / path.name
+    source_path = metadata_path(staging, "source") / "UmiOCR-data" / "plugins" / plugin.name / path.name
     payload = load_json(path) if path.is_file() else {}
     expected_models = [
         "UVDoc" if str(item.get("model_name", "")).startswith("UVDoc_grid")
@@ -975,7 +986,7 @@ def source_asset(source_lock, name: str):
 
 
 def source_archive_record(staging: Path, asset, cache_root: Path | None):
-    source_in_release = staging / "source" / "third_party" / asset["name"]
+    source_in_release = metadata_path(staging, "source") / "third_party" / asset["name"]
     source_cache = cache_root / "sources" / asset["name"] if cache_root else None
     release_hash = sha256(source_in_release) if source_in_release.is_file() else None
     cache_hash = sha256(source_cache) if source_cache and source_cache.is_file() else None
@@ -1033,7 +1044,7 @@ def verify_mpl(staging: Path, vendor: Path, source_lock, cache_root: Path | None
     assets = {key: source_asset(source_lock, name) or {} for key, name in asset_names.items()}
     source_records = [source_archive_record(staging, asset, cache_root) for asset in assets.values() if asset]
     source_paths = {
-        key: staging / "source" / "third_party" / asset["name"] for key, asset in assets.items() if asset
+        key: metadata_path(staging, "source") / "third_party" / asset["name"] for key, asset in assets.items() if asset
     }
     source_complete = len(source_records) == len(asset_names) and all(item["present_in_release_source"] for item in source_records)
     missing_assets = [asset_names[key] for key, asset in assets.items() if not asset]
@@ -1149,7 +1160,7 @@ def verify_agpl(staging: Path, repo: Path, plugin: Path):
     copying = repo / "COPYING"
     mit = repo / "LICENSE"
     about = repo / "UmiOCR-data" / "about.json"
-    combined = staging / "LICENSES" / "COMBINED_DISTRIBUTION.md"
+    combined = metadata_path(staging, "LICENSES") / "COMBINED_DISTRIBUTION.md"
     manifest = plugin / "umi-plugin.json"
     controller = repo / "UmiOCR-data" / "py_src" / "plugins_controller" / "plugins_controller.py"
     api = repo / "UmiOCR-data" / "plugins" / "win32_PaddleOCRv6_CUDA" / "api.py"
@@ -1292,7 +1303,7 @@ def verify_cpu_pdfium_bundle(staging: Path, plugin: Path, vendor: Path):
     Windows wheel and the reviewed pdfium-binaries release.
     """
 
-    source_lock_path = staging / "source" / "cpu-source-closure.json"
+    source_lock_path = metadata_path(staging, "source") / "cpu-source-closure.json"
     source_lock = load_json(source_lock_path) if source_lock_path.is_file() else {}
     record = source_lock.get("pypdfium2_pdfium_bundle", {}) if isinstance(source_lock, dict) else {}
     blockers = []
@@ -1352,10 +1363,10 @@ def verify_cpu_pdfium_bundle(staging: Path, plugin: Path, vendor: Path):
     if set(evidence_by_path) != expected_evidence_paths or not all(record_matches(item) for item in evidence_by_path.values()):
         blockers.append("pypdfium2/PDFium evidence snapshots are missing, changed, or outside the release source mirror.")
 
-    wheel_path = staging / "source" / "third_party" / "pypdfium2-5.12.1-py3-none-win_amd64.whl"
-    pdfium_archive = staging / "source" / "third_party" / "pdfium-win-x64.tgz"
-    pypi_path = staging / "source" / "third_party" / "pypdfium2-pypi-5.12.1.json"
-    release_path = staging / "source" / "third_party" / "pdfium-binaries-chromium-7947.github.json"
+    wheel_path = metadata_path(staging, "source") / "third_party" / "pypdfium2-5.12.1-py3-none-win_amd64.whl"
+    pdfium_archive = metadata_path(staging, "source") / "third_party" / "pdfium-win-x64.tgz"
+    pypi_path = metadata_path(staging, "source") / "third_party" / "pypdfium2-pypi-5.12.1.json"
+    release_path = metadata_path(staging, "source") / "third_party" / "pdfium-binaries-chromium-7947.github.json"
     wheel_member_hash = None
     release_member_hash = None
     expected_notice_paths = set()
@@ -1533,7 +1544,7 @@ def verify_cpu_runtime(staging: Path, plugin: Path, errors: list[str]):
         blockers.append("CPU vendor imports CUDA/cuDNN/DirectML binaries.")
     patch_path = plugin / "paddlex-offline-patch.json"
     patch = load_json(patch_path) if patch_path.is_file() else {}
-    patch_script = staging / "source" / "tools" / "patch_paddlex_cpu_offline.py"
+    patch_script = metadata_path(staging, "source") / "tools" / "patch_paddlex_cpu_offline.py"
     official_models = vendor / "paddlex" / "inference" / "utils" / "official_models.py"
     pipeline = vendor / "paddlex" / "inference" / "pipelines" / "doc_preprocessor" / "pipeline.py"
     if (
@@ -1696,7 +1707,7 @@ def verify_cpu_models(staging: Path, plugin: Path, apache_path: str):
                 "license_evidence_snapshot": file_record(snapshot, staging),
                 "model_card": file_record(card, staging),
                 "required_notices": list(dict.fromkeys((entry or {}).get("required_notices", []) + [apache_path, rel(card, staging) if card.is_file() else ""])),
-                "evidence_snapshot_path": "LICENSES/model-rights.json",
+                "evidence_snapshot_path": rel(metadata_path(staging, "LICENSES/model-rights.json"), staging),
                 "status": "PASS" if valid else "BLOCK",
             }
         )
@@ -1767,13 +1778,13 @@ def archive_member_sha256(path: Path, member: str) -> str | None:
 
 def verify_cpu_copyleft(staging: Path, plugin: Path):
     vendor = plugin / "vendor"
-    lock_path = staging / "source" / "cpu-source-closure.json"
+    lock_path = metadata_path(staging, "source") / "cpu-source-closure.json"
     source_lock = load_json(lock_path) if lock_path.is_file() else {}
     source_entries = {entry.get("component"): entry for entry in source_lock.get("source_archives", []) if isinstance(entry, dict)}
     license_paths = {
-        "MPL-2.0": staging / "LICENSES" / "MPL-2.0.txt",
-        "LGPL-3.0-only": staging / "LICENSES" / "LGPL-3.0.txt",
-        "LGPL-2.1-or-later": staging / "LICENSES" / "LGPL-2.1.txt",
+        "MPL-2.0": metadata_path(staging, "LICENSES") / "MPL-2.0.txt",
+        "LGPL-3.0-only": metadata_path(staging, "LICENSES") / "LGPL-3.0.txt",
+        "LGPL-2.1-or-later": metadata_path(staging, "LICENSES") / "LGPL-2.1.txt",
     }
     expected = (
         ("certifi", "certifi", "MPL-2.0", vendor / "certifi" / "cacert.pem"),
@@ -1911,7 +1922,7 @@ def verify_cpu_e2e(staging: Path, repo: Path, plugin: Path):
 
 
 def verify_cpu_source_mirror(staging: Path, plugin: Path):
-    source = staging / "source"
+    source = metadata_path(staging, "source")
     required = (
         source / CPU_PLUGIN_ID / "api.py",
         source / CPU_PLUGIN_ID / "coordinates.py",
@@ -2090,36 +2101,65 @@ def verify_cpu_and_document(repo: Path, cpu_staging: Path | None = None, errors:
     }
 
 
-def report_markdown(kind: str, gates: dict[str, dict]) -> str:
+def report_markdown(kind: str, gates: dict[str, dict], evidence_prefix: str = "LICENSES") -> str:
     lines = ["# Release Evidence Report", "", f"Verification date: `{VERIFY_DATE}`", "", f"Artifact kind: `{kind}`", "", "| Gate | Status | Evidence |", "| --- | --- | --- |"]
     evidence = {
-        "runtime_vendor": "LICENSES/runtime-vendor-lock.json",
-        "paddle_models": "LICENSES/model-rights.json",
-        "cuda": "LICENSES/cuda-redistributable.json",
-        "cudnn": "LICENSES/cudnn-redistributable.json",
-        "opencv": "LICENSES/opencv-artifact.json",
-        "ffmpeg": "LICENSES/ffmpeg-build.json",
-        "gpu_ocr_e2e": "LICENSES/gpu-e2e-evidence.json",
-        "mpl": "LICENSES/mpl-components.json",
-        "agpl_nvidia": "LICENSES/agpl-integration.json",
-        "cpu_ocr": "LICENSES/cpu-document-gates.json",
-        "document_models": "LICENSES/cpu-document-gates.json",
+        "runtime_vendor": "runtime-vendor-lock.json",
+        "paddle_models": "model-rights.json",
+        "cuda": "cuda-redistributable.json",
+        "cudnn": "cudnn-redistributable.json",
+        "opencv": "opencv-artifact.json",
+        "ffmpeg": "ffmpeg-build.json",
+        "gpu_ocr_e2e": "gpu-e2e-evidence.json",
+        "mpl": "mpl-components.json",
+        "agpl_nvidia": "agpl-integration.json",
+        "cpu_ocr": "cpu-document-gates.json",
+        "document_models": "cpu-document-gates.json",
+        "source_delivery": "source-delivery.json",
+        "current_source_e2e": "current-source-e2e.json",
     }
     for name, entry in gates.items():
-        lines.append(f"| {name} | {entry.get('status', 'BLOCK')} | `{evidence[name]}` |")
-    lines.extend(["", "A PASS records only the verified artifact-specific condition. It does not resolve another gate."])
+        lines.append(f"| {name} | {entry.get('status', 'BLOCK')} | `{evidence_prefix}/{evidence[name]}` |")
+    lines.extend([
+        "", "A PASS records only the verified artifact-specific condition. It does not resolve another gate.",
+        "ACCEPTED_WITH_LIMITATIONS, when present only for current_source_e2e, retains NOT_RUN manual scenarios and the original, source/payload-bound user publication decision. It is not a manual-test PASS.",
+        "These artifact-derived publication reports are generated after source publication; they are not asserted to be present in the canonical source commit.",
+    ])
     return "\n".join(lines) + "\n"
 
 
 def public_release_allowed(gates: dict[str, dict]) -> bool:
-    # NOT_INCLUDED records that the archive contains no artifact for that gate.
-    # PASS_WITH_REQUIREMENTS stays fail-closed until its conditions are closed.
-    return all(entry.get("status") in {"PASS", "NOT_INCLUDED"} for entry in gates.values())
+    # A missing publication gate is a block, not an absent product. Only the
+    # current-source manual coverage gate has a narrowly authorized exception.
+    source = gates.get("source_delivery", {})
+    current = gates.get("current_source_e2e", {})
+    if source.get("status") != "PASS" or source.get("verified") is not True:
+        return False
+    if current.get("verified") is not True or current.get("publication_authorized") is not True:
+        return False
+    if current.get("status") not in {"PASS", "ACCEPTED_WITH_LIMITATIONS"}:
+        return False
+    return all(
+        entry.get("status") in {"PASS", "NOT_INCLUDED"}
+        for name, entry in gates.items()
+        if name not in release_gate_inputs.RELEASE_GATES
+    )
 
 
-def verify(staging: Path, repo: Path, kind: str, cache_root: Path | None, cpu_staging: Path | None = None):
+def verify(staging: Path, repo: Path, kind: str, cache_root: Path | None, cpu_staging: Path | None = None, release_gates: Path | None = None):
     errors: list[str] = []
-    licenses = staging / "LICENSES"
+    metadata = release_gate_inputs.checked_metadata_root(staging, kind)
+    licenses = metadata / "LICENSES"
+    previous = {}
+    previous_path = licenses / "RELEASE_EVIDENCE.json"
+    if previous_path.is_file():
+        try:
+            previous = release_gate_inputs.read_json(previous_path)
+            if not isinstance(previous, dict):
+                raise ValueError("Existing evidence must be an object")
+        except (OSError, ValueError):
+            errors.append("Existing release evidence is malformed; publication stays blocked.")
+            previous = {}
     licenses.mkdir(parents=True, exist_ok=True)
     extra_outputs = {}
     if kind == "cpu":
@@ -2193,6 +2233,10 @@ def verify(staging: Path, repo: Path, kind: str, cache_root: Path | None, cpu_st
     }
     if kind == "gpu":
         gates["gpu_ocr_e2e"] = gpu_e2e
+    release_checks = release_gate_inputs.validate_release_gates(
+        release_gates, staging, kind, previous
+    )
+    gates.update(release_checks)
     outputs = {
         "runtime-vendor-lock.json": runtime,
         "model-rights.json": models,
@@ -2207,6 +2251,10 @@ def verify(staging: Path, repo: Path, kind: str, cache_root: Path | None, cpu_st
     }
     if kind == "gpu":
         outputs["gpu-e2e-evidence.json"] = gpu_e2e
+    outputs.update({
+        "source-delivery.json": release_checks["source_delivery"],
+        "current-source-e2e.json": release_checks["current_source_e2e"],
+    })
     for name, value in outputs.items():
         write_json(licenses / name, value)
     report = {
@@ -2214,11 +2262,21 @@ def verify(staging: Path, repo: Path, kind: str, cache_root: Path | None, cpu_st
         "verification_date": VERIFY_DATE,
         "artifact_kind": kind,
         "gates": {name: entry.get("status", "BLOCK") for name, entry in gates.items()},
-        "public_prerelease_allowed": public_release_allowed(gates),
+        "public_prerelease_allowed": not errors and public_release_allowed(gates),
         "validation_errors": errors,
+        "local_candidate": not all(entry.get("verified") is True for entry in release_checks.values()),
+        **release_checks,
     }
+    if "current_source_validation" in previous:
+        # Preserve the scoped historical automatic evidence, not its authority
+        # to close a newly reconstructed publication gate.
+        report["current_source_validation"] = previous["current_source_validation"]
+    if release_gates and release_gates.is_file():
+        report["release_gate_input"] = {"name": release_gates.name, "sha256": sha256(release_gates)}
     write_json(licenses / "RELEASE_EVIDENCE.json", report)
-    (licenses / "RELEASE_EVIDENCE.md").write_text(report_markdown(kind, gates), encoding="utf-8")
+    (licenses / "RELEASE_EVIDENCE.md").write_text(
+        report_markdown(kind, gates, rel(licenses, staging)), encoding="utf-8"
+    )
     return report
 
 
@@ -2230,14 +2288,16 @@ def main() -> int:
     parser.add_argument("--cache-root", type=Path)
     parser.add_argument("--cpu-staging-root", type=Path)
     parser.add_argument("--require-public-release", action="store_true")
+    parser.add_argument("--release-gates", type=Path, help="Explicit public-source, current-payload evidence and user-acceptance JSON")
     args = parser.parse_args()
     try:
         report = verify(
-            args.staging_root.resolve(),
+            args.staging_root.absolute(),
             args.repo_root.resolve(),
             args.kind,
             args.cache_root.resolve() if args.cache_root else None,
             args.cpu_staging_root.resolve() if args.cpu_staging_root else None,
+            args.release_gates.absolute() if args.release_gates else None,
         )
     except Exception as exc:
         print(f"release evidence verifier failed: {exc}", file=sys.stderr)

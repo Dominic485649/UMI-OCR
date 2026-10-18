@@ -44,7 +44,7 @@ Write-Host "Regression tier: $Kind"
 
 function Invoke-PortablePython([string]$Script, [string[]]$TestArguments = @()) {
     # -I ignores PYTHON* environment variables, so use -B explicitly.
-    & $Python -B -I -S (Join-Path $RepoRoot $Script) @TestArguments
+    & $Python -B -I -S -X utf8 (Join-Path $RepoRoot $Script) @TestArguments
     if ($LASTEXITCODE -ne 0) { throw "Release test failed: $Script" }
 }
 
@@ -53,6 +53,8 @@ function Invoke-PortablePython([string]$Script, [string[]]$TestArguments = @()) 
 Invoke-PortablePython "tests\test_plugin_contract.py"
 Invoke-PortablePython "tests\test_mission_runtime.py" @($DataRoot)
 Invoke-PortablePython "tests\test_plugin_services.py" @($DataRoot)
+Invoke-PortablePython "tests\test_optional_backend_configs.py" @($DataRoot)
+Invoke-PortablePython "tests\test_utf8_runtime.py" @($DataRoot, (Join-Path $StagingRoot "Umi-OCR.exe"))
 Invoke-PortablePython "tests\test_http_api.py" @("--data-root", $DataRoot, "--packaged")
 Invoke-PortablePython "build\tools\qt_startup_smoke.py" @($DataRoot, (Join-Path $StagingRoot "Umi-OCR.exe"))
 Invoke-PortablePython "tests\test_qt_runtime.py" @($DataRoot)

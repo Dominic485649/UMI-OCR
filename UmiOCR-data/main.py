@@ -58,6 +58,18 @@ import traceback
 _DllDirectoryHandles = []
 
 
+def configureUtf8():
+    """统一标准流和普通 Python 子进程的编码，不依赖系统代码页。"""
+    os.environ["PYTHONUTF8"] = "1"
+    os.environ["PYTHONIOENCODING"] = "utf-8"
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(
+                encoding="utf-8", errors=getattr(stream, "errors", None) or "strict"
+            )
+
+
 def installNoConsoleSubprocess():
     """Keep console helpers launched by dependencies hidden in the GUI build."""
     if os.name != "nt":
@@ -109,6 +121,7 @@ os.MessageBox = MessageBox
 def initRuntimeEnvironment():
     """初始化运行环境"""
 
+    configureUtf8()
     installNoConsoleSubprocess()
 
     # 尝试获取控制台的输出对象

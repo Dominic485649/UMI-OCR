@@ -1,6 +1,6 @@
 # Windows CUDA 构建文档
 
-本文档适用于 Umi-OCR 3.0.0 的独立 Windows x64 基础包和 CUDA 12.6 插件。版本从 `UmiOCR-data/about.json` 读取。产品展示名、窗口标题、`Umi-OCR.exe` 和便携设置目录 `.settings` 保持为 `Umi-OCR`。
+本文档适用于 Umi-OCR 3.0.1 的独立 Windows x64 基础包和 CUDA 12.6 插件。版本从 `UmiOCR-data/about.json` 读取。产品展示名、窗口标题、`Umi-OCR.exe` 和便携设置目录 `.settings` 保持为 `Umi-OCR`。
 
 ## 构建环境
 
@@ -38,8 +38,8 @@ pwsh -File .\build\windows\Resolve-Lock.ps1
 ```powershell
 $repo = (Get-Location).Path
 $run = Get-Date -Format 'yyyyMMdd-HHmmss'
-$base = Join-Path $repo "build/staging/300-base-$run"
-$gpu = Join-Path $repo "build/staging/300-gpu-$run"
+$base = Join-Path $repo "build/staging/301-base-$run"
+$gpu = Join-Path $repo "build/staging/301-gpu-$run"
 pwsh -File ./build/windows/Build-Release.ps1 -StagingRoot $base `
   -ReuseDependencies -ReuseFromStagingRoot "$repo/build/staging/281-base-current" `
   -Offline -SkipTests -SkipArchive -LocalCandidate
@@ -54,13 +54,13 @@ Base 只复制 runtime/site-packages 和 Qt manifest，再复制包含未 tracke
 可选组装和拆分公开产品，不隐式读取兄弟 CPU/VL 仓库：
 
 ```powershell
-$complete = "$repo/build/artifacts/3.0.0-$run/complete"
+$complete = "$repo/build/artifacts/3.0.1-$run/complete"
 pwsh -File ./build/windows/Assemble-Candidate.ps1 -Destination $complete `
   -BaseStagingRoot $base -GpuStagingRoot $gpu
 & $python -B ./build/tools/prepare_products.py --complete-root $complete `
-  --products-root "$repo/build/artifacts/3.0.0-products-$run"
+  --products-root "$repo/build/artifacts/3.0.1-products-$run"
 & $python -B ./build/tools/export_cuda_source.py `
-  --output-dir "$repo/build/artifacts/300-plugin-repository"
+  --output-dir "$repo/build/artifacts/301-plugin-repository"
 ```
 
 源码导出仅包含公开 CUDA 适配器、所需公开构建工具、docs、锁、许可证和锁定对应源码材料，保留相对路径，不创建远端、Git 历史或发布。目标存在即失败；不要清理已有导出以重试。显式 `-CpuStagingRoot`、`-VlStagingRoot` 和 `--optional-plugin ID=PATH` 仅用于可选开发工作流；公开默认不选择它们。`source_snapshot.py` 默认为 `public`，包含未 tracked 公开源码，排除 vendor/models/cache/artifacts/临时数据；直接生成快照也要求已有锁定对应源码缓存。
@@ -77,7 +77,7 @@ Base 解压到选择的应用根目录，根下直接出现 `Umi-OCR.exe` 和 `U
 
 该入口覆盖首屏懒加载与后台预热复用、Qt/QML D3D11 和图像多边形/鼠标锚点缩放、图片解码、UVDoc、截图/批量/PDF、二维码、HTTP/CLI、便携设置、HDR shader、DPI 坐标和自动截图捕获。CUDA 缺失测试会隔离 Paddle GPU wheel或请求不存在的 `gpu:N`，并验证 OCR 明确失败且未出现 CPU fallback。不要在正式 staging 中安装 CPU Paddle wheel来模拟失败。
 
-自动截图捕获不等同于人工选区和 HDR 观感验收。发布前还必须按 [HDR 截图测试与校准](https://github.com/Dominic485649/UMI-OCR/blob/v3.0.0/docs/HDR_TEST_WINDOWS.md) 完成人工步骤。
+自动截图捕获不等同于人工选区和 HDR 观感验收。发布前还必须按 [HDR 截图测试与校准](https://github.com/Dominic485649/UMI-OCR/blob/v3.0.1/docs/HDR_TEST_WINDOWS.md) 完成人工步骤。
 
 若当前桌面内容不应由自动测试读取，构建时可传 `-SkipScreenshotCapture`；它只跳过自动全屏捕获，其他回归、干净构建、包审计和归档仍执行。必须由人工截图验收补足该项。
 

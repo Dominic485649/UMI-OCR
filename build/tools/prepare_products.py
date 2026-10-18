@@ -1,4 +1,4 @@
-"""Prepare independently selected 3.0.0 local products without rebuilding.
+"""Prepare independently selected local products without rebuilding.
 
 The public default creates only the base application and the CUDA plugin. CPU
 and PaddleOCR-VL are not read from a sibling checkout and are never selected
@@ -19,7 +19,10 @@ import shutil
 import sys
 import re
 import zipfile
-from typing import Iterable
+from typing import Callable, Iterable
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import prepare_cuda_overlay as cuda_overlay
 
 
 class PreparationError(RuntimeError):
@@ -34,11 +37,11 @@ def digest(path: Path) -> str:
     return checksum.hexdigest()
 
 
-def payload(root: Path) -> dict[str, str]:
+def payload(root: Path, *, exclude: Callable[[Path], bool] | None = None) -> dict[str, str]:
     return {
         path.relative_to(root).as_posix(): digest(path)
         for path in sorted(root.rglob("*"), key=lambda item: item.as_posix().casefold())
-        if path.is_file()
+        if path.is_file() and not (exclude and exclude(path.relative_to(root)))
     }
 
 
@@ -158,22 +161,20 @@ def check_snapshot_version(complete: Path, version: str) -> None:
                 raise PreparationError(f"source snapshot member hash mismatch: {name}")
 
 
+def base_excluded(relative: Path) -> bool:
+    parts = tuple(part.casefold() for part in relative.parts)
+    return (
+        cuda_overlay.private_path(relative)
+        or parts[:2] in {("umiocr-data", "plugins"), ("licenses", "plugins")}
+        or len(parts) == 1 and parts[0] in {"assembly.json", "prepared-products.json"}
+    )
+
+
 def prepare_base(complete: Path, target: Path) -> None:
-    # Build-Release's complete staging root already contains no inference
-    # backend in its base product. An assembly can include selected plugins.
+    # Copying and expected hashes must use exactly the same release boundary.
     def ignore(directory: str, names: list[str]) -> set[str]:
         relative = Path(directory).relative_to(complete)
-        omitted = {name for name in names if name.casefold() in {
-            "__pycache__", ".settings", ".pre_settings", ".plugins_state",
-            "temp", "temp_doc", "logs", "startup_error.log", ".build",
-        }}
-        if relative.as_posix() == "UmiOCR-data/plugins":
-            return set(names)
-        if relative.as_posix() == "LICENSES":
-            omitted.update({"plugins"}.intersection(names))
-        if not relative.parts:
-            omitted.update({"assembly.json", "prepared-products.json"}.intersection(names))
-        return omitted
+        return {name for name in names if base_excluded(relative / name)}
     for path in complete.rglob("*"):
         if path.is_symlink():
             raise PreparationError(f"candidate contains a link: {path}")
@@ -216,6 +217,18 @@ def prepare_plugin(
         plugin_version = str(document.get("version", ""))
         if plugin_version and plugin_version != version:
             raise PreparationError(f"plugin {plugin_id} version {plugin_version!r} != {version!r}")
+
+
+def prepare_cuda(complete: Path, target: Path, version: str) -> None:
+    manifest = complete / "UmiOCR-data/plugins" / cuda_overlay.PLUGIN_ID / "umi-plugin.json"
+    if manifest.is_file():
+        plugin_version = str(json.loads(manifest.read_text(encoding="utf-8")).get("version", ""))
+        if plugin_version and plugin_version != version:
+            raise PreparationError(f"plugin {cuda_overlay.PLUGIN_ID} version {plugin_version!r} != {version!r}")
+    try:
+        cuda_overlay.prepare(complete, target, combined=True)
+    except RuntimeError as exc:
+        raise PreparationError(str(exc)) from exc
 
 
 def product_name(version: str, label: str, product: str, plugin_id: str | None = None) -> str:
@@ -290,17 +303,11 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 plugin_id = "win32_PaddleOCRv6_CUDA"
                 source = complete / "UmiOCR-data" / "plugins" / plugin_id
-                prepare_plugin(complete, target, plugin_id, source, version)
+                prepare_cuda(complete, target, version)
                 expected_source = source
-            expected = payload(expected_source)
-            if product == "base":
-                expected = {name: value for name, value in expected.items()
-                            if not name.startswith(("UmiOCR-data/plugins/", "LICENSES/plugins/"))}
+            expected = payload(expected_source, exclude=base_excluded if product == "base" else cuda_overlay.private_path)
             actual_root = target if product == "base" else target / "UmiOCR-data" / "plugins" / "win32_PaddleOCRv6_CUDA"
-            if product == "base":
-                actual = payload(actual_root)
-            else:
-                actual = payload(actual_root)
+            actual = payload(actual_root)
             if expected != actual:
                 raise PreparationError(f"payload integrity mismatch for {product}")
             result["products"][product] = {

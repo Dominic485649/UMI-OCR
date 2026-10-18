@@ -1,6 +1,6 @@
-# Umi-OCR 3.0.0 Source Code Notice
+# Umi-OCR 3.0.1 Source Code Notice
 
-The formal release tag is `v3.0.0`. Public source belongs to these repositories:
+The formal release tag is `v3.0.1`. Public source belongs to these repositories:
 
 - Application and base distribution: https://github.com/Dominic485649/UMI-OCR
 - CUDA plugin: https://github.com/Dominic485649/UMI-OCR_plugins

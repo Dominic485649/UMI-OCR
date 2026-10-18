@@ -13,10 +13,20 @@ def main():
     spec = importlib.util.spec_from_file_location("release_evidence", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    assert module.public_release_allowed({"included": {"status": "PASS"}})
-    assert module.public_release_allowed({"absent": {"status": "NOT_INCLUDED"}})
-    assert not module.public_release_allowed({"cudnn": {"status": "PASS_WITH_REQUIREMENTS"}})
-    assert not module.public_release_allowed({"model": {"status": "BLOCK"}})
+
+    def allowed(conditions):
+        # These unit cases isolate component statuses; publication additionally
+        # requires separately verified source and current-payload gates.
+        return module.public_release_allowed({
+            "source_delivery": {"status": "PASS", "verified": True},
+            "current_source_e2e": {"status": "PASS", "verified": True, "publication_authorized": True},
+            **conditions,
+        })
+
+    assert allowed({"included": {"status": "PASS"}})
+    assert allowed({"absent": {"status": "NOT_INCLUDED"}})
+    assert not allowed({"cudnn": {"status": "PASS_WITH_REQUIREMENTS"}})
+    assert not allowed({"model": {"status": "BLOCK"}})
     staging = ROOT / "staging"
     package = staging / "UmiOCR-data"
     assert module.runtime_lock_target(staging, package, package / "native-dlls.lock.json", "UmiOCR-data/runtime/python313.dll") == staging / "UmiOCR-data/runtime/python313.dll"
@@ -132,7 +142,7 @@ def main():
         assert result["cpu_ocr"]["status"] == "NOT_INCLUDED"
         assert result["document_models"]["status"] == "NOT_INCLUDED"
         # A development source tree must not influence actual archive scope.
-        assert module.public_release_allowed({"cpu": result["cpu_ocr"], "document": result["document_models"]})
+        assert allowed({"cpu": result["cpu_ocr"], "document": result["document_models"]})
         (staging / "UmiOCR-data/plugins/win32_PaddleOCRVL_1_6").mkdir()
         result = module.verify_cpu_and_document(repo, artifact_staging=staging)
         assert result["document_models"]["status"] == "BLOCK"
@@ -144,7 +154,7 @@ def main():
             result = module.verify_cpu_and_document(repo, artifact_staging=staging)
             verify_cpu.assert_called_once_with(staging, repo, [])
         assert result["cpu_ocr"]["status"] == "BLOCK"
-        assert not module.public_release_allowed({"cpu": result["cpu_ocr"]})
+        assert not allowed({"cpu": result["cpu_ocr"]})
     print("Release evidence status gate regression passed.")
 
 

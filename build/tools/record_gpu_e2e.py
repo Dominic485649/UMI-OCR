@@ -60,7 +60,7 @@ def main():
     environment["PADDLE_PDX_DISABLE_DEVICE_FALLBACK"] = "True"
     environment["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
     process = subprocess.run(
-        [str(runtime), "-B", "-I", "-S", str(test), str(data), "--device", args.device],
+        [str(runtime), "-B", "-I", "-S", "-X", "utf8", str(test), str(data), "--device", args.device],
         cwd=staging, env=environment, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         encoding="utf-8", errors="replace", timeout=900,
     )

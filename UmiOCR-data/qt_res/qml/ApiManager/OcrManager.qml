@@ -219,6 +219,11 @@ Item {
             else // 无局部配置
                 localOptions[key] = {"title":key, "type":"group"}
         }
+        if(globalOptions.api.optionsList.length === 0) {
+            // 基础包允许不安装 OCR 后端，不注册无法选择的接口枚举。
+            delete qmlapp.globalConfigs.configDict.ocr
+            return
+        }
         const preferred = ["win32_PaddleOCRv6_CPU", "win32_PaddleOCRv6_CUDA"].find(key => localOptions.hasOwnProperty(key)) || Object.keys(localOptions)[0]
         if(preferred) globalOptions.api.default = preferred
         qmlapp.globalConfigs.configDict.ocr = globalOptions // 写入全局预配置

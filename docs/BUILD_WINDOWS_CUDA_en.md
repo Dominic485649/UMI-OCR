@@ -1,6 +1,6 @@
 # Windows CUDA Build Guide
 
-This guide builds independent Umi-OCR 3.0.0 Windows x64 base and CUDA 12.6 plugin products. Versions come from `UmiOCR-data/about.json`. The product name, window title, `Umi-OCR.exe`, portable `.settings` location, and branding remain `Umi-OCR`.
+This guide builds independent Umi-OCR 3.0.1 Windows x64 base and CUDA 12.6 plugin products. Versions come from `UmiOCR-data/about.json`. The product name, window title, `Umi-OCR.exe`, portable `.settings` location, and branding remain `Umi-OCR`.
 
 ## Prerequisites
 
@@ -37,8 +37,8 @@ Run from the repository root. These commands compile local native components, co
 ```powershell
 $repo = (Get-Location).Path
 $run = Get-Date -Format 'yyyyMMdd-HHmmss'
-$base = Join-Path $repo "build/staging/300-base-$run"
-$gpu = Join-Path $repo "build/staging/300-gpu-$run"
+$base = Join-Path $repo "build/staging/301-base-$run"
+$gpu = Join-Path $repo "build/staging/301-gpu-$run"
 pwsh -File ./build/windows/Build-Release.ps1 -StagingRoot $base `
   -ReuseDependencies -ReuseFromStagingRoot "$repo/build/staging/281-base-current" `
   -Offline -SkipTests -SkipArchive -LocalCandidate
@@ -53,13 +53,13 @@ Base copies runtime/site-packages and the Qt manifest, then current public host 
 Optional assembly and independent public products never infer a sibling CPU/VL checkout:
 
 ```powershell
-$complete = "$repo/build/artifacts/3.0.0-$run/complete"
+$complete = "$repo/build/artifacts/3.0.1-$run/complete"
 pwsh -File ./build/windows/Assemble-Candidate.ps1 -Destination $complete `
   -BaseStagingRoot $base -GpuStagingRoot $gpu
 & $python -B ./build/tools/prepare_products.py --complete-root $complete `
-  --products-root "$repo/build/artifacts/3.0.0-products-$run"
+  --products-root "$repo/build/artifacts/3.0.1-products-$run"
 & $python -B ./build/tools/export_cuda_source.py `
-  --output-dir "$repo/build/artifacts/300-plugin-repository"
+  --output-dir "$repo/build/artifacts/301-plugin-repository"
 ```
 
 The local CUDA source export contains only its public adapters, required public build tools, docs, locks, licenses and locked corresponding-source materials, preserving relative paths. It creates no remote, Git history or release, and refuses existing outputs. `-CpuStagingRoot`, `-VlStagingRoot` and `--optional-plugin ID=PATH` are explicit development-only selections. `source_snapshot.py` defaults to public scope, includes untracked public sources and excludes vendor/models/cache/artifacts/user temporary data; direct snapshots also require the existing locked corresponding-source cache.
@@ -76,7 +76,7 @@ These commands skip runtime acceptance. `LocalCandidate` keeps public-release an
 
 This entry point covers startup lazy imports and warmup reuse, Qt/QML D3D11 and polygon/cursor-anchored image behavior, decoders, UVDoc, screenshot/batch/PDF OCR, QR codes, HTTP/CLI, portable settings, the HDR shader, DPI geometry, and automated screen capture. The CUDA-unavailable checks isolate the GPU wheel or request a missing `gpu:N` device and require an explicit OCR failure with no CPU fallback. Do not install a CPU Paddle wheel into staging for this test.
 
-Automated capture does not replace manual selection-window and HDR visual acceptance. Complete the manual steps in [HDR screenshot testing and calibration](https://github.com/Dominic485649/UMI-OCR/blob/v3.0.0/docs/HDR_TEST_WINDOWS.md) before release.
+Automated capture does not replace manual selection-window and HDR visual acceptance. Complete the manual steps in [HDR screenshot testing and calibration](https://github.com/Dominic485649/UMI-OCR/blob/v3.0.1/docs/HDR_TEST_WINDOWS.md) before release.
 
 Use `-SkipScreenshotCapture` when the current desktop must not be read by an automated test. It skips only automated full-screen capture; all other regressions, clean-build work, auditing, and archiving still run. Manual screenshot acceptance must cover the omitted check.
 
