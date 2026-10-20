@@ -16,6 +16,7 @@ class OutputTxt(Output):
                 f.write(f'{argd["startDatetime"]}\n\n')  # 写入开始时间日期
         except Exception as e:
             raise Exception(f"Failed to create txt file. {e}\n创建txt文件失败。")
+        self.recordArtifact(self.outputPath)
 
     def print(self, res):  # 输出图片结果
         if not res["code"] == 100 and self.ignoreBlank:

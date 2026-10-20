@@ -2,6 +2,7 @@
 
 import importlib.util
 from pathlib import Path
+import sys
 import tempfile
 import zipfile
 
@@ -29,7 +30,19 @@ def main():
         plugin = root / "UmiOCR-data/plugins/win32_PaddleOCRv6_CPU"
         plugin.mkdir(parents=True)
         assert module.verify(root)["status"] == "BLOCK"
-    print("Public payload privacy gate regression passed.")
+    sys.path.insert(0, str(ROOT / "build/tools"))
+    from export_cuda_source import selected_sources
+
+    exported = {path.as_posix() for path in selected_sources(ROOT)}
+    required_documents = {
+        "docs/RELEASE_3.0.2_DRAFT.md",
+        "docs/RELEASE_CUDA_3.0.2_DRAFT.md",
+        "docs/RELEASE_3.0.2_REVIEW.md",
+    }
+    assert required_documents <= exported, sorted(required_documents - exported)
+    assert "cleanup-old-artifacts.ps1" not in exported
+    assert all((ROOT / name).is_file() for name in required_documents)
+    print("Public payload privacy and CUDA release-document export regressions passed.")
 
 
 if __name__ == "__main__":

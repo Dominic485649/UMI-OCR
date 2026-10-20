@@ -2,286 +2,326 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import Qt.labs.qmlmodels 1.0 // 表格
-import Qt5Compat.GraphicalEffects // 子元素圆角
+import Qt.labs.qmlmodels 1.0
+import Qt5Compat.GraphicalEffects
 
 Item {
     id: fTableRoot
-
-    // ========================= 【定义】 =========================
-
-    // 表头。定义每一列。
     property var headers: [
-        // 第一列也作为总key（tk），不允许重复。
-        {key: "path", title: "文件", },
-        {key: "time", title: "耗时", },
-        {key: "state", title: "状态", },
-        // 可选项：
-        // btn:  true 启用按钮
-        // onClicked: 单击函数
-        // left: true 左对齐
-        // display: 显示函数，输入value，返回显示文本
+        {key: "path", title: "文件"},
+        {key: "time", title: "耗时"},
+        {key: "state", title: "状态"}
     ]
     property string openBtnText: "选择文件"
     property string clearBtnText: "清空"
     property string defaultTips: "拖入或选择文件"
     property string fileDialogTitle: "请选择文件"
     property var fileDialogNameFilters: ["文件 (*.jpg *.jpe *.jpeg *.jfif *.png *.avif *.webp *.jxl *.jxr *.wdp *.hdp *.bmp *.tif *.tiff)"]
-    property int spacing: size_.smallLine // 表项水平间隔
-    property int minWidth0: size_.smallLine * 5 // 第0列最小宽度
-    property bool isLock: false // 是否锁定UI操作
+    property int spacing: size_.smallLine
+    property int minWidth0: size_.smallLine * 5
+    property bool isLock: false
+    // 保留原有锁；运行中只按页面授权放开导入，不能顺便放开清空。
+    property bool allowOpenWhileLocked: false
+    property var clearHandler: undefined
+    property string statusText: ""
+    property bool dragSortEnabled: false // 默认不改变其它页面的交互。
+    property bool contextMenuEnabled: false
+    property var canMoveRow: undefined // (稳定路径) => bool
+    property var rowMenuBuilder: undefined // (稳定路径) => Menu_ 条目
+    property string contextPath: ""
+    property string dragPath: ""
+    property string dragBeforePath: ""
+    property real dragPointerY: 0
+    property real dragIndicatorY: 0
+    readonly property bool openEnabled: !isLock || allowOpenWhileLocked
+    readonly property bool clearEnabled: !isLock
+    signal addPaths(var paths)
+    signal click(var info)
+    signal rowMoveRequested(string path, string beforePath)
 
+    // ========================= 【数据接口】 =========================
 
-    // ========================= 【调用接口】 =========================
-
-    // 增：添加一项。 row：字典，key在headers中，如 { "path" "time" "state" }
-    // ik：可以是表格行index（int），也可以是总key（string）
-    function add(row, ik=-1) {
-        const key = row[headerKey]
-        if(key in dataDict) {
-            console.warn(`add: ${key} 已在dataDict中！`)
-            return false
-        }
-        if(ik === -1 || ik === rowCount) {
-            dataDict[key] = rowCount
-            dataModel.append(row)
-        }
-        else {
-            const i = ik2i(ik)
-            if(i < 0) {
-                console.warn(`add: ik ${ik} ${i} < 0 ！`)
-                return false
-            }
-            dataDict[key] = i
-            dataModel.insert(i, row)
-        }
-        updateWidth()
-        return true
+    // 所有结构变化共用索引重建，禁止沿用插入/删除/移动之前的 path -> index。
+    function rebuildIndex() {
+        const dict = {}
+        for(let i = 0; i < dataModel.count; i++) dict[dataModel.get(i)[headerKey]] = i
+        dataDict = dict
     }
-    // 删：删除一项
-    function del(ik) {
-        const i = ik2i(ik)
-        if(i < 0) {
-            console.warn(`del: ik ${ik} ${i} < 0 ！`)
-            return false
-        }
-        const key = dataModel.get(i)[headerKey]
-        delete dataDict[key]
-        dataModel.remove(i)
-        return true
-    }
-    // 删：清空
-    function clear() {
-        dataModel.clear()
-        dataDict = {}
-    }
-    // 改：属性字典
-    function set(ik, columnDict) {
-        const i = ik2i(ik)
-        if(i < 0) {
-            console.warn(`set: ik ${ik} ${i} < 0 ！`)
-            return false
-        }
-        dataModel.set(i, columnDict)
-        updateWidth()
-        return true
-    }
-    // 改：单个属性
-    function setProperty(ik, columnKey, value) {
-        const i = ik2i(ik)
-        if(i < 0) {
-            console.warn(`setProperty: ik ${ik} ${i} < 0 ！`)
-            return false
-        }
-        dataModel.setProperty(i, columnKey, value)
-        updateWidth()
-        return true
-    }
-    // 查：ik转index。返回-1表示失败。
     function ik2i(ik) {
-        if (typeof ik === "number") {
-            if(ik >= 0 && ik < rowCount)
-                return ik
-        } else if (typeof ik === "string") {
-            if(ik in dataDict)
-                return dataDict[ik]
+        if(typeof ik === "number") return Number.isInteger(ik) && ik >= 0 && ik < rowCount ? ik : -1
+        if(typeof ik === "string" && Object.prototype.hasOwnProperty.call(dataDict, ik)) {
+            const i = dataDict[ik]
+            if(i >= 0 && i < rowCount && dataModel.get(i)[headerKey] === ik) return i
         }
         return -1
     }
-    // 查：获取单个行的字典
+    function add(row, ik=-1) {
+        const key = row[headerKey]
+        if(typeof key !== "string" || ik2i(key) >= 0) return false
+        const i = (ik === -1 || ik === rowCount) ? rowCount : ik2i(ik)
+        if(i < 0) return false
+        if(i === rowCount) dataModel.append(row)
+        else dataModel.insert(i, row)
+        rebuildIndex()
+        updateWidth()
+        return true
+    }
+    function del(ik) {
+        const i = ik2i(ik)
+        if(i < 0) return false
+        if(dataModel.get(i)[headerKey] === dragPath) cancelRowDrag()
+        dataModel.remove(i)
+        rebuildIndex()
+        updateWidth()
+        return true
+    }
+    function clear() {
+        cancelRowDrag()
+        rowMenu.close()
+        dataModel.clear()
+        rebuildIndex()
+    }
+    // 仅在权威快照到达后移动模型；鼠标松手不先行修改显示顺序。
+    function move(ik, to) {
+        const from = ik2i(ik)
+        if(from < 0 || !Number.isInteger(to) || to < 0 || to >= rowCount) return false
+        if(from !== to) dataModel.move(from, to, 1)
+        rebuildIndex()
+        updateWidth()
+        return true
+    }
+    function set(ik, columnDict) {
+        const i = ik2i(ik)
+        if(i < 0) return false
+        if(columnDict[headerKey] !== undefined && columnDict[headerKey] !== dataModel.get(i)[headerKey]
+            && ik2i(columnDict[headerKey]) >= 0) return false
+        dataModel.set(i, columnDict)
+        if(columnDict[headerKey] !== undefined) rebuildIndex()
+        updateWidth()
+        return true
+    }
+    function setProperty(ik, columnKey, value) {
+        const change = {}
+        change[columnKey] = value
+        return set(ik, change)
+    }
     function get(ik) {
         const i = ik2i(ik)
-        if(i < 0) {
-            console.warn(`get: ik ${ik} ${i} < 0 ！`)
-            return {}
-        }
-        return dataModel.get(i)
+        return i < 0 ? {} : dataModel.get(i)
     }
-    // 查：获取key列的所有数据，返回每项为value
     function getColumnsValue(key) {
-        let list = []
-        for(let y = 0; y < rowCount; y++) {
-            list.push( dataModel.get(y)[key] )
+        const list = []
+        for(let i = 0; i < rowCount; i++) list.push(dataModel.get(i)[key])
+        return list
+    }
+    function getColumnsValues(keys=[]) {
+        const list = []
+        for(let i = 0; i < rowCount; i++) {
+            if(!keys.length) { list.push(dataModel.get(i)); continue }
+            const row = {}
+            for(const key of keys) row[key] = dataModel.get(i)[key]
+            list.push(row)
         }
         return list
     }
-    // 查：获取多个列的数据，返回每项为字典
-    function getColumnsValues(keys=[]) {
-        let list = []
-        if(keys.length > 0) {
-            for(let y = 0; y < rowCount; y++) {
-                const data = dataModel.get(y)
-                const d = {}
-                for(let i in keys)
-                    d[keys[i]] = data[keys[i]]
-                list.push(d)
+    // 增量协调快照，逐页进度更新不再 clear 全表，保留滚动位置和现有 delegate。
+    function reconcileRows(rows) {
+        const wanted = {}
+        for(let i = 0; i < rows.length; i++) {
+            const key = rows[i][headerKey]
+            if(typeof key !== "string" || Object.prototype.hasOwnProperty.call(wanted, key)) return false
+            wanted[key] = true
+        }
+        for(let i = rowCount - 1; i >= 0; i--)
+            if(!Object.prototype.hasOwnProperty.call(wanted, dataModel.get(i)[headerKey])) del(i)
+        for(let i = 0; i < rows.length; i++) {
+            const row = rows[i]
+            const current = ik2i(row[headerKey])
+            if(current < 0) add(row, i)
+            else {
+                if(current !== i) move(current, i)
+                const changed = {}, previous = dataModel.get(i)
+                for(const key of Object.keys(row))
+                    if(previous[key] !== row[key]) changed[key] = row[key]
+                if(Object.keys(changed).length) set(i, changed)
             }
         }
-        else {
-            for(let y = 0; y < rowCount; y++)
-                list.push(dataModel.get(y))
-        }
-        return list
+        rebuildIndex()
+        refreshContextMenu()
+        return true
     }
+    function replaceRows(rows) { return reconcileRows(rows) }
 
-    // 定义信号
-    signal addPaths(var paths) // 添加文件的信号
-    signal click(var info) // 点击条目的信号
+    // ========================= 【交互接口】 =========================
 
-    Component.onCompleted: {
-        dataDict = {}
-        columnCount = headers.length
-        for(let i=0; i<columnCount; i++){
-            headerModel.append({
-                "key": headers[i].key,
-                "title": headers[i].title,
-                "width": 1,
-            })
+    function requestClear() {
+        if(!clearEnabled) return false
+        if(clearHandler) clearHandler()
+        else clear()
+        return true
+    }
+    function refreshContextMenu() {
+        if(rowMenu.visible && rowMenuBuilder) rowMenu.menuList = rowMenuBuilder(contextPath) || []
+    }
+    function openRowMenu(path, x, y) {
+        if(!contextMenuEnabled || !rowMenuBuilder || ik2i(path) < 0) return false
+        contextPath = path // 捕获路径，不捕获会随扫描、排序和移除变化的行号。
+        rowMenu.menuList = rowMenuBuilder(path) || []
+        rowMenu.x = x
+        rowMenu.y = y
+        rowMenu.open()
+        return true
+    }
+    function isRowMovable(path) { return dragSortEnabled && (!canMoveRow || canMoveRow(path)) }
+    function beginRowDrag(path, y) {
+        if(!isRowMovable(path) || ik2i(path) < 0) return false
+        dragPath = path
+        updateRowDrag(y)
+        return true
+    }
+    function updateRowDrag(y) {
+        if(!dragPath) return
+        dragPointerY = y
+        const stride = size_.smallLine * 1.5 + tableView.rowSpacing
+        const landing = Math.max(0, Math.min(rowCount, Math.round((tableView.contentY + y) / stride)))
+        let before = ""
+        for(let i = landing; i < rowCount; i++) {
+            const key = dataModel.get(i)[headerKey]
+            if(key !== dragPath && isRowMovable(key)) { before = key; break }
         }
+        dragBeforePath = before
+        dragIndicatorY = Math.max(0, Math.min(tableView.height - 3,
+            (before ? ik2i(before) : rowCount) * stride - tableView.contentY))
+    }
+    function cancelRowDrag() { dragPath = ""; dragBeforePath = "" }
+    function finishRowDrag() {
+        const path = dragPath, before = dragBeforePath
+        cancelRowDrag()
+        if(!path || ik2i(path) < 0) return false
+        rowMoveRequested(path, before) // 后端此刻再次检查 pending，真实顺序只取后端快照。
+        return true
+    }
+    function activateColumn(path, x) {
+        const i = ik2i(path)
+        if(i < 0) return
+        let boundary = 0
+        for(let column = 0; column < columnCount; column++) {
+            boundary += headerModel.get(column).width - 1
+            if(x <= boundary) {
+                if(headers[column].btn && headers[column].onClicked) headers[column].onClicked(i)
+                return
+            }
+        }
+    }
+    onDragSortEnabledChanged: { if(!dragSortEnabled) cancelRowDrag() }
+    onContextMenuEnabledChanged: { if(!contextMenuEnabled) rowMenu.close() }
+
+    // ========================= 【布局逻辑】 =========================
+
+    property int columnCount: 0
+    property int rowCount: dataModel.count
+    property string headerKey: "path"
+    property var dataDict: ({})
+    ListModel { id: headerModel }
+    ListModel { id: dataModel }
+    Component.onCompleted: {
+        columnCount = headers.length
+        for(let i = 0; i < columnCount; i++)
+            headerModel.append({key: headers[i].key, title: headers[i].title, width: 1})
         headerKey = headers[0].key
         updateWidth(true)
     }
-
-    // ========================= 【逻辑】 =========================
-
-    property int columnCount: 0 // 列数量， onCompleted 中初始化
-    property int rowCount: dataModel.count // 行数量
-    property string headerKey: "" // 自动
-    // 表头， key title width
-    ListModel { id: headerModel }
-    // 数据， 项为headers的key
-    ListModel { id: dataModel }
-    property var dataDict: {} // 指向 dataModel 的 index
     onRowCountChanged: {
-        headerModel.setProperty(0, "title", headers[0].title + ` (${rowCount})`)
+        if(headerModel.count) headerModel.setProperty(0, "title", headers[0].title + ` (${rowCount})`)
     }
-
-    // 宽度更新
     Timer {
         id: updateWidthTimer
         interval: 100
-        repeat: false
-        onTriggered: {
-            updateWidth(true)
-        }
+        onTriggered: updateWidth(true)
     }
-    // 更新全部宽度
     function updateWidth(timer=false) {
-        if(!timer) { // 启动计时器，减少调用频率
-            updateWidthTimer.restart()
-            return
-        }
-        let ws = Array(columnCount).fill(1)
-        // 表头
+        if(!timer) { updateWidthTimer.restart(); return }
+        const ws = Array(columnCount).fill(1)
         for(let i = 1; i < columnCount; i++) {
-            let maxWidth = headerRepeater.itemAt(i).maxWidth + fTableRoot.spacing*2
-            if(maxWidth > ws[i]) ws[i] = maxWidth
+            const item = headerRepeater.itemAt(i)
+            if(item) ws[i] = Math.max(ws[i], item.maxWidth + spacing * 2)
         }
-        // 表体
-        for(let y in tableView.items) {
-            const repeater = tableView.items[y].repeater
+        for(const row of tableView.contentItem.children) {
+            if(!row.repeater) continue
             for(let x = 1; x < columnCount; x++) {
-                let maxWidth = repeater.itemAt(x).maxWidth + fTableRoot.spacing*2
-                if(maxWidth > ws[x]) ws[x] = maxWidth
+                const cell = row.repeater.itemAt(x)
+                if(cell) ws[x] = Math.max(ws[x], cell.maxWidth + spacing * 2)
             }
         }
-        // 赋值 / 计算第0列宽度
         let w0 = tableArea.width
         for(let i = 1; i < columnCount; i++) {
             headerModel.setProperty(i, "width", ws[i])
             w0 -= ws[i]
         }
-        // 更新第0列宽度
         updateWidth0(w0)
     }
-    // 更新第0列宽度
-    function updateWidth0(w0 = -1) {
-        if(headerModel.count <= 0) return
+    function updateWidth0(w0=-1) {
+        if(!headerModel.count) return
         if(w0 < 0) {
             w0 = tableArea.width
-            for(let i = 1; i < columnCount; i++)
-                w0 -= headerModel.get(i).width
+            for(let i = 1; i < columnCount; i++) w0 -= headerModel.get(i).width
         }
-        w0 += columnCount-10 // 避让右侧滚动条空间
-        if(w0 < minWidth0) w0 = minWidth0
-        headerModel.setProperty(0, "width", w0)
+        headerModel.setProperty(0, "width", Math.max(minWidth0, w0 + columnCount - 10))
     }
 
-    // ========================= 【布局】 =========================
-
-    // 表格区域
     Rectangle {
         id: tableArea
         anchors.fill: parent
         color: theme.bgColor
-
         Item {
             id: tableContainer
             anchors.fill: parent
-
-            // 上方操控版
             Item {
                 id: tableTopPanel
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
-                height: size_.line * 2
-
-                // 左打开图片按钮
+                height: size_.line * 2 + loadingStatus.height
+                Text_ {
+                    id: loadingStatus
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: fTableRoot.statusText ? size_.smallLine * 1.5 : 0
+                    visible: height > 0
+                    text: fTableRoot.statusText
+                    font.pixelSize: size_.smallText
+                    verticalAlignment: Text.AlignVCenter
+                    elide: Text.ElideRight
+                }
                 IconTextButton {
                     id: openBtn
-                    visible: parent.width > openBtn.width + clearBtn.width // 容器宽度过小时隐藏
+                    objectName: "filesOpenButton"
+                    visible: parent.width > openBtn.width + clearBtn.width
                     anchors.left: parent.left
                     anchors.top: parent.top
-                    anchors.bottom: parent.bottom
+                    anchors.bottom: loadingStatus.top
                     anchors.margins: size_.smallSpacing * 0.5
                     icon_: "folder"
                     text_: openBtnText
-
-                    onClicked: {
-                        if(isLock) return
-                        fileDialog.open()
-                    }
+                    enabled: fTableRoot.openEnabled
+                    opacity: enabled ? 1 : 0.45
+                    onClicked: { if(openEnabled) fileDialog.open() }
                 }
-
-                // 右清空按钮
                 IconTextButton {
                     id: clearBtn
+                    objectName: "filesClearButton"
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.bottom: parent.bottom
+                    anchors.bottom: loadingStatus.top
                     anchors.margins: size_.smallSpacing * 0.5
                     icon_: "clear"
                     text_: clearBtnText
-
-                    onClicked: {
-                        if(isLock) return
-                        fTableRoot.clear()
-                    }
+                    enabled: fTableRoot.clearEnabled
+                    opacity: enabled ? 1 : 0.45
+                    onClicked: requestClear()
                 }
             }
-
-            // 提示
             DefaultTips {
                 visibleFlag: fTableRoot.rowCount
                 anchors.top: tableTopPanel.bottom
@@ -290,8 +330,6 @@ Item {
                 anchors.bottom: parent.bottom
                 tips: defaultTips
             }
-
-            // 表头
             Item {
                 id: tableHeaderContainer
                 visible: fTableRoot.rowCount > 0
@@ -300,13 +338,12 @@ Item {
                 anchors.right: parent.right
                 height: size_.line * 1.5
                 onWidthChanged: updateWidth0()
-
                 Row {
                     anchors.fill: parent
                     spacing: -1
                     Repeater {
-                        model: headerModel
                         id: headerRepeater
+                        model: headerModel
                         Rectangle {
                             width: model.width
                             anchors.top: parent.top
@@ -320,7 +357,7 @@ Item {
                                 anchors.top: parent.top
                                 anchors.bottom: parent.bottom
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                verticalAlignment: Text.AlignVCenter // 垂直居中
+                                verticalAlignment: Text.AlignVCenter
                                 font.pixelSize: size_.smallText
                                 text: model.title
                             }
@@ -328,29 +365,37 @@ Item {
                     }
                 }
             }
-            // 表体
             TableView {
                 id: tableView
+                objectName: "filesTableViewport"
                 anchors.top: tableHeaderContainer.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                flickableDirection: Flickable.VerticalFlick // 只允许垂直滚动
-                boundsBehavior: Flickable.StopAtBounds // 禁止flick过冲。不影响滚轮滚动的过冲
+                flickableDirection: Flickable.VerticalFlick
+                boundsBehavior: Flickable.StopAtBounds
                 model: dataModel
                 clip: true
-                property var items: tableView.children[0].children
                 rowSpacing: -1
                 delegate: Item {
+                    id: tableRow
+                    objectName: "fileRow:" + rowPath
                     Component.onCompleted: updateWidth()
-                    TableView.onReused: updateWidth()
+                    TableView.onReused: { rowContent.y = 0; updateWidth() }
                     implicitHeight: size_.smallLine * 1.5
-                    implicitWidth: 1
+                    implicitWidth: tableView.width
                     property int rowIndex: index
                     property var rowModel: model
+                    property string rowPath: rowModel[headerKey] || ""
                     property alias repeater: repeater
+                    z: dragPath === rowPath ? 2 : 0
+                    onRowPathChanged: { if(rowContent) rowContent.y = 0 }
                     Row {
-                        anchors.fill: parent
+                        id: rowContent
+                        width: parent.width
+                        height: parent.height
+                        y: 0
+                        opacity: dragPath === tableRow.rowPath ? 0.6 : 1
                         spacing: -1
                         Repeater {
                             id: repeater
@@ -368,39 +413,94 @@ Item {
                                 property var header: headers[columnIndex]
                                 clip: true
                                 Button_ {
-                                    visible: header.btn?true:false
+                                    visible: header.btn ? true : false
                                     anchors.fill: parent
                                     radius: 0
-                                    onClicked: {
-                                        if(header.onClicked) {
-                                            header.onClicked(rowIndex)
-                                        }
-                                    }
+                                    onClicked: { if(header.onClicked) header.onClicked(rowIndex) }
                                 }
                                 Text_ {
                                     id: hText
-                                    property bool isLeft: headers[columnIndex].left?true:false
+                                    property bool isLeft: header.left ? true : false
                                     anchors.top: parent.top
                                     anchors.bottom: parent.bottom
-                                    anchors.left: isLeft? parent.left : undefined
+                                    anchors.left: isLeft ? parent.left : undefined
                                     anchors.leftMargin: fTableRoot.spacing * 0.5
-                                    anchors.horizontalCenter: isLeft? undefined : parent.horizontalCenter
-                                    verticalAlignment: Text.AlignVCenter // 垂直居中
+                                    anchors.horizontalCenter: isLeft ? undefined : parent.horizontalCenter
+                                    verticalAlignment: Text.AlignVCenter
                                     font.pixelSize: size_.smallText
-                                    color: (columnKey != "state"|| typeof rowModel.state != "string" || rowModel.state.length == 0) ? theme.subTextColor : 
-                                        (rowModel.state.startsWith("×") ? theme.noColor : (rowModel.state.startsWith("√") ? theme.yesColor : theme.subTextColor))
+                                    color: (columnKey !== "state" || typeof rowModel.state !== "string" || !rowModel.state.length)
+                                        ? theme.subTextColor : (rowModel.state.startsWith("×") ? theme.noColor
+                                        : (rowModel.state.startsWith("√") ? theme.yesColor : theme.subTextColor))
                                     text: header.display ? header.display(rowModel[columnKey]) : rowModel[columnKey]
                                 }
                             }
                         }
                     }
+                    // 与标签栏相同的 MouseArea 阈值拖动和落点反馈，不创建内部 URL DropArea。
+                    MouseArea {
+                        id: rowMouse
+                        objectName: "fileRowMouse:" + tableRow.rowPath
+                        anchors.fill: parent
+                        enabled: dragSortEnabled || contextMenuEnabled
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        preventStealing: true
+                        property string pressedPath: ""
+                        property bool moved: false
+                        drag.target: dragSortEnabled && isRowMovable(tableRow.rowPath)
+                            && (pressedButtons & Qt.LeftButton) ? rowContent : undefined
+                        drag.axis: Drag.YAxis
+                        drag.threshold: 12
+                        property bool dragActive: drag.active
+                        onPressed: function(mouse) { pressedPath = tableRow.rowPath; moved = false }
+                        onDragActiveChanged: {
+                            if(drag.active) {
+                                const point = mapToItem(tableView, mouseX, mouseY)
+                                moved = beginRowDrag(pressedPath, point.y)
+                            }
+                        }
+                        onPositionChanged: function(mouse) {
+                            if(moved) updateRowDrag(mapToItem(tableView, mouse.x, mouse.y).y)
+                        }
+                        onReleased: {
+                            rowContent.y = 0
+                            if(moved) finishRowDrag()
+                        }
+                        onCanceled: { rowContent.y = 0; moved = false; cancelRowDrag() }
+                        onClicked: function(mouse) {
+                            if(moved) return
+                            if(mouse.button === Qt.RightButton) {
+                                const point = mapToItem(fTableRoot, mouse.x, mouse.y)
+                                openRowMenu(pressedPath, point.x, point.y)
+                            }
+                            else activateColumn(pressedPath, mouse.x)
+                        }
+                    }
                 }
-                // 滚动条
-                ScrollBar.vertical: ScrollBar { }
+                ScrollBar.vertical: ScrollBar {}
+            }
+            Rectangle {
+                x: tableView.x
+                y: tableView.y + dragIndicatorY
+                width: tableView.width
+                height: 3
+                z: 5
+                visible: dragPath.length > 0
+                color: theme.specialTextColor
+            }
+            Timer {
+                interval: 40
+                repeat: true
+                running: dragPath.length > 0
+                onTriggered: {
+                    const delta = dragPointerY < size_.line ? -size_.smallLine
+                        : (dragPointerY > tableView.height - size_.line ? size_.smallLine : 0)
+                    if(!delta) return
+                    tableView.contentY = Math.max(0, Math.min(Math.max(0, tableView.contentHeight - tableView.height),
+                        tableView.contentY + delta))
+                    updateRowDrag(dragPointerY)
+                }
             }
         }
-
-        // 内圆角裁切
         layer.enabled: true
         layer.effect: OpacityMask {
             maskSource: Rectangle {
@@ -410,17 +510,12 @@ Item {
             }
         }
     }
-
-    // 文件选择对话框
-    // 历史参考：Qt 5 的 “Model size ... is less than 0” 问题。
-    // https://bugreports.qt.io/browse/QTBUG-92444
+    Menu_ { id: rowMenu; objectName: "filesRowMenu" }
     FileDialog_ {
         id: fileDialog
         title: fileDialogTitle
         nameFilters: fileDialogNameFilters
-        selectMultiple: true // 多选
-        onAccepted: {
-            addPaths(fileDialog.fileUrls_)
-        }
+        selectMultiple: true
+        onAccepted: addPaths(fileDialog.fileUrls_)
     }
 }

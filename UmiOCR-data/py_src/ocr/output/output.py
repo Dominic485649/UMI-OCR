@@ -24,6 +24,19 @@ class Output:
             textOut += f"错误原因：{res['data']}"
         print(textOut)
 
+    def recordArtifact(self, path, status="saved", error="", sourcePath=""):
+        # 只在实际写入/保存返回后登记，文件存在不是本次保存成功的凭据。
+        if not hasattr(self, "_artifacts"):
+            self._artifacts = {}
+        path = os.path.abspath(path)
+        self._artifacts[path] = {"path": path, "status": status,
+                                 "saved": status == "saved", "error": str(error)}
+        if sourcePath:
+            self._artifacts[path]["sourcePath"] = os.path.abspath(sourcePath).replace("\\", "/")
+
+    def getArtifacts(self):
+        return [dict(item) for item in getattr(self, "_artifacts", {}).values()]
+
     def openOutputFile(self):  # 打开输出文件
         if self.outputPath and os.path.exists(self.outputPath):
             Platform.startfile(self.outputPath)

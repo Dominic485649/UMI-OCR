@@ -1,6 +1,6 @@
 # Windows CUDA 构建文档
 
-本文档适用于 Umi-OCR 3.0.1 的独立 Windows x64 基础包和 CUDA 12.6 插件。版本从 `UmiOCR-data/about.json` 读取。产品展示名、窗口标题、`Umi-OCR.exe` 和便携设置目录 `.settings` 保持为 `Umi-OCR`。
+本文档适用于 Umi-OCR 3.0.2 本地候选的独立 Windows x64 基础包和 CUDA 12.6 插件。版本从 `UmiOCR-data/about.json` 读取。产品展示名、窗口标题、`Umi-OCR.exe` 和便携设置目录 `.settings` 保持为 `Umi-OCR`。本轮不创建公开标签或 GitHub Release，见 [3.0.2 本地说明](RELEASE_3.0.2_LOCAL.md)。
 
 ## 构建环境
 
@@ -38,13 +38,16 @@ pwsh -File .\build\windows\Resolve-Lock.ps1
 ```powershell
 $repo = (Get-Location).Path
 $run = Get-Date -Format 'yyyyMMdd-HHmmss'
-$base = Join-Path $repo "build/staging/301-base-$run"
-$gpu = Join-Path $repo "build/staging/301-gpu-$run"
+$base = Join-Path $repo "build/staging/302-base-$run"
+$gpu = Join-Path $repo "build/staging/302-gpu-$run"
+# 首次升级示例；清理旧版本后，改为当版验收记录中的有效只读 seed。
+$baseSeed = "$repo/build/staging/301-base-20261018"
+$gpuSeed = "$repo/build/staging/301-gpu-20261018"
 pwsh -File ./build/windows/Build-Release.ps1 -StagingRoot $base `
-  -ReuseDependencies -ReuseFromStagingRoot "$repo/build/staging/281-base-current" `
+  -ReuseDependencies -ReuseFromStagingRoot $baseSeed `
   -Offline -SkipTests -SkipArchive -LocalCandidate
 pwsh -File ./build/windows/Build-GpuPlugin.ps1 -StagingRoot $gpu -BaseStagingRoot $base `
-  -ReuseDependencies -ReuseVendorFromStagingRoot "$repo/build/staging/281-gpu-current" `
+  -ReuseDependencies -ReuseVendorFromStagingRoot $gpuSeed `
   -ReuseModels -SkipModels -Offline -SkipArchive -LocalCandidate
 $python = "$base/UmiOCR-data/runtime/python.exe"
 ```
@@ -54,13 +57,13 @@ Base 只复制 runtime/site-packages 和 Qt manifest，再复制包含未 tracke
 可选组装和拆分公开产品，不隐式读取兄弟 CPU/VL 仓库：
 
 ```powershell
-$complete = "$repo/build/artifacts/3.0.1-$run/complete"
+$complete = "$repo/build/artifacts/3.0.2-$run/complete"
 pwsh -File ./build/windows/Assemble-Candidate.ps1 -Destination $complete `
   -BaseStagingRoot $base -GpuStagingRoot $gpu
 & $python -B ./build/tools/prepare_products.py --complete-root $complete `
-  --products-root "$repo/build/artifacts/3.0.1-products-$run"
+  --products-root "$repo/build/artifacts/3.0.2-products-$run"
 & $python -B ./build/tools/export_cuda_source.py `
-  --output-dir "$repo/build/artifacts/301-plugin-repository"
+  --output-dir "$repo/build/artifacts/302-plugin-repository-$run"
 ```
 
 源码导出仅包含公开 CUDA 适配器、所需公开构建工具、docs、锁、许可证和锁定对应源码材料，保留相对路径，不创建远端、Git 历史或发布。目标存在即失败；不要清理已有导出以重试。显式 `-CpuStagingRoot`、`-VlStagingRoot` 和 `--optional-plugin ID=PATH` 仅用于可选开发工作流；公开默认不选择它们。`source_snapshot.py` 默认为 `public`，包含未 tracked 公开源码，排除 vendor/models/cache/artifacts/临时数据；直接生成快照也要求已有锁定对应源码缓存。

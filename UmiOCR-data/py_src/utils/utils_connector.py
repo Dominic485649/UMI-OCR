@@ -1,5 +1,6 @@
 # 通用工具连接器
 
+from threading import Lock
 from typing import List
 from PySide6.QtCore import QCoreApplication, QObject, QTimer, Slot
 
@@ -51,19 +52,37 @@ class UtilsConnector(QObject):
         paths: List,  # 初始路径列表
         sufType: str,  # 后缀类型，FileSuf的key
         isRecurrence: bool,  # 若为True，则递归搜索
-        completeKey: str,  # 全部完成后的事件key。向事件传入合法路径列表。
+        completeKey: str,  # 唯一终态事件key。向事件传入 (合法路径列表, 诊断列表)。
         updateKey: str,  # 加载中刷新进度的key，不填则无。向事件传入 (已完成的路径数量, 最近一条路径)
         updateTime: float,  # 刷新进度的间距
     ):
-        threadRun(
-            file_finder.asynFindFiles,
-            paths,
-            sufType,
-            isRecurrence,
-            completeKey,
-            updateKey,
-            updateTime,
-        )
+        gate = Lock()
+        state = "pending"
+
+        def run():
+            nonlocal state
+            with gate:
+                if state != "pending":
+                    return
+                state = "running"
+            file_finder.asynFindFiles(
+                paths, sufType, isRecurrence, completeKey, updateKey, updateTime
+            )
+
+        try:
+            threadRun(run)
+        except Exception as exc:
+            # 调度失败也必须释放导入票据；已开始的任务由 finder 的 finally 结算。
+            # 若线程池在报错后才交付 runnable，pending 状态门禁避免第二次终态。
+            with gate:
+                if state != "pending":
+                    return
+                state = "cancelled"
+            message = f"无法启动文件扫描（{type(exc).__name__}）。"
+            logger.error(message)
+            file_finder.PubSubService.publish(
+                completeKey, [], [{"kind": "scanerror", "path": "", "message": message}]
+            )
 
     # QUrl列表 转 String列表
     @Slot("QVariant", result="QVariant")

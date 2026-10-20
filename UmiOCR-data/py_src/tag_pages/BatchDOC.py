@@ -3,228 +3,171 @@
 # ========================================
 
 import os
+import threading
 import time
 
-from umi_log import logger
-from .page import Page  # 页基类
-from ..mission.mission_doc import MissionDOC  # 任务管理器
+from .batch_runtime import Attempt, BatchPage, OutputSession
+from ..mission.mission_doc import MissionDOC
 from ..utils import utils
 from ..ocr.output import Output
 
 
-class BatchDOC(Page):
-    def __init__(self, *args):
-        super().__init__(*args)
-        self._msnID = ""  # 当前正在进行的任务ID（已提交至任务处理器）
-        self._pauseMsnID = ""  # 当前正在暂停的任务ID
-        self._queuedDocs = []  # 当前正在排队的文档信息（未提交）
-        self._argd = None
-        self._docArgd = None
+class BatchDOC(BatchPage):
+    document = True
 
-    # 进行任务。
-    # docs为列表，每一项为： {path:文档路径, range_start:范围起始, range_end: 范围结束, page_count:总页数, password:密码}
-    # 返回一个列表，每项为： {path:文档路径, msnID:任务ID。若[Error]开头则为失败。}
+    @property
+    def _manager(self):
+        return MissionDOC
+
     def msnDocs(self, docs, argd):
-        if self._msnID or self._queuedDocs:
-            return "[Error] 有任务进行中，不允许提交新任务。"
+        return self._start_batch(docs, argd)
 
-        # 从 argd 中提取一些条目，组装 docArgd
-        prefixes = ["ocr.", "doc.", "tbpu."]  # 要提取的条目前缀
-        docArgd = {}
-        for k, v in argd.items():
-            for prefix in prefixes:
-                if k.startswith(prefix):
-                    docArgd[k] = v
-                    break
-
-        # 记录任务参数
-        self._queuedDocs = docs
-        self._argd = argd
-        self._docArgd = docArgd
-        # 提交第一个任务
-        self._runNewDoc()
-
-    def msnStop(self):  # 停止当前所有任务
-        MissionDOC.stopMissionList(self._msnID)
-        self._msnID = ""
-        self._queuedDocs = []
-        self._argd = None
-        self._docArgd = None
-
-    def msnPause(self):  # 任务暂停
-        self._pauseMsnID = self._msnID
-        MissionDOC.pauseMissionList(self._msnID)
-
-    def msnResume(self):  # 任务恢复
-        self._pauseMsnID = ""
-        MissionDOC.resumeMissionList(self._msnID)
-
-    # 初始化输出器列表。成功返回两个输出器列表 output 。失败返回 "失败信息"
-    def _initOutputList(self, argd, path, pageRange, pageCount, password=""):
-        # =============== 提取输出路径 outputDir, outputDirName ===============
-        if argd["mission.dirType"] == "source":  # 若保存到原目录
-            outputDir = os.path.dirname(path)  # 则保存路径设为文档的目录
-        else:  # 若保存到用户指定目录
-            d = os.path.abspath(argd["mission.dir"])  # 转绝对地址
-            if not os.path.exists(d):  # 检查地址是否存在
-                try:  # 不存在，尝试创建地址
-                    os.makedirs(d)
-                except OSError as e:
-                    return f"[Error] 无法创建路径 {d}"
-            outputDir = d
-
-        # =============== 提取时间信息和文件名 outputFileName ===============
-        startTimestamp = time.time()  # 开始时间戳
-        startDatetime = time.strftime(  # 日期时间字符串（标准格式）
-            r"%Y-%m-%d %H:%M:%S", time.localtime(startTimestamp)
-        )
-        # 日期时间字符串（用户指定格式）：先替换时间戳，再strftime
-        startDatetimeUser = argd["mission.datetimeFormat"].replace(
-            r"%unix", str(startTimestamp)
-        )
-        startDatetimeUser = time.strftime(
-            startDatetimeUser, time.localtime(startTimestamp)
-        )
-        # 替换时间 %date
-        nameTemplate = argd["mission.fileNameFormat"]
-        nameTemplate = nameTemplate.replace(r"%date", startDatetimeUser)  # 替换时间
-        # 替换范围 %range
-        rangeStr = ""  # 范围全本
-        if pageRange[1] - pageRange[0] + 1 < pageCount:  # 范围非全本
-            if pageRange[1] == pageRange[0]:  # 只识别一页，写入单个页数
-                rangeStr = f"(p{pageRange[0]})"
-            else:  # 识别多页，写入开头和结尾页数
-                rangeStr = f"(p{pageRange[0]}-{pageRange[1]})"
-        nameTemplate = nameTemplate.replace(r"%range", rangeStr)
-        # 替换文件名 #name
-        fileNameStr = os.path.splitext(os.path.basename(path))[0]
-        outputFileName = nameTemplate.replace(r"%name", fileNameStr)  # 替换名称元素
-        if not utils.allowedFileName(outputFileName):  # 文件名不合法
-            return f'[Error] 文件名【{outputFileName}】含有不允许的字符。\n不允许含有下列字符： \\  /  :  *  ?  "  <  >  |'
-
-        # =============== 组装输出参数字典 ===============
-        outputArgd = {
-            "outputDir": outputDir,  # 输出路径
-            "outputDirType": argd[
-                "mission.dirType"
-            ],  # 输出目录类型，"source" 为原文件目录
-            "outputFileName": outputFileName,  # 输出文件名（前缀）
-            "startDatetime": startDatetime,  # 开始日期
-            "ignoreBlank": argd["mission.ignoreBlank"],  # 忽略空白文件
-            "originPath": path,  # 原始文件名
-            "password": password,  # 文档密码
+    def _initOutputList(self, argd, path, pageRange, pageCount, password="", attempt_id=""):
+        if argd["mission.dirType"] == "source":
+            output_dir = os.path.dirname(path)
+        else:
+            output_dir = os.path.abspath(argd["mission.dir"])
+            os.makedirs(output_dir, exist_ok=True)
+        timestamp = time.time()
+        datetime_user = argd["mission.datetimeFormat"].replace("%unix", str(timestamp))
+        datetime_user = time.strftime(datetime_user, time.localtime(timestamp))
+        name = argd["mission.fileNameFormat"].replace("%date", datetime_user)
+        range_text = ""
+        if pageRange[1] - pageRange[0] + 1 < pageCount:
+            range_text = (f"(p{pageRange[0]})" if pageRange[0] == pageRange[1]
+                          else f"(p{pageRange[0]}-{pageRange[1]})")
+        name = name.replace("%range", range_text)
+        name = name.replace("%name", os.path.splitext(os.path.basename(path))[0])
+        if not utils.allowedFileName(name):
+            raise ValueError(f"输出文件名【{name}】含有不允许的字符。")
+        # 所有格式共享完整 attempt UUID，包含首轮，禁止覆盖旧尝试的 TXT/CSV。
+        if attempt_id:
+            name += "." + attempt_id
+        output_argd = {
+            "outputDir": output_dir, "outputDirType": argd["mission.dirType"],
+            "outputFileName": name, "startDatetime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp)),
+            "ignoreBlank": argd["mission.ignoreBlank"], "originPath": path, "password": password,
+            "attemptPrefix": bool(attempt_id),
         }
+        factories = [(key[len("mission.filesType."):], Output[key[len("mission.filesType."):]])
+                     for key, enabled in argd.items() if key.startswith("mission.filesType.") and enabled]
+        return OutputSession(factories, output_argd)
 
-        # =============== 实例化输出器对象 ===============
-        output = []
+    def _advance(self):
+        if self._active:
+            if self._active.phase == "prepared":
+                self._submit_document(self._active)
+            return
+        if not self._pending:
+            self._finish_batch()
+            return
+        if self._paused:
+            return
+        identity = self._pending.pop(0)
+        row = self._records[identity]
+        entry = row["_entry"]
+        entry["outcome"] = "active"
+        context = Attempt(self._batch_id, self._generation, entry, (row,), entry["argd"])
+        self._active = context
+        row["status"] = "preparing"
+        self._start_worker(self._prepare_worker, context)
+
+    def _prepare_worker(self, context):
+        if context.cancelled.is_set():
+            return
+        metadata = context.entry["metadata"]
+        error = ""
         try:
-            for key in argd.keys():
-                if "mission.filesType" in key and argd[key]:
-                    output.append(Output[key[18:]](outputArgd))
-        except Exception as e:
-            return f"[Error] 初始化输出器失败。{e}"
-        return output
+            start, end, count = metadata["range_start"], metadata["range_end"], metadata["page_count"]
+            if start < 1 or end < start or end > count:
+                raise ValueError("识别页码范围不合法。")
+            context.session = self._initOutputList(context.argd, metadata["path"], [start, end], count,
+                                                   metadata["password"], context.attempt_id)
+            if context.session.errors:
+                error = "[Error] " + "\n".join(context.session.errors)
+        except Exception as exc:
+            error = f"[Error] 无法创建输出器：{exc}"
+        if context.cancelled.is_set():
+            self._worker_end(context, {}, "[Warning] 任务已停止。")
+        else:
+            self.callFunc(self._prepared, context, error)
 
-    def _runNewDoc(self):  # 取 self._queuedList 首位任务，提交执行
-        if not self._queuedDocs:
-            logger.warning("文档任务： queuedDocs 已空")
+    def _prepared(self, context, error):
+        self._assert_main()
+        if not self._valid_context(context):
+            context.cancelled.set()
+            self._worker_end(context, {}, "[Warning] 任务已停止。")
             return
-        d = self._queuedDocs.pop(0)  # 取首位任务
-        path = d["path"]  # 取地址
-        password = d["password"]  # 密码
-        pageRange = [int(d["range_start"]), int(d["range_end"])]  # 识别范围
-        pageCount = int(d["page_count"])  # 总页数
-        # 构造输出器
-        output = self._initOutputList(self._argd, path, pageRange, pageCount, password)
-        if isinstance(output, str):  # 创建输出器失败
-            self._onEnd({"path": path}, "[Error] 无法创建输出器。")
+        context.phase = "prepared"
+        if error:
+            self._worker_end(context, {}, error)
+        elif not self._paused:
+            self._submit_document(context)
+        self._emit()
+
+    def _submit_document(self, context):
+        if not self._valid_context(context) or self._paused:
             return
-        # 任务信息
-        msnInfo = {
-            "onStart": self._onStart,
-            "onReady": self._onReady,
-            "onGet": self._onGet,
-            "onEnd": self._onEnd,
-            "argd": self._docArgd,
-            # 交给 self._onGet 的参数
-            "get_output": output,
+        context.phase = "active"
+        row = context.rows[0]
+        row["status"] = "active"
+        metadata = context.entry["metadata"]
+        # 配置、回调和输出器都属于本次上下文，不再读取可被下一批覆盖的全局 ID。
+        doc_argd = {key: value for key, value in context.argd.items()
+                    if key.startswith(("ocr.", "doc.", "tbpu."))}
+        info = {
+            "_reserved_msnID": context.mission_id, "argd": doc_argd,
+            "onStart": lambda info: self.callFunc(self._event, context, "start", info.get("msnID", "")),
+            "onReady": lambda info, page: None,
+            "onGet": lambda info, page, result: self._worker_get(context, info, page, result),
+            "onEnd": lambda info, message: self._worker_end(context, info, message),
         }
-        msnID = MissionDOC.addMission(msnInfo, path, pageRange, password=password)
-        if msnID.startswith("["):  # 添加任务失败
-            self._msnID = ""
-            self._onEnd({"path": path}, msnID)
-        else:
-            self._msnID = msnID
+        self._submit(context, lambda: MissionDOC.addMission(
+            info, metadata["path"], [metadata["range_start"], metadata["range_end"]],
+            password=metadata["password"]))
 
-    # ========================= 【任务控制器的异步回调】 =========================
-
-    def _onStart(self, msnInfo):  # 一个文档 开始
-        msnID = msnInfo["msnID"]
-        if not msnID == self._msnID:
-            logger.warning(f"_onStart 任务ID未在记录。{msnID}")
-            return
-        self.callQmlInMain("onDocStart", msnInfo["path"])
-
-    def _onReady(self, msnInfo, page):  # 一个文档的一页 准备开始
-        page += 1
-
-    def _onGet(self, msnInfo, page, res):  # 一个文档的一页 获取结果
-        page += 1
-        msnID = msnInfo["msnID"]
-        if not msnID == self._msnID:
-            logger.warning(f"_onGet 任务ID未在记录。{msnID}")
-            return
-
-        # 为 res 添加信息
-        res["page"] = page
-        res["fileName"] = f"{page}"
-        res["path"] = msnInfo["path"]
-
-        # 输出
-        for o in msnInfo["get_output"]:
-            try:
-                o.print(res)
-            except Exception:
-                logger.error(f"文档结果输出失败：{o}", exc_info=True, stack_info=True)
-
-        self.callQmlInMain("onDocGet", msnInfo["path"], page, res)
-
-    def _onEnd(self, msnInfo, msg):  # 一个文档处理完毕
-        # msg: [Success] [Warning] [Error]
-
-        if "path" not in msnInfo:
-            raise Exception('[Error] BatchDOC onEnd(): "path" not in msnInfo')
-
-        msnID = ""  # 该任务的ID
-        if "msnID" in msnInfo:
-            msnID = msnInfo["msnID"]
-            if not msnID == self._msnID:
-                logger.warning(f"_onEnd 任务ID未在记录。{msnID}")
+    def _worker_get(self, context, info, page, result):
+        # 该集合只保护本次输出去重；队列/页数统计仍由主线程处理。
+        with context.io_lock:
+            if context.cancelled.is_set() or context.end_requested or page in context.seen:
                 return
+            context.seen.add(page)
+            result = dict(result, page=page + 1, fileName=str(page + 1), path=context.entry["metadata"]["path"])
+            if context.session:
+                context.session.print(result)
+        self.callFunc(self._event, context, "get", info.get("msnID", ""), page + 1, result)
 
-        # 结束输出器，保存文件。
-        if "get_output" in msnInfo:
-            output = msnInfo["get_output"]
-            for o in output:
-                try:
-                    o.onEnd()
-                except Exception as e:
-                    msg = f"[Error] 输出器异常：{e}" + msg
-
-        # 上报
-        isAll = False if self._queuedDocs else True  # 是否所有文档处理完毕
-        self.callQmlInMain("onDocEnd", msnInfo["path"], msg, isAll)
-
-        # 所有任务完毕
-        if isAll:
-            self._msnID = ""
-            self._argd = None
-            self._docArgd = None
-        # 还有排队中的任务，则提交新任务
-        else:
-            self._runNewDoc()
-            # 如果新任务 self._msnID 已提交成功，且上一个任务 msnID 处于暂停状态，
-            # 也就是在保存文件的过程中，用户点了暂停，
-            # 那么将新的任务设为暂停。
-            if self._msnID and msnID and self._pauseMsnID == msnID:
-                self.msnPause()
+    def _handle_event(self, context, kind, *args):
+        row = context.rows[0]
+        entry = context.entry
+        if kind == "start":
+            self._qml("onDocStart", row["path"])
+        elif kind == "get":
+            page, result = args
+            entry["done"] += 1
+            row["donePages"] = entry["done"]
+            if result.get("code") not in (100, 101):
+                entry["pageError"] = True
+            self._qml("onDocGet", row["path"], page, result)
+        elif kind == "finalizing":
+            context.phase = "finalizing"
+            row["status"] = "finalizing"
+        elif kind == "finished":
+            message, artifacts = args
+            success = (message.startswith("[Success]") and not entry.get("pageError")
+                       and entry["done"] == entry["budget"])
+            if message.startswith("[Success]") and not success:
+                message = "[Error] 文档存在识别失败或未完成的页面。"
+            entry["outcome"] = "success" if success else "failed"
+            row.update(status="finished" if success else "failed", message=message,
+                       attemptArtifacts=artifacts)
+            if success:
+                saved = [artifact for artifact in artifacts if artifact.get("saved")]
+                if saved:
+                    row["artifacts"] = saved
+            self._active = None
+            # 兼容旧单文档事件，整批完成只由 onBatchState 判定，避免导入边界误报。
+            self._qml("onDocEnd", row["path"], message, False)
+            self._drive()
+            return
+        self._emit()

@@ -1,5 +1,6 @@
 # 单独txt文件
 
+import hashlib
 import os
 from .output import Output
 from .tools import getDataText
@@ -10,6 +11,7 @@ class OutputTxtIndividual(Output):
         super().__init__(argd)
         # 是否输出到原目录
         self.outputSource = argd["outputDirType"] == "source"
+        self.attemptPrefix = bool(argd.get("attemptPrefix"))
 
     def openOutputFile(self):
         pass  # 覆盖父类方法
@@ -25,11 +27,19 @@ class OutputTxtIndividual(Output):
         else:
             textOut += f'[Error] OCR failed. Code: {res["code"]}, Msg: {res["data"]}\n【异常】OCR识别失败。\n'
         # 输出文件
-        if self.outputSource:  # 输出到原始路径
+        if self.attemptPrefix:
+            # 输入完整规范路径参与身份，避免不同目录的同名图片互相覆盖。
+            source = os.path.normcase(os.path.abspath(res["path"]))
+            identity = hashlib.sha256(source.encode("utf-8", "surrogatepass")).hexdigest()[:32]
+            stem = os.path.splitext(os.path.basename(res["fileName"]))[0]
+            directory = os.path.dirname(os.path.abspath(res["path"])) if self.outputSource else self.dir
+            path = os.path.join(directory, f"{self.fileName}.{stem}.{identity}.txt")
+        elif self.outputSource:  # 输出到原始路径
             p, _ = os.path.splitext(res["path"])  # 原路径去除扩展名
             path = p + ".txt"
         else:  # 输出到指定路径
             f, _ = os.path.splitext(res["fileName"])  # 原文件名去除扩展名
             path = f"{self.dir}/{f}.txt"
-        with open(path, "w", encoding="utf-8") as f:  # 追加写入同名本地文件
+        with open(path, "w", encoding="utf-8") as f:  # 写入本次文件
             f.write(textOut)
+        self.recordArtifact(path, sourcePath=res["path"])

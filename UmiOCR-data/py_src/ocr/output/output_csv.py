@@ -68,3 +68,4 @@ class OutputCsv(Output):
                     writer.writerow(writeList)  # 写入CSV内容
         except Exception as e:
             raise Exception(f"Failed to write csv file. {e}\n写入csv文件失败。")
+        self.recordArtifact(self.outputPath)

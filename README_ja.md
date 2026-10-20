@@ -1,8 +1,8 @@
-# Umi-OCR 3.0.1
+# Umi-OCR 3.0.2 ローカル候補版
 
 メインリポジトリ：https://github.com/Dominic485649/UMI-OCR
 
-正式版：3.0.1。Release tag は `v3.0.1` です。基本プログラムと CUDA プラグインを公開提供します。
+この作業ツリーでは、文書キュー、ファイル取り込み、無視領域を修正した **3.0.2 ローカル候補版**を準備します。今回の更新では公開タグや GitHub Release を作成しません。範囲は [3.0.2 ローカル配布の説明](docs/RELEASE_3.0.2_LOCAL.md)をご覧ください。公開済みの正式版は引き続き `v3.0.1` で、下記の有効なダウンロードリンクを維持します。
 
 作者と出典：Dominic485649（本 fork の作者・メンテナー）、[hiroi-sora](https://github.com/hiroi-sora/Umi-OCR)（Umi-OCR の原作者・原著作権の出典）。
 
@@ -48,7 +48,7 @@
 
 <div align="center">
   <strong>オープンソース、一括処理対応のオフライン OCR ソフトウェア</strong><br>
-  <sub>Umi-OCR 3.0.1：今回のリリースは Windows 10/11 x64 向けです</sub>
+  <sub>Umi-OCR 3.0.2 ローカル候補版：Windows 10/11 x64 向けです</sub>
 </div><br>
 
 - **公開版**: 基本プログラムと CUDA プラグインを無料で公開します。サードパーティ製プラグインの開発・接続にも対応します。
@@ -70,7 +70,7 @@
 
 ## リリースのダウンロード:
 
-今回は tag `v3.0.1` の **Windows x64 正式 Release** です。基本プログラムと CUDA プラグインを別々にダウンロードします。CPU と PaddleOCR-VL は公開アセットに含まれません。
+現在公開済みなのは tag `v3.0.1` の **Windows x64 正式 Release** です。下記のリンクはローカル候補版 3.0.2 の公開を意味しません。基本プログラムと CUDA プラグインを別々にダウンロードします。CPU と PaddleOCR-VL は公開アセットに含まれません。
 
 - **基本プログラム**：[メインリポジトリ v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1)。
 - **CUDA プラグイン**：[プラグインリポジトリ v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.1)。

@@ -59,8 +59,12 @@ Invoke-PortablePython "tests\test_http_api.py" @("--data-root", $DataRoot, "--pa
 Invoke-PortablePython "build\tools\qt_startup_smoke.py" @($DataRoot, (Join-Path $StagingRoot "Umi-OCR.exe"))
 Invoke-PortablePython "tests\test_qt_runtime.py" @($DataRoot)
 Invoke-PortablePython "tests\test_image_viewer_qml.py" @($DataRoot)
+Invoke-PortablePython "tests\test_config_folding_qml.py" @($DataRoot, "--packaged")
 Invoke-PortablePython "tests\test_image_decoder.py" @($DataRoot)
-Invoke-PortablePython "tests\test_file_import.py" @($DataRoot)
+Invoke-PortablePython "tests\test_file_import.py" @($DataRoot, "--packaged")
+Invoke-PortablePython "tests\test_doc_probe.py" @($DataRoot, "--packaged")
+Invoke-PortablePython "tests\test_batch_runtime.py" @($DataRoot, "--packaged")
+Invoke-PortablePython "tests\test_batch_shutdown.py" @($DataRoot)
 Invoke-PortablePython "tests\test_portable_settings.py" @($DataRoot)
 Invoke-PortablePython "tests\test_capture_geometry.py"
 Invoke-PortablePython "tests\test_hdr_shader.py" @((Join-Path $DataRoot "native\UmiOCR-HdrCapture.dll"))

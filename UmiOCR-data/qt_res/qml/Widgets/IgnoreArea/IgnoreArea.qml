@@ -8,6 +8,7 @@ import ".."
 
 ModalLayer {
     id: iRoot
+    objectName: "imageIgnoreAreaEditor"
     property string previewPath: "" // 图片预览路径
     property string previewType: "" // 图片预览路径
     property bool running: false
@@ -18,10 +19,11 @@ ModalLayer {
     function show() {
         running = false
         iRoot.visible = true
+        imageWithIgnore.cancelSelection()
         let initArea = configsComp.getValue(configKey)
+        let ig1 = []
         if(initArea && initArea.length>0) {
             // 读取设置，反格式化
-            let ig1 = []
             for(let i=0,l=initArea.length; i<l; i++) {
                 const b = initArea[i]
                 ig1.push({
@@ -31,8 +33,8 @@ ModalLayer {
                     "height": b[2][1] - b[0][1],
                 })
             }
-            imageWithIgnore.ig1Boxes = ig1
         }
+        imageWithIgnore.ig1Boxes = ig1
     }
     function showPath(path) {
         show()
@@ -52,23 +54,9 @@ ModalLayer {
     }
     // 关闭面板时触发
     onVisibleChanged: {
-        if(visible) return
-        if(imageWithIgnore.ig1Boxes.length > 0) {
-            // 格式化，存入设置
-            let ig1 = []
-            for(let i=0,l=imageWithIgnore.ig1Boxes.length; i<l; i++) {
-                const b = imageWithIgnore.ig1Boxes[i]
-                const x = Math.round(b.x)
-                const y = Math.round(b.y)
-                const w = Math.round(b.width)
-                const h = Math.round(b.height)
-                ig1.push([[x, y], [x+w, y], [x+w, y+h], [x, y+h]])
-            }
-            configsComp.setValue(configKey, ig1)
-        }
-        else {
-            configsComp.setValue(configKey, undefined)
-        }
+        if(visible || !imageWithIgnore) return
+        imageWithIgnore.cancelSelection()
+        configsComp.setValue(configKey, imageWithIgnore.getIgnoreArea())
         running = false
         iRoot.visible = false
     }
@@ -169,6 +157,7 @@ ModalLayer {
             // 右图片组件
             ImageWithIgnore {
                 id: imageWithIgnore
+                objectName: "imageIgnoreAreaCanvas"
                 anchors.left: lCtrl.right
                 anchors.right: parent.right
                 anchors.top: parent.top

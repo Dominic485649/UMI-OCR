@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "verification_date": "2026-10-14",
+  "artifact_kind": "gpu",
+  "gates": {
+    "runtime_vendor": "PASS",
+    "paddle_models": "PASS",
+    "cuda": "PASS",
+    "cudnn": "PASS",
+    "opencv": "PASS",
+    "ffmpeg": "NOT_INCLUDED",
+    "mpl": "PASS",
+    "agpl_nvidia": "PASS",
+    "cpu_ocr": "NOT_INCLUDED",
+    "document_models": "NOT_INCLUDED",
+    "gpu_ocr_e2e": "PASS"
+  },
+  "public_prerelease_allowed": true,
+  "validation_errors": []
+}

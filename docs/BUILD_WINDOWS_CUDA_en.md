@@ -1,6 +1,6 @@
 # Windows CUDA Build Guide
 
-This guide builds independent Umi-OCR 3.0.1 Windows x64 base and CUDA 12.6 plugin products. Versions come from `UmiOCR-data/about.json`. The product name, window title, `Umi-OCR.exe`, portable `.settings` location, and branding remain `Umi-OCR`.
+This guide builds independent Umi-OCR 3.0.2 local-candidate Windows x64 base and CUDA 12.6 plugin products. Versions come from `UmiOCR-data/about.json`. The product name, window title, `Umi-OCR.exe`, portable `.settings` location, and branding remain `Umi-OCR`. This update creates no public tag or GitHub Release; see the [local delivery notes](RELEASE_3.0.2_LOCAL.md).
 
 ## Prerequisites
 
@@ -37,13 +37,16 @@ Run from the repository root. These commands compile local native components, co
 ```powershell
 $repo = (Get-Location).Path
 $run = Get-Date -Format 'yyyyMMdd-HHmmss'
-$base = Join-Path $repo "build/staging/301-base-$run"
-$gpu = Join-Path $repo "build/staging/301-gpu-$run"
+$base = Join-Path $repo "build/staging/302-base-$run"
+$gpu = Join-Path $repo "build/staging/302-gpu-$run"
+# 首次升级示例；清理旧版本后，改为当版验收记录中的有效只读 seed。
+$baseSeed = "$repo/build/staging/301-base-20261018"
+$gpuSeed = "$repo/build/staging/301-gpu-20261018"
 pwsh -File ./build/windows/Build-Release.ps1 -StagingRoot $base `
-  -ReuseDependencies -ReuseFromStagingRoot "$repo/build/staging/281-base-current" `
+  -ReuseDependencies -ReuseFromStagingRoot $baseSeed `
   -Offline -SkipTests -SkipArchive -LocalCandidate
 pwsh -File ./build/windows/Build-GpuPlugin.ps1 -StagingRoot $gpu -BaseStagingRoot $base `
-  -ReuseDependencies -ReuseVendorFromStagingRoot "$repo/build/staging/281-gpu-current" `
+  -ReuseDependencies -ReuseVendorFromStagingRoot $gpuSeed `
   -ReuseModels -SkipModels -Offline -SkipArchive -LocalCandidate
 $python = "$base/UmiOCR-data/runtime/python.exe"
 ```
@@ -53,13 +56,13 @@ Base copies runtime/site-packages and the Qt manifest, then current public host 
 Optional assembly and independent public products never infer a sibling CPU/VL checkout:
 
 ```powershell
-$complete = "$repo/build/artifacts/3.0.1-$run/complete"
+$complete = "$repo/build/artifacts/3.0.2-$run/complete"
 pwsh -File ./build/windows/Assemble-Candidate.ps1 -Destination $complete `
   -BaseStagingRoot $base -GpuStagingRoot $gpu
 & $python -B ./build/tools/prepare_products.py --complete-root $complete `
-  --products-root "$repo/build/artifacts/3.0.1-products-$run"
+  --products-root "$repo/build/artifacts/3.0.2-products-$run"
 & $python -B ./build/tools/export_cuda_source.py `
-  --output-dir "$repo/build/artifacts/301-plugin-repository"
+  --output-dir "$repo/build/artifacts/302-plugin-repository-$run"
 ```
 
 The local CUDA source export contains only its public adapters, required public build tools, docs, locks, licenses and locked corresponding-source materials, preserving relative paths. It creates no remote, Git history or release, and refuses existing outputs. `-CpuStagingRoot`, `-VlStagingRoot` and `--optional-plugin ID=PATH` are explicit development-only selections. `source_snapshot.py` defaults to public scope, includes untracked public sources and excludes vendor/models/cache/artifacts/user temporary data; direct snapshots also require the existing locked corresponding-source cache.

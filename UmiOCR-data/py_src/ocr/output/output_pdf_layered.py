@@ -37,9 +37,8 @@ class OutputPdfLayered(Output):
         doc = fitz.open(path)
         # 如果已加密，则尝试解密
         if doc.is_encrypted and not doc.authenticate(self.password):
-            raise Exception(
-                f'The document is encrypted, and the password "{self.password}" is incorrect.\n文档已加密，输入密码不正确。'
-            )
+            doc.close()
+            raise ValueError("文档已加密，输入密码不正确。")
         if doc.is_pdf:
             return doc
         b = doc.convert_to_pdf()  # 转换为PDF格式的二进制数据
@@ -121,53 +120,59 @@ class OutputPdfLayered(Output):
                 fill_opacity=self.opacity,  # 填充（字体）透明度
             )
 
-    def onEnd(self):  # 结束时保存。
-        if not self.pdf:
+    def onEnd(self):  # 结束时保存，并且无论成功与否都释放文档。
+        if self.pdf is None:
             return
-        # 删除未处理的页数
-        for i in range(len(self.pdf) - 1, -1, -1):
-            if i not in self.existentPages:
-                self.pdf.delete_page(i)
-        logger.info(f"保存{len(self.pdf)}页PDF：{self.outputPath}")
-        if self.isInsertFont:  # 有任意页面嵌入字体，则构建字体子集
-            try:  # 对于部分PDF，如用txt直接打印的，构建字体子集会失败。
-                self.pdf.subset_fonts()  # 构建字体子集，减小文件大小。需要 fontTools 库
-            except Exception:  # TODO: 失败原因？可能文件中实际并没有字体？
-                logger.error("构建字体子集失败。", exc_info=True, stack_info=True)
-            # 保存：压缩并进行3级垃圾回收。等同 ez_save
-            self.save(self.pdf, self.outputPath, deflate=True, garbage=3)
-        else:
-            # 无嵌入字体，则直接保存，不压缩
-            self.save(self.pdf, self.outputPath)
-
-    def save(self, pdf, path, **options):  # 保存并关闭 pdf 对象
+        pdf, self.pdf = self.pdf, None
         try:
-            # 尝试保存到指定路径
-            pdf.save(path, **options)
-        except Exception:
-            # 保存失败，尝试保存到 ".temp" 路径
-            tempPath = self.outputPath + ".temp"
-            logger.warning(f"保存PDF失败。 path: {path}", exc_info=True)
-            try:
-                pdf.save(tempPath, **options)
+            if not self.existentPages:
+                self.recordArtifact(self.outputPath, "cancelled", "本次没有完成的页面。")
+                return
+            # 删除未处理页只改变内存中的本次输出，不触碰原始文档。
+            processed = set(self.existentPages)
+            for i in range(len(pdf) - 1, -1, -1):
+                if i not in processed:
+                    pdf.delete_page(i)
+            logger.info(f"保存{len(pdf)}页PDF：{self.outputPath}")
+            if self.isInsertFont:
+                try:
+                    pdf.subset_fonts()
+                except Exception:
+                    logger.error("构建字体子集失败。", exc_info=True)
+                self.save(pdf, self.outputPath, deflate=True, garbage=3)
+            else:
+                self.save(pdf, self.outputPath)
+        except Exception as exc:
+            self.recordArtifact(self.outputPath, "failed", str(exc))
+            raise
+        finally:
+            if not pdf.is_closed:
                 pdf.close()
-            except Exception as e1:
-                logger.error(
-                    f"保存PDF到临时路径失败。 tempPath: {tempPath}", exc_info=True
-                )
-                raise Exception(f"[Error] Unable to save PDF to [{tempPath}]: {e1}")
-            # 已保存到 .temp 并 close 原对象，尝试替换文件
-            try:
-                if os.path.exists(path):
-                    os.remove(path)
-                os.rename(tempPath, path)
-            except Exception as e2:
-                logger.warning(
-                    f"保存PDF文件替换失败。保存到临时文件: {tempPath}", exc_info=True
-                )
 
-                raise Exception(
-                    f"[Warning] Unable to save PDF: [{path}]. Exception: {e2}. Saved to temporary path: [{tempPath}]."
-                )
-        else:  # 正常结束
-            pdf.close()
+    def save(self, pdf, path, **options):  # 记录本次实际保存结果，而不是仅报告预期路径。
+        try:
+            try:
+                pdf.save(path, **options)
+            except Exception:
+                temp_path = path + ".temp"
+                logger.warning(f"保存PDF失败。 path: {path}", exc_info=True)
+                try:
+                    pdf.save(temp_path, **options)
+                    pdf.close()
+                    self.recordArtifact(temp_path, "recovery", "正常路径保存失败，已保留恢复文件。")
+                except Exception as exc:
+                    self.recordArtifact(path, "failed", str(exc))
+                    raise RuntimeError(f"无法保存PDF到恢复路径 [{temp_path}]：{exc}") from exc
+                try:
+                    os.replace(temp_path, path)
+                except Exception as exc:
+                    self.recordArtifact(path, "failed", str(exc))
+                    raise RuntimeError(f"无法替换PDF [{path}]，恢复文件保留在 [{temp_path}]：{exc}") from exc
+                # 恢复文件已成功转正，不再把消失的临时路径作为产物。
+                self._artifacts.pop(os.path.abspath(temp_path), None)
+            else:
+                pdf.close()
+            self.recordArtifact(path)
+        finally:
+            if not pdf.is_closed:
+                pdf.close()

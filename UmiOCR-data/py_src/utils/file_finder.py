@@ -10,8 +10,9 @@ from PySide6.QtQml import QJSValue
 from typing import List
 
 from ..event_bus.pubsub_service import PubSubService  # 发布事件
-from ..mission.mission_doc import MissionDOC, DocSuf
+from ..mission.mission_doc import DocSuf
 from ..mission.mission_ocr import ImageSuf
+from .doc_probe import PROBE_BATCH_SIZE, probe_documents
 from umi_log import logger
 
 
@@ -29,7 +30,7 @@ def _displayPath(path):
 
 
 def _scanFiles(paths, sufs, isRecurrence, addFile):
-    """Find matching files and return diagnostics for paths that could not import."""
+    """枚举支持的文件，并为无法导入的路径保留可见诊断。"""
     issues = []
 
     def addIssue(kind, path, message):
@@ -55,7 +56,7 @@ def _scanFiles(paths, sufs, isRecurrence, addFile):
                 else:
                     addIssue("missing", path, f"路径不存在：{displayPath}")
                 continue
-        except OSError as exc:
+        except (TypeError, ValueError, OSError) as exc:
             addIssue("unreadable", path, f"无法访问路径：{displayPath}（{exc}）")
             continue
 
@@ -127,7 +128,7 @@ def findFiles(
 
 # 异步从路径中搜索后缀符合要求的文件，并定时刷新UI。
 # image: 返回路径列表
-# doc: 返回 MissionDOC.getDocInfo 的信息字典列表
+# doc: 返回隔离进程读取的文档信息字典列表
 def asynFindFiles(
     paths: List,  # 初始路径列表
     sufType: str,  # 后缀类型，FileSuf的key
@@ -136,50 +137,77 @@ def asynFindFiles(
     updateKey: str,  # UI刷新进度的事件key。填""则不刷新。向事件传入 (已完成的路径数量, 最近一条路径)
     updateTime: float,  # UI刷新进度的间距
 ):
-    if isinstance(paths, QJSValue):
-        paths = paths.toVariant()
-    if not isinstance(paths, list):
-        logger.error(f"不合法的路径列表：{paths}, {type(paths)}")
-        PubSubService.publish(completeKey, [])
-        return
-    sufs = FileSuf.get(sufType, "")
-    if not sufs:
-        logger.error(f"不合法的后缀类型：{sufs}")
-        PubSubService.publish(completeKey, [])
-        return
-
-    if not updateKey:  # 如果没有刷新事件，则刷新间隔为无穷大
-        updateTime = float("inf")
     filePaths = []
     issues = []
-    lastTime = 0  # 上一次update事件的时间
+    pending = []
+    lastTime = 0
+
+    def addIssue(kind, path, message):
+        issues.append({"kind": kind, "path": path, "message": message})
+        logger.warning(message)
 
     def updateEvent(fp):
         nonlocal lastTime
-        now = time.time()
-        if now - lastTime > updateTime:
+        now = time.monotonic()
+        if updateKey and now - lastTime > updateTime:
             PubSubService.publish(updateKey, len(filePaths), fp)
             lastTime = now
 
-    def addFile(fp):
-        fp = fp.replace("\\", "/")  # 规范化正斜杠
-        if sufType == "doc":  # 文档读取信息
-            info = MissionDOC.getDocInfo(fp)
+    def flushDocuments():
+        if not pending:
+            return
+        batch = pending.copy()
+        pending.clear()
+        try:
+            # 每次最多缓存固定数量的路径；扫描线程不调用 fitz，也不先读完整个目录树。
+            infos = list(probe_documents(batch))
+            if len(infos) != len(batch):
+                raise ValueError("文档读取结果数量不匹配")
+        except Exception as exc:
+            message = f"文档读取异常（{type(exc).__name__}）。"
+            infos = [{"error": message, "error_kind": "workererror"} for _ in batch]
+        for fp, info in zip(batch, infos):
             if "error" in info:
-                logger.warning(f'读入文档失败：{fp}, {info["error"]}')
-                issues.append(
-                    {
-                        "kind": "unreadable",
-                        "path": fp,
-                        "message": f'读入文档失败：{fp}（{info["error"]}）',
-                    }
+                addIssue(
+                    info.get("error_kind", "unreadable"),
+                    fp,
+                    f'读入文档失败：{fp}（{info["error"]}）',
                 )
             else:
                 filePaths.append(info)
+            updateEvent(fp)
+
+    def addFile(fp):
+        fp = fp.replace("\\", "/")
+        if sufType == "doc":
+            pending.append(fp)
+            if len(pending) >= PROBE_BATCH_SIZE:
+                flushDocuments()
         else:
             filePaths.append(fp)
-        updateEvent(fp)
+            updateEvent(fp)
 
-    issues.extend(_scanFiles(paths, sufs, isRecurrence, addFile))
-
-    PubSubService.publish(completeKey, filePaths, issues)
+    try:
+        if isinstance(paths, QJSValue):
+            paths = paths.toVariant()
+        if not isinstance(paths, list):
+            addIssue("invalid", "", "不合法的路径列表。")
+            return
+        sufs = FileSuf.get(sufType, "") if isinstance(sufType, str) else ""
+        if not sufs:
+            addIssue("invalid", "", "不合法的后缀类型。")
+            return
+        if updateKey:
+            updateTime = max(0.0, float(updateTime))
+        issues.extend(_scanFiles(paths, sufs, isRecurrence, addFile))
+    except Exception as exc:
+        addIssue("scanerror", "", f"文件扫描异常（{type(exc).__name__}）：{exc}")
+    finally:
+        # 正常、空结果、参数错误或扫描异常，都只能从这里发送一次双参数终态。
+        # 已枚举到的文档即使在后续扫描异常时也要结算，不能遗失导入票据。
+        try:
+            flushDocuments()
+        except Exception as exc:
+            addIssue("scanerror", "", f"文档导入汇总异常（{type(exc).__name__}）：{exc}")
+        finally:
+            PubSubService.publish(completeKey, filePaths, issues)

@@ -648,7 +648,7 @@ Item {
                 enabledFold = origin.enabledFold?true:false
                 const f = origin.fold?true:false
                 if(enabledFold) { // 若启用折叠按钮，则取记录值，无记录则使用设定值
-                    const readf = uiSettings.value(foldKey, undefined)
+                    const readf = UmiSettings.value("UI", foldKey, f)
                     // 字符串转bool
                     if(readf===undefined) fold = f
                     else if(readf===true || readf==="true") fold = true
@@ -697,7 +697,7 @@ Item {
                 bgColor_: theme.bgColor
                 onClicked: {
                     fold=!fold
-                    uiSettings.setValue(foldKey, fold) // 折叠状态写入本地
+                    UmiSettings.setValue("UI", foldKey, fold) // 折叠状态写入本地
                 }
             }
             // 内容

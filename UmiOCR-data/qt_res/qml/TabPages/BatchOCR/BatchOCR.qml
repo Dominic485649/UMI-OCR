@@ -4,7 +4,6 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-
 import ".."
 import "../../Widgets"
 import "../../Widgets/ResultLayout"
@@ -12,226 +11,198 @@ import "../../Widgets/IgnoreArea"
 
 TabPage {
     id: tabPage
+    objectName: "batchOcrPage"
+    property string msnID: ""
+    property bool pageAlive: true
+    property var backendState: ({rows: [], running: false, importCount: 0})
+    property var importRequests: []
+    property string timedBatchId: ""
+    property string notifiedBatchId: ""
+    property var resultTimes: ({})
+    property var resultLabels: ({})
+    property int errorNum: backendState.failedDocs || 0
 
-    // ========================= 【逻辑】 =========================
-
-    property int errorNum: 0 // 异常的任务个数
-    property string msnID: "" // 当前任务ID
-
-    Component.onCompleted: {
+    function reportError(message) { qmlapp.popup.simple(qsTr("批量 OCR"), message || qsTr("操作未能完成，请重试。")) }
+    function applyResult(result) {
+        if(typeof result === "string" && result.startsWith("[Error]")) { reportError(result); return false }
+        if(result && result.ok === false) { reportError(result.error); return false }
+        if(result && result.rows) onBatchState(result)
+        return result
     }
+    function invoke(name, ...args) { return applyResult(tabPage.callPy(name, ...args)) }
+    function refreshBatchState() {
+        if(pageAlive && connector && ctrlKey) applyResult(tabPage.callPy("getBatchState"))
+    }
+    onConnectorChanged: { if(connector) Qt.callLater(refreshBatchState) }
+    onCtrlKeyChanged: { if(ctrlKey) Qt.callLater(refreshBatchState) }
 
-    // 异步加载一批图像路径
+    // 打开与拖入共用入口；运行中也登记票据，不静默 return，也不重交整张表。
     function addImages(paths) {
-        if(ctrlPanel.state_ !== "stop") return
-        if(paths.length <= 0) return
-        const isRecurrence = configsComp.getValue("mission.recurrence")
-        qmlapp.asynFilesLoader.run(paths,"image",isRecurrence,onAddImages)
-    }
-    // 完毕后，将合法路径加入表格
-    function onAddImages(paths) {
-        for(let i in paths) {
-            filesTableView.add({ path: paths[i], time: "", state: "" })
+        if(!pageAlive || !paths || !paths.length) return false
+        const ticket = tabPage.callPy("beginImport")
+        if(!ticket || !ticket.ok) { reportError(ticket ? ticket.error : ""); return false }
+        let requestId = ""
+        try {
+            requestId = qmlapp.asynFilesLoader.start(paths, "image",
+                configsComp.getValue("mission.recurrence"), function(images, terminal) {
+                    if(!tabPage || !tabPage.pageAlive) return
+                    importRequests = importRequests.filter(function(item) { return item.requestId !== terminal.requestId })
+                    invoke("finishImport", ticket.ticketId, images, terminal)
+                })
+            importRequests = importRequests.concat([{requestId: requestId, ticketId: ticket.ticketId}])
         }
+        catch(error) {
+            invoke("finishImport", ticket.ticketId, [], {requestId: requestId, status: "error", error: String(error)})
+            return false
+        }
+        return requestId
     }
-
-    // 运行OCR
+    function cancelPageImports() {
+        const requests = importRequests
+        importRequests = []
+        for(const request of requests) qmlapp.asynFilesLoader.cancel(request.requestId)
+    }
     function ocrStart() {
-        let msnLength = filesTableView.rowCount
-        if(msnLength <= 0) {
-            ctrlPanel.stopFinished()
-            return
-        }
-        // 刷新表格
-        for(let i = 0; i < msnLength; i++) {
-            filesTableView.set(i, { time: "", state: qsTr("排队") })
-        }
-        // 刷新计数
-        errorNum = 0 // 异常任务个数
-        // 开始运行
-        const paths = filesTableView.getColumnsValue("path")
-        const argd = configsComp.getValueDict()
-        msnID = tabPage.callPy("msnPaths", paths, argd)
-        // 若tabPanel面板的下标没有变化过，则切换到记录页
-        if(tabPanel.indexChangeNum < 2)
-            tabPanel.currentIndex = 1
-        ctrlPanel.runFinished(msnLength)
+        resultTimes = {}
+        resultLabels = {}
+        const paths = (backendState.rows || []).map(function(row) { return row.path })
+        const id = invoke("msnPaths", paths, configsComp.getValueDict())
+        if(id === false) { ctrlPanel.stopFinished(); return }
+        if(tabPanel.indexChangeNum < 2) tabPanel.currentIndex = 1
+        refreshBatchState()
     }
-
-    // 停止OCR
-    function ocrStop() {
-        _ocrStop()
-        tabPage.callPy("msnStop")
-        ctrlPanel.stopFinished()
+    function ocrStop() { invoke("msnStop"); refreshBatchState() }
+    function ocrClear() {
+        if(backendState.running) return false
+        if(invoke("clearRows") === false) return false
+        cancelPageImports()
+        return true
     }
-
-    function _ocrStop() {
-        msnID = "" // 清除任务ID
-        // 刷新表格，清空未执行的任务的状态
-        let msnLength = filesTableView.rowCount
-        for(let i = 0; i < msnLength; i++) {
-            const row = filesTableView.get(i)
-            if(row.time === "") {
-                filesTableView.setProperty(i, "state", "")
-            }
+    function rowStateText(row) {
+        switch(row.status) {
+            case "pending": return qsTr("排队")
+            case "preparing": return qsTr("准备")
+            case "active": return qsTr("处理")
+            case "finalizing": return qsTr("保存中")
+            case "finished": return resultLabels[row.path] || "√"
+            case "failed": return resultLabels[row.path] || ("× " + qsTr("失败"))
+            case "stopped": return qsTr("已停止")
+            default: return ""
         }
     }
-
-    // 关闭页面
-    function closePage() {
-        if(ctrlPanel.state_ !== "stop") {
-            const argd = { yesText: qsTr("依然关闭") }
-            const callback = (flag)=>{
-                if(flag) {
-                    ocrStop()
-                    delPage()
-                }
-            }
-            qmlapp.popup.dialog("", qsTr("任务正在进行中。\n要结束任务并关闭页面吗？"), callback, "warning", argd)
+    function displayRows(rows) {
+        return rows.map(function(row) { return {path: row.path, time: resultTimes[row.path] || "", state: rowStateText(row)} })
+    }
+    function onBatchState(state) {
+        if(!pageAlive || !state || !state.rows) return
+        if(backendState.generation !== undefined && state.generation < backendState.generation) return
+        backendState = state
+        msnID = state.batchId || ""
+        filesTableView.reconcileRows(displayRows(state.rows))
+        if(state.running && timedBatchId !== msnID) {
+            timedBatchId = msnID
+            ctrlPanel.runFinished(state.totalPages || 0)
         }
-        else {
-            delPage()
+        ctrlPanel.msnAllNum = state.totalPages || 0
+        ctrlPanel.msnNowNum = state.donePages || 0
+        ctrlPanel.statusOverride = state.state === "waiting_import" ? qsTr("等待导入")
+            : (state.state === "stopped" ? qsTr("任务停止")
+            : (state.completed && state.failedDocs ? qsTr("已完成（存在失败）") : ""))
+        if(state.running) {
+            if(state.paused && ctrlPanel.state_ !== "pause") ctrlPanel.pauseFinished()
+            else if(!state.paused && ctrlPanel.state_ === "pause") ctrlPanel.resumeFinished()
+            ctrlPanel.isWaiting = false
+            ctrlPanel.msnStep(0)
+        }
+        else ctrlPanel.stopFinished()
+        if(state.completed && msnID && notifiedBatchId !== msnID) {
+            notifiedBatchId = msnID
+            const summary = qsTr("成功 %1，失败 %2，跳过 %3，停止 %4")
+                .arg(state.successDocs || 0).arg(state.failedDocs || 0).arg(state.skippedDocs || 0).arg(state.stoppedDocs || 0)
+            qmlapp.popup.simple(qsTr("批量识别完成"), summary, configsComp.getValue("other.simpleNotificationType"))
+            if(state.canPostTaskActions)
+                qmlapp.globalConfigs.utilsDicts.postTaskHardwareCtrl(configsComp.getValue("postTaskActions.system"))
         }
     }
-
-    // 预览
-    function msnPreview(path) {
-        const argd = configsComp.getValueDict()
-        tabPage.callPy("msnPreview", path, argd)
-    }
-
-    // ========================= 【python调用qml】 =========================
-
-    // 准备开始一个任务
-    function onOcrReady(path) {
-        // 刷新表格显示
-        filesTableView.setProperty(path, "state", qsTr("处理"))
-    }
-
-    // 获取一个OCR的返回值
-    function onOcrGet(path, res) {
-        const time = res.time.toFixed(2)
-        let state = ""
-        switch(res.code){
-            case 100:
-                state = (typeof res.score === "number" && isFinite(res.score))
-                    ? "√ "+res.score.toFixed(2) : "√ ---- ";break
-            case 101:
-                state = "√ ---- ";break
-            default:
-                state = "× "+res.code
-                errorNum++ // 异常任务数量+1
+    function queueSummary() {
+        let text = qsTr("图片 %1/%2").arg(backendState.doneDocs || 0).arg(backendState.totalDocs || 0)
+        if(backendState.importCount) text += qsTr(" · 导入中 %1 组").arg(backendState.importCount)
+        for(const request of importRequests) {
+            if(request.requestId === qmlapp.asynFilesLoader.activeRequestId) {
+                text += " · " + qmlapp.asynFilesLoader.statusText
                 break
+            }
         }
-        // 刷新表格显示
-        filesTableView.set(path, { "time": time, "state": state })
-        // 提取文字，添加到结果表格
+        return text
+    }
+    function finishClose() {
+        if(!pageAlive) return
+        tabPage.callPy("closeBatch")
+        pageAlive = false
+        cancelPageImports()
+        delPage()
+    }
+    function closePage() {
+        if(backendState.running) {
+            qmlapp.popup.dialog("", qsTr("任务正在进行中。\n要结束任务并关闭页面吗？"),
+                function(flag) { if(flag) finishClose() }, "warning", {yesText: qsTr("依然关闭")})
+        }
+        else finishClose()
+    }
+    Component.onDestruction: { pageAlive = false }
+
+    // 单段结束不等于整批输出完成；续接/收尾只由 onBatchState 决定。
+    function onOcrReady(path) {}
+    function onOcrGet(path, res) {
+        if(!pageAlive) return
+        const times = Object.assign({}, resultTimes), labels = Object.assign({}, resultLabels)
+        times[path] = typeof res.time === "number" ? res.time.toFixed(2) : ""
+        labels[path] = res.code === 100 && typeof res.score === "number" && isFinite(res.score)
+            ? "√ " + res.score.toFixed(2) : (res.code === 100 || res.code === 101 ? "√ ----" : "× " + res.code)
+        resultTimes = times
+        resultLabels = labels
+        filesTableView.reconcileRows(displayRows(backendState.rows || []))
         res.title = res.fileName
         resultsTableView.addOcrResult(res)
-        ctrlPanel.msnStep(1) // 任务计数器步进
     }
-
-    // 任务队列完毕
     function onOcrEnd(msg, thisMsnID) {
-        // msg: [Success] [Warning] [Error]
-        if(msnID !== thisMsnID) { // 返回的任务ID不等于前端展示的任务ID，则不处理
-            return
-        }
-        _ocrStop()
-        // 任务成功
-        if(msg.startsWith("[Success]")) {
-            let errMsg = ""
-            if(errorNum > 0) { // 有异常任务
-                errMsg = qsTr("%1 张图片识别失败！").arg(errorNum)
-            }
-            const simpleType = configsComp.getValue("other.simpleNotificationType")
-            qmlapp.popup.simple(qsTr("批量识别完成"), errMsg, simpleType)
-            // 任务完成后续操作
-            qmlapp.globalConfigs.utilsDicts.postTaskHardwareCtrl(
-                configsComp.getValue("postTaskActions.system")
-            )
-        }
-        // 任务失败
-        else if(msg.startsWith("[Error]")) {
-            qmlapp.popup.message(qsTr("批量识别任务异常"), msg, "error")
-        }
-        ctrlPanel.stopFinished()
+        if(pageAlive && msg && msg.startsWith("[Error]")) reportError(msg)
     }
-
-    // 预览
-    function onPreview(path, res) {
-        ignoreArea.getPreview(res, path, "")
-    }
-    // 路径转文件名
-    function path2name(path) {
-        const parts = path.split("/")
-        return parts[parts.length - 1]
-    }
-    // 文件表格中单击路径
+    function msnPreview(path) { tabPage.callPy("msnPreview", path, configsComp.getValueDict()) }
+    function onPreview(path, res) { ignoreArea.getPreview(res, path, "") }
+    function path2name(path) { const parts = path.replace(/\\/g, "/").split("/"); return parts[parts.length - 1] }
     function onClickPath(index) {
-        let info = filesTableView.get(index)
-        let fileName = path2name(info.path)
-        let res = resultsTableView.getResult(fileName)
-        let data = undefined, text = undefined
-        if(res) {
-            if(res.source)
-                data = JSON.parse(res.source)
-            if(res.resText)
-                text = res.resText
-        }
-        previewImage.show(info.path, data, text)
+        const info = filesTableView.get(index)
+        const res = resultsTableView.getResult(path2name(info.path))
+        const data = res && res.source ? JSON.parse(res.source) : undefined
+        previewImage.show(info.path, data, res ? res.resText : undefined)
     }
 
-    // ========================= 【布局】 =========================
-
-    // 配置
     configsComp: BatchOCRConfigs {
-        // 点按钮打开忽略区域
-        onClickIgnoreArea: {
-            if(filesTableView.rowCount > 0) {
-                const path = filesTableView.get(0).path
-                console.log("打开路径", path)
-                ignoreArea.showPath(path)
-            }
-            else {
-                ignoreArea.show()
-            }
-        }
+        onClickIgnoreArea: { if(filesTableView.rowCount) ignoreArea.showPath(filesTableView.get(0).path); else ignoreArea.show() }
     }
-    // 主区域：可切换双栏面板
     DoubleSwitchableLayout {
         id: doubleLayout
         saveKey: "BatchOCR_1"
         anchors.fill: parent
-
-        // 面板A：控制板+文件表格
         itemA: Panel {
             anchors.fill: parent
-
-            // 上方控制板
             MissionCtrlPanel {
                 id: ctrlPanel
+                objectName: "batchOcrMissionCtrl"
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.margins: size_.spacing
                 height: size_.line * 2
-
                 onRunClicked: tabPage.ocrStart()
-                onPauseClicked: {
-                    tabPage.callPy("msnPause")
-                    pauseFinished()
-                }
-                onResumeClicked: {
-                    tabPage.callPy("msnResume")
-                    resumeFinished()
-                }
+                onPauseClicked: { tabPage.invoke("msnPause"); tabPage.refreshBatchState() }
+                onResumeClicked: { tabPage.invoke("msnResume"); tabPage.refreshBatchState() }
                 onStopClicked: tabPage.ocrStop()
             }
-
-            // 下方文件表格
             FilesTableView {
                 id: filesTableView
+                objectName: "batchOcrFilesTable"
                 anchors.top: ctrlPanel.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -239,75 +210,38 @@ TabPage {
                 anchors.margins: size_.spacing
                 anchors.topMargin: size_.smallSpacing
                 headers: [
-                    {key: "path", title: qsTr("图片"), left: true, display:path2name,
-                        btn: true, onClicked:onClickPath},
-                    {key: "time", title: qsTr("耗时"), },
-                    {key: "state", title: qsTr("状态"), },
+                    {key: "path", title: qsTr("图片"), left: true, display: path2name, btn: true, onClicked: onClickPath},
+                    {key: "time", title: qsTr("耗时")}, {key: "state", title: qsTr("状态")}
                 ]
                 openBtnText: qsTr("打开图片")
-                clearBtnText: qsTr("清空")
                 defaultTips: qsTr("拖入图片或文件夹")
                 fileDialogTitle: qsTr("请选择图片")
-                fileDialogNameFilters: [qsTr("图片")+" (*.jpg *.jpe *.jpeg *.jfif *.png *.avif *.webp *.jxl *.jxr *.wdp *.hdp *.bmp *.tif *.tiff)"]
-                isLock: ctrlPanel.state_ !== "stop"
-                onAddPaths: {
-                    tabPage.addImages(paths)
-                }
+                fileDialogNameFilters: [qsTr("图片") + " (*.jpg *.jpe *.jpeg *.jfif *.png *.avif *.webp *.jxl *.jxr *.wdp *.hdp *.bmp *.tif *.tiff)"]
+                isLock: !!backendState.running
+                allowOpenWhileLocked: true
+                clearHandler: tabPage.ocrClear
+                statusText: tabPage.queueSummary()
+                // 文档页专属的排序和右键菜单保持默认关闭。
+                onAddPaths: function(paths) { tabPage.addImages(paths) }
             }
         }
-        // 面板B：文字输出 & 设置
         itemB: Panel {
             anchors.fill: parent
-
-            // 配置项控制板
             TabPanel {
                 id: tabPanel
                 anchors.fill: parent
                 anchors.margins: size_.spacing
-                isMenuTop: doubleLayout.isRow // 左右布局时，菜单在顶部；上下布局时菜单在底部
+                isMenuTop: doubleLayout.isRow
                 menuHeight: size_.line * 2
-
-                // 结果面板
-                ResultsTableView {
-                    id: resultsTableView
-                    anchors.fill: parent
-                    visible: false
-                }
-
+                ResultsTableView { id: resultsTableView; anchors.fill: parent; visible: false }
                 tabsModel: [
-                    {
-                        "key": "configs",
-                        "title": qsTr("设置"),
-                        "component": configsComp.panelComponent,
-                    },
-                    {
-                        "key": "ocrResult",
-                        "title": qsTr("记录"),
-                        "component": resultsTableView,
-                    },
+                    {key: "configs", title: qsTr("设置"), component: configsComp.panelComponent},
+                    {key: "ocrResult", title: qsTr("记录"), component: resultsTableView}
                 ]
             }
         }
     }
-
-    // 鼠标拖入图片
-    DropArea_ {
-        anchors.fill: parent
-        callback: tabPage.addImages
-    }
-
-    // 预览面板
-    PreviewImage {
-        id: previewImage
-        anchors.fill: parent
-    }
-
-    // 忽略区域编辑器
-    IgnoreArea {
-        id: ignoreArea
-        anchors.fill: parent
-        pathPreview: msnPreview
-        configsComp: tabPage.configsComp
-        configKey: "tbpu.ignoreArea"
-    }
+    DropArea_ { objectName: "batchOcrExternalDrop"; anchors.fill: parent; callback: tabPage.addImages }
+    PreviewImage { id: previewImage; anchors.fill: parent }
+    IgnoreArea { id: ignoreArea; anchors.fill: parent; pathPreview: msnPreview; configsComp: tabPage.configsComp; configKey: "tbpu.ignoreArea" }
 }

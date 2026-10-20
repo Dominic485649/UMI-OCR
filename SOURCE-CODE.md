@@ -1,6 +1,19 @@
-# Umi-OCR 3.0.1 Source Code Notice
+# Umi-OCR 3.0.2 Candidate Source Code Notice
 
-The formal release tag is `v3.0.1`. Public source belongs to these repositories:
+The main branch contains the current and previous application updates, including
+3.0.2 candidate code and draft release notes. A source update does not create a
+3.0.2 tag or GitHub Release and does not authorize binary publication while the
+artifact gates remain blocked. See [the application draft](docs/RELEASE_3.0.2_DRAFT.md)
+and [the CUDA draft](docs/RELEASE_CUDA_3.0.2_DRAFT.md).
+
+The existing local candidate archives were frozen from internal revision
+`2a038a48a443140ee3b7f90757e29d72830c094b`. They retain their original corresponding-source
+snapshot, member hashes, provenance and third-party materials. New documentation
+or public source commits do not retroactively change those archives, their source
+identity, or their blocked publication status. The earlier
+[local delivery notes](docs/RELEASE_3.0.2_LOCAL.md) describe that local-only phase.
+
+The existing published formal release tag remains `v3.0.1`. Its public source belongs to these repositories:
 
 - Application and base distribution: https://github.com/Dominic485649/UMI-OCR
 - CUDA plugin: https://github.com/Dominic485649/UMI-OCR_plugins

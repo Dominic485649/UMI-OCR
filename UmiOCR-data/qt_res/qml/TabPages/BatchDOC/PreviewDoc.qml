@@ -11,6 +11,7 @@ import "../../Widgets/IgnoreArea"
 
 ModalLayer {
     id: pRoot
+    objectName: "documentPreview"
     property var updateInfo // 更新信息函数
     property var configsComp: undefined // 设置组件
 
@@ -40,11 +41,12 @@ ModalLayer {
         password = info.password
         isEncrypted = info.is_encrypted
         isAuthenticate = info.is_authenticate
-        // 读取忽略区域设置
+        ocrRunning = false
+        // 每次打开都重新读取，空设置也必须清除上次的区域。
         let initArea = configsComp.getValue("tbpu.ignoreArea")
+        let ig1 = []
         if(initArea && initArea.length>0) {
             // 读取设置，反格式化
-            let ig1 = []
             for(let i=0,l=initArea.length; i<l; i++) {
                 const b = initArea[i]
                 ig1.push({
@@ -54,16 +56,32 @@ ModalLayer {
                     "height": b[2][1] - b[0][1],
                 })
             }
-            imgViewer.ig1Boxes = ig1
         }
+        imgViewer.ig1Boxes = ig1
         ignoreRangeStart = configsComp.getValue("tbpu.ignoreRangeStart")
         ignoreRangeEnd = configsComp.getValue("tbpu.ignoreRangeEnd")
         toPreview()
     }
 
+    // 当前编辑值是 OCR 预览、持久化和单件重识别确认参数的同一来源。
+    function getIgnoreConfig() {
+        return {
+            "tbpu.ignoreArea": imgViewer.getIgnoreArea(),
+            "tbpu.ignoreRangeStart": ignoreRangeStart,
+            "tbpu.ignoreRangeEnd": ignoreRangeEnd,
+        }
+    }
+    function getPreviewArguments() {
+        const argd = Object.assign({}, configsComp.getValueDict(), getIgnoreConfig())
+        argd["tbpu.parser"] = "None" // 去除排版解析
+        return argd
+    }
+
     // 返回上层，更新信息
     onVisibleChanged: {
         if(visible) return
+        imgViewer.cancelSelection()
+        if(!previewPath) return // 初次创建或重复关闭时不保存未初始化数据。
         // 负数转倒数
         if(rangeStart < 0) rangeStart += pageCount + 1
         if(rangeEnd < 0) rangeEnd += pageCount + 1
@@ -75,35 +93,23 @@ ModalLayer {
         let pages_ = `${pageCount}` // 如果范围为整本，只显示总页数。否则显示 起始-结束
         if(rangeEnd - rangeStart + 1 < pageCount)
             pages_ = `${rangeStart}-${rangeEnd}`
+        // 先持久化，再通知页面确认元信息，避免回调读取到旧配置。
+        const ignoreConfig = getIgnoreConfig()
+        for(let key in ignoreConfig)
+            configsComp.setValue(key, ignoreConfig[key])
         if(updateInfo) {
             updateInfo(previewPath, {
                 pages: pages_,
                 state: isAuthenticate ? "" : qsTr("加密"),
+                page_count: pageCount,
                 range_start: rangeStart,
                 range_end: rangeEnd,
                 password: password,
                 is_authenticate: isAuthenticate,
+                argd: ignoreConfig,
             })
         }
-        // 更新忽略区域
-        if(imgViewer.ig1Boxes.length > 0) {
-            // 格式化，存入设置
-            let ig1 = []
-            for(let i=0,l=imgViewer.ig1Boxes.length; i<l; i++) {
-                const b = imgViewer.ig1Boxes[i]
-                const x = Math.round(b.x)
-                const y = Math.round(b.y)
-                const w = Math.round(b.width)
-                const h = Math.round(b.height)
-                ig1.push([[x, y], [x+w, y], [x+w, y+h], [x, y+h]])
-            }
-            configsComp.setValue("tbpu.ignoreArea", ig1)
-        }
-        else {
-            configsComp.setValue("tbpu.ignoreArea", undefined)
-        }
-        configsComp.setValue("tbpu.ignoreRangeStart", ignoreRangeStart)
-        configsComp.setValue("tbpu.ignoreRangeEnd", ignoreRangeEnd)
+        ocrRunning = false
         imgViewer.clear()
         prevConn.clear() // 清除文档缓存
         previewPath = ""
@@ -129,15 +135,14 @@ ModalLayer {
 
     // 预览一页文档
     function toPreview() {
-        if(!previewPath) return
+        imgViewer.cancelSelection()
+        if(!previewPath || pageCount < 1) return
         if(previewPage < 1) previewPage = 1
         if(previewPage > pageCount) previewPage = pageCount
         prevConn.preview(previewPath, previewPage, password)
-        if(previewOCR) { // 预览OCR
+        if(previewOCR) { // 预览OCR，立即使用尚未关闭面板的编辑值。
             ocrRunning = true
-            const argd = configsComp.getValueDict()
-            argd["tbpu.parser"] = "None" // 去除排版解析
-            prevConn.ocr(previewPath, previewPage, password, argd)
+            prevConn.ocr(previewPath, previewPage, password, getPreviewArguments())
         }
     }
     // 预览连接器
@@ -145,6 +150,7 @@ ModalLayer {
         id: prevConn
         // 图片渲染的回调
         onPreviewImg: function(imgID) {
+            if(!visible || !previewPath) return
             const title = qsTr("打开文档失败")
             if(imgID === "[Warning] is_encrypted") {
                 qmlapp.popup.simple(title, qsTr("请填写正确的密码"))
@@ -420,6 +426,7 @@ ModalLayer {
         // 右：图片查看面板
         rightItem: ImageWithIgnore {
             id: imgViewer
+            objectName: "documentIgnoreAreaCanvas"
             anchors.fill: parent
             // 加载中 动态图标
             Loading {

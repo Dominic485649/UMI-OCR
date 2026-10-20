@@ -135,6 +135,17 @@ def runQml(engineAddImportPath, quitAfterMs=0):
         raise RuntimeError("QML root object could not be created; see Qt diagnostics above.")
 
     def shutdownBackends():
+        # 先完成批量页面的输出收尾，再关闭它仍可能依赖的识别后端。
+        # 未打开过批量页时不为退出而额外导入页面、文档或输出依赖。
+        import sys
+
+        batchRuntime = sys.modules.get("py_src.tag_pages.batch_runtime")
+        if batchRuntime is not None:
+            try:
+                if not batchRuntime.shutdownBatchIO(30000):
+                    logger.error("批量后台任务未能在退出等待期限内完成收尾。")
+            except Exception:
+                logger.error("关闭批量后台任务失败。", exc_info=True)
         # 每种能力类型的任务管理器都要单独收尾：document 后端可能持有
         # 外部服务进程或连接，只关 OCR 会留下孤儿进程。
         from .mission.mission_ocr import MissionOCR

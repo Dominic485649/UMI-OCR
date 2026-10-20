@@ -51,6 +51,7 @@ Item {
     // 任务计数
     property int msnAllNum: 0 // 总任务数
     property int msnNowNum: 0 // 当前已完成任务数
+    property string statusOverride: "" // 权威批次可区分等待解密、失败、跳过和停止，默认不影响其它页面。
     clip: true
 
     // 右：开始/暂停/停止按钮
@@ -73,6 +74,7 @@ Item {
                 state_==="stop"?ctrlRight.width_:ctrlRight.width_*0.5)
 
             Button_ {
+                objectName: "missionStartButton"
                 visible: state_ === "stop" && !isWaiting
                 anchors.fill: parent
                 bold_: true
@@ -86,6 +88,7 @@ Item {
                 }
             }
             IconButton {
+                objectName: "missionPauseResumeButton"
                 visible: state_ !== "stop" || isWaiting
                 anchors.fill: parent
                 color: theme.textColor
@@ -122,6 +125,7 @@ Item {
         // 停止 按钮
         IconButton {
             id: btn2
+            objectName: "missionStopButton"
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.right: parent.right
@@ -165,6 +169,7 @@ Item {
                 // 计时器、任务计数器
                 Text_ {
                     id: timer
+                    objectName: "missionTimer"
                     text: `${strState}  ${strTime}  ${strNumber}`
                     color: timer_.running?theme.textColor:(missionCtrl.msnNowNum<missionCtrl.msnAllNum?theme.noColor:theme.yesColor)
                     font.pixelSize: size_.smallText
@@ -234,11 +239,12 @@ Item {
                             else
                                 p = qsTr("任务完成")
                         }
-                        // 刷新
+                        // 不以计数相等推断自然成功；批次可明确显示停止、失败或跳过。
+                        if(missionCtrl.statusOverride) p = missionCtrl.statusOverride
                         timer.strNumber = n
                         timer.strState = p
-                        if(missionCtrl.msnAllNum > 0)
-                            missionProgress.percent = missionCtrl.msnNowNum/missionCtrl.msnAllNum
+                        missionProgress.percent = missionCtrl.msnAllNum > 0
+                            ? missionCtrl.msnNowNum/missionCtrl.msnAllNum : 0
                     }
 
                     property real startStamp // 开始时间戳，秒

@@ -16,6 +16,7 @@ class OutputTxtPlain(Output):
             raise Exception(
                 f"Failed to create plain txt file. {e}\n创建纯文本txt文件失败。"
             )
+        self.recordArtifact(self.outputPath)
 
     def print(self, res):  # 输出图片结果
         if not res["code"] == 100:

@@ -1,8 +1,8 @@
-# Umi-OCR 3.0.1
+# Umi-OCR 3.0.2 Local Candidate
 
 Main repository: https://github.com/Dominic485649/UMI-OCR
 
-Stable version: 3.0.1; Release tag: `v3.0.1`. This release publicly provides the base application and CUDA plugin.
+This working tree prepares a **3.0.2 local candidate** with document-queue, import and ignore-region fixes. This update does not create a public tag or GitHub Release. See the [3.0.2 local delivery notes](docs/RELEASE_3.0.2_LOCAL.md). The published stable version remains `v3.0.1`; its valid download links are retained below.
 
 Authors and provenance: Dominic485649 (author and maintainer of this fork); [hiroi-sora](https://github.com/hiroi-sora/Umi-OCR) (original Umi-OCR author and original copyright source).
 
@@ -69,7 +69,7 @@ Authors and provenance: Dominic485649 (author and maintainer of this fork); [hir
 
 <div align="center">
   <strong>Open-source, Batch Offline OCR Software</strong><br>
-  <sub>Umi-OCR 3.0.1: this release targets Windows 10/11 x64</sub>
+  <sub>Umi-OCR 3.0.2 local candidate: Windows 10/11 x64</sub>
 </div><br>
 
 - **Public editions**: The base application and CUDA plugin are provided publicly at no charge; third-party plugin development and integration are open.
@@ -93,7 +93,7 @@ PDF preview, PDF page reading, document OCR, and single-layer and layered search
 
 ## Download Releases:
 
-This is the **3.0.1 Windows x64 stable Release**, tagged `v3.0.1`. Download the base application and CUDA plugin separately. CPU and PaddleOCR-VL plugins are not public assets in this release.
+The currently published version is the **3.0.1 Windows x64 stable Release**, tagged `v3.0.1`. These links do not claim that the local 3.0.2 candidate is published. Download the base application and CUDA plugin separately. CPU and PaddleOCR-VL plugins are not public assets in that release.
 
 - **Base application**: [Main repository v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1).
 - **CUDA plugin**: [Plugin repository v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.1).

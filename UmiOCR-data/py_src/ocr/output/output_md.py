@@ -18,6 +18,7 @@ class OutputMD(Output):
                 f.write(f'> {argd["startDatetime"]}\n\n')
         except Exception as e:
             raise Exception(f"Failed to create jsonl file. {e}\n创建jsonl文件失败。")
+        self.recordArtifact(self.outputPath)
 
     def print(self, res):  # 输出图片结果
         if not res["code"] == 100 and self.ignoreBlank:

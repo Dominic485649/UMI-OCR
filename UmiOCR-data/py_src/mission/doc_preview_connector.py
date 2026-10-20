@@ -2,6 +2,8 @@
 # =============== 文档预览 - 连接器 ===============
 # ===============================================
 
+from copy import deepcopy
+
 from PySide6.QtCore import QObject, Slot, Signal
 from PySide6.QtGui import QPixmap, QImage
 
@@ -21,103 +23,127 @@ class DocPreviewConnector(QObject):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self._previewMission = SimpleMission(self._previewTask)  # 简单任务对象
-        self._previewDoc = None  # 当前预览的对象
-        self._previewPath = ""
-        self._zooms = {}  # 缓存页面缩放系数
+        self._previewMission = SimpleMission(self._previewTask)
+        # 请求代次仅在主线程递增，工作线程不直接向界面发送结果。
+        self._renderRevision = 0
+        self._ocrRevision = 0
+        self._documentSession = 0
+        self._zooms = {}  # 主线程保存当前渲染代次的页面缩放系数
+        # 以下文档缓存仅由串行渲染工作线程使用。
+        self._previewDoc = None
+        self._previewKey = None  # (会话, 路径, 密码)
 
-    # 预览PDF画面
     @Slot(str, int, str)
     def preview(self, path, page, password):
-        page -= 1
-        self._previewMission.addMissionList([(path, page, password)], replace=True)
+        self._renderRevision += 1
+        self._ocrRevision += 1  # 换页、换文档或刷新后，旧 OCR 也不能回写。
+        self._zooms.clear()
+        request = (self._renderRevision, self._documentSession, path, page - 1, password)
+        self._previewMission.addMissionList([request], replace=True)
 
-    def _previewTask(self, msn):
+    def _closePreviewDoc(self):
+        doc, self._previewDoc = self._previewDoc, None
+        self._previewKey = None
+        if doc is not None:
+            try:
+                doc.close()
+            except Exception:
+                logger.warning("关闭文档预览缓存失败。", exc_info=True)
+
+    def _previewTask(self, request):
         import fitz
 
-        path, page, password = msn
+        revision, session, path, page, password = request
         if path is None:
-            if self._previewDoc: self._previewDoc.close()
-            self._previewDoc, self._previewPath, self._zooms = None, "", {}
+            self._closePreviewDoc()
             return
-        if path == self._previewPath:  # 已经加载了
-            doc = self._previewDoc
-        else:  # 新加载
-            try:
-                doc = fitz.open(path)
-                if doc.is_encrypted and not doc.authenticate(password):
-                    msg = "[Warning] is_encrypted"  # 固定指令，不能改
-                    self.previewImg.emit(msg)
+        if revision != self._renderRevision:
+            return
+        try:
+            key = (session, path, password)
+            if key != self._previewKey:
+                self._closePreviewDoc()
+                self._previewDoc = fitz.open(path)
+                self._previewKey = key
+                if self._previewDoc.is_encrypted and not self._previewDoc.authenticate(password):
+                    self._closePreviewDoc()
+                    CallFunc.now(self._deliverPreview, revision, "[Warning] is_encrypted")
                     return
-            except Exception as e:
-                msg = f"[Error] 打开文档失败：{path} {e}"
-                self.previewImg.emit(msg)
-                return
-            if self._previewDoc: self._previewDoc.close()
-            self._previewDoc = doc
-            self._previewPath = path
-            self._zooms = {}
-        page_count = doc.page_count
-        if page < 0 or page >= page_count:
-            logger.error(f"页数 {page} 超出范围 0-{page_count} 。")
+            doc = self._previewDoc
+            if page < 0 or page >= doc.page_count:
+                raise ValueError(f"页数 {page} 超出范围 0-{doc.page_count} 。")
+            rect = doc[page].rect
+            width, height = abs(rect[2] - rect[0]), abs(rect[3] - rect[1])
+            minimum = min(width, height)
+            zoom = MinSize / max(minimum, 1) if minimum < MinSize else 1
+            matrix = fitz.Matrix(zoom, zoom) if zoom != 1 else fitz.Identity
+            pixmap = doc[page].get_pixmap(matrix=matrix)
+            samples = pixmap.samples
+            # 跨线程交付必须复制外部 samples；QPixmap 和图片缓存只在主线程创建。
+            image = QImage(
+                samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format.Format_RGB888
+            ).copy()
+            CallFunc.now(self._deliverPreview, revision, image, page, zoom)
+        except Exception as exc:
+            self._closePreviewDoc()
+            CallFunc.now(self._deliverPreview, revision, f"[Error] 打开文档失败：{path} {exc}")
+        finally:
+            # replace 不能取消已在执行的渲染，结束时仍要释放其旧文档资源。
+            if revision != self._renderRevision:
+                self._closePreviewDoc()
+
+    def _deliverPreview(self, revision, result, page=-1, zoom=1):
+        # 必须在主线程实际交付时复核，不能只在 worker emit 前判断。
+        if revision != self._renderRevision:
             return
-        # 检查页面边长，如果低于阈值，则增加放大系数，以提高渲染清晰度
-        rect = doc[page].rect
-        w, h = abs(rect[2] - rect[0]), abs(rect[3] - rect[1])
-        m = min(w, h)
-        if m < MinSize:
-            zoom = MinSize / max(m, 1)
-            matrix = fitz.Matrix(zoom, zoom)
-            self._zooms[page] = zoom
-        else:
-            matrix = fitz.Identity
-            self._zooms[page] = 1
-        p = doc[page].get_pixmap(matrix=matrix)
-        # 通过 QImage fromImage 转换
-        # 必须先使用变量提取出图像 https://github.com/pymupdf/PyMuPDF/issues/1210
-        samples = p.samples
-        # 必须传入 pix.stride ，否则部分格式的图像会导致崩溃
-        qimage = QImage(
-            samples, p.width, p.height, p.stride, QImage.Format.Format_RGB888
-        )
-        qpixmap = QPixmap.fromImage(qimage)
-        imgID = PixmapProvider.addPixmap(qpixmap)
+        if isinstance(result, str):
+            self.previewImg.emit(result)
+            return
+        self._zooms[page] = zoom
+        imgID = PixmapProvider.addPixmap(QPixmap.fromImage(result))
         self.previewImg.emit(imgID)
 
-    # 预览一页OCR内容
     @Slot(str, int, str, "QVariant")
     def ocr(self, path, page, password, argd):
         from .mission_doc import MissionDOC
-
         from ..plugins_controller.services import _to_python_value
+
+        self._ocrRevision += 1
+        revision, renderRevision = self._ocrRevision, self._renderRevision
         argd = _to_python_value(argd)
-        # if "tbpu.ignoreArea" in argd:  # 删除忽略区域参数
-        #     del argd["tbpu.ignoreArea"]
 
         def _onGet(msnInfo, page_, res):
-            # 缩放文本位置
-            if page_ in self._zooms and res["code"] == 100:
-                z = self._zooms[page_]
-                for r in res["data"]:
-                    for bi in range(4):
-                        r["box"][bi][0] = r["box"][bi][0] * z
-                        r["box"][bi][1] = r["box"][bi][1] * z
-            page_ += 1
-            self.previewOcr.emit([path, page_, res])
+            # 冻结结果，避免任务线程在主线程取走之前继续修改同一字典。
+            CallFunc.now(self._deliverOcr, revision, renderRevision, path, page_, deepcopy(res))
 
         def _onEnd(msnInfo, msg):
             if not msg.startswith("[Success]"):
-                res = {"code": 103, "data": msg}
-                self.previewOcr.emit([path, -1, res])
+                CallFunc.now(
+                    self._deliverOcr, revision, renderRevision, path, -1,
+                    {"code": 103, "data": msg},
+                )
 
-        msnInfo = {
-            "argd": argd,
-            "onGet": _onGet,
-            "onEnd": _onEnd,
-        }
+        msnInfo = {"argd": argd, "onGet": _onGet, "onEnd": _onEnd}
         MissionDOC.addMission(msnInfo, path, (page, page), password=password)
 
-    # 清空缓存
+    def _deliverOcr(self, revision, renderRevision, path, page, res):
+        if revision != self._ocrRevision or renderRevision != self._renderRevision:
+            return
+        if res["code"] == 100:
+            zoom = self._zooms.get(page, 1)
+            if zoom != 1:
+                for block in res["data"]:
+                    for point in block["box"]:
+                        point[0] *= zoom
+                        point[1] *= zoom
+        self.previewOcr.emit([path, page + 1 if page >= 0 else -1, res])
+
     @Slot()
     def clear(self):
-        self._previewMission.addMissionList([(None, 0, "")], replace=True)
+        self._renderRevision += 1
+        self._ocrRevision += 1
+        self._documentSession += 1
+        self._zooms.clear()
+        # 若此清理被下一次 preview 的 replace 替换，会话号仍强制重新打开文档。
+        request = (self._renderRevision, self._documentSession, None, 0, "")
+        self._previewMission.addMissionList([request], replace=True)

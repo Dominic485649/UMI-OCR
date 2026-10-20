@@ -17,6 +17,7 @@ class OutputJsonl(Output):
                 pass
         except Exception as e:
             raise Exception(f"Failed to create jsonl file. {e}\n创建jsonl文件失败。")
+        self.recordArtifact(self.outputPath)
 
     def print(self, res):  # 输出图片结果
         # 不忽略空白条目
