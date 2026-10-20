@@ -60,6 +60,9 @@ Invoke-PortablePython "build\tools\qt_startup_smoke.py" @($DataRoot, (Join-Path 
 Invoke-PortablePython "tests\test_qt_runtime.py" @($DataRoot)
 Invoke-PortablePython "tests\test_image_viewer_qml.py" @($DataRoot)
 Invoke-PortablePython "tests\test_config_folding_qml.py" @($DataRoot, "--packaged")
+Invoke-PortablePython "tests\test_config_enum_qml.py" @($DataRoot, "--packaged")
+Invoke-PortablePython "tests\test_hot_ui_scheduler.py"
+Invoke-PortablePython "tests\test_windows_tray_readiness.py"
 Invoke-PortablePython "tests\test_image_decoder.py" @($DataRoot)
 Invoke-PortablePython "tests\test_file_import.py" @($DataRoot, "--packaged")
 Invoke-PortablePython "tests\test_doc_probe.py" @($DataRoot, "--packaged")

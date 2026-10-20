@@ -61,6 +61,34 @@ def shell_icons(pid):
     return results
 
 
+def wait_http_ready(opener, base_url, process, expected_version, timeout=30):
+    """退出之前实际读取服务标识，不把退出接口的应答当作先前已就绪。"""
+    import re
+
+    deadline = time.monotonic() + timeout
+    last_error = "no response"
+    attempts = 0
+    while True:
+        if process.poll() is not None:
+            raise RuntimeError("Candidate exited before HTTP readiness")
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("HTTP readiness timed out: " + last_error)
+        attempts += 1
+        try:
+            with opener.open(base_url + "/umiocr", timeout=min(2, remaining)) as response:
+                identity = response.read(4096).decode("utf-8").strip()
+                if response.status != 200 or not identity.startswith("Umi-OCR") or not re.search(
+                    r"(?<![A-Za-z0-9.])v?" + re.escape(expected_version) + r"(?![A-Za-z0-9.])", identity
+                ):
+                    raise RuntimeError("Unexpected Umi-OCR HTTP identity: " + identity[:160])
+                return {"ready": True, "status": response.status,
+                        "identity": identity, "attempts": attempts}
+        except (urllib.error.URLError, OSError) as exc:
+            last_error = str(exc)
+            time.sleep(min(0.1, max(0, deadline - time.monotonic())))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("staging_root", type=Path)
@@ -73,6 +101,8 @@ def main():
     if output.exists() or not output.parent.is_dir():
         raise RuntimeError("Use a new report path in an existing output directory")
     data = root / "UmiOCR-data"
+    version = json.loads((data / "about.json").read_text(encoding="utf-8"))["version"]
+    expected_version = ".".join(str(version[key]) for key in ("major", "minor", "patch"))
     settings = data / ".settings"
     previous_settings = settings.read_bytes() if settings.exists() else None
     pre_settings = data / ".pre_settings"
@@ -104,6 +134,7 @@ def main():
                 if not icons:
                     time.sleep(0.1)
             opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+            readiness = wait_http_ready(opener, f"http://127.0.0.1:{port}", process, expected_version)
             request = urllib.request.Request(f"http://127.0.0.1:{port}/argv",
                 data=b'["--quit"]', headers={"Content-Type": "application/json"})
             with opener.open(request, timeout=30) as response:
@@ -111,8 +142,10 @@ def main():
             process.wait(timeout=20)
             assert process.returncode == 0, process.returncode
             output.write_text(json.dumps({"status": "PASS", "pid": process.pid,
-                "shell_icons": icons, "quit_reply": reply, "exit_code": process.returncode}, indent=2) + "\n", encoding="utf-8")
-            print("Actual Windows Shell notification-icon registration and clean quit passed.")
+                "shell_icons": icons, "http_ready_before_quit": readiness["ready"],
+                "http_readiness": readiness, "quit_reply": reply,
+                "exit_code": process.returncode}, indent=2) + "\n", encoding="utf-8")
+            print("Actual Windows Shell registration, pre-quit HTTP readiness and clean quit passed.")
     finally:
         if process and process.poll() is None:
             process.terminate()

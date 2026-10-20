@@ -946,7 +946,7 @@ Item {
                 anchors.margins: 1
                 width: parent.width*0.5
                 model: []
-                onCurrentIndexChanged: set() // 数值刷新
+                onActivated: set() // 仅提交用户选择，刷新 model/currentIndex 不写回配置
 
                 popup: Popup {
                     y: comboBox.height + size_.smallSpacing
