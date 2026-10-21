@@ -13,6 +13,7 @@ param(
     [string]$OutputRoot = "",
     [string]$ReuseFromStagingRoot = "",
     [string]$CpuStagingRoot = "",
+    [string]$ReleaseGates = "",
     [switch]$ReuseDependencies,
     [switch]$SkipTests,
     [switch]$Offline,
@@ -22,7 +23,35 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+if ($LocalCandidate -and $ReleaseGates) { throw "-LocalCandidate is mutually exclusive with -ReleaseGates." }
+if (-not $LocalCandidate -and -not $SkipArchive -and [string]::IsNullOrWhiteSpace($ReleaseGates)) {
+    throw "Formal archives require an explicit -ReleaseGates JSON input. Use a new noncandidate staging with -SkipArchive for review preparation."
+}
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+function Resolve-BuildPath([string]$Path) {
+    if ([string]::IsNullOrWhiteSpace($Path)) { throw "Build paths must not be blank." }
+    # 在任何文件探测前拒绝任意混合分隔符的 UNC/device 前缀。
+    if ($Path -match '^[\\/]{2}') { throw "Network/device build paths are not supported." }
+    if ([IO.Path]::IsPathRooted($Path) -and -not [IO.Path]::IsPathFullyQualified($Path)) { throw "Drive-relative build paths are not supported." }
+    if (-not [IO.Path]::IsPathFullyQualified($Path)) { $Path = Join-Path $RepoRoot $Path }
+    $root = [IO.Path]::GetPathRoot($Path)
+    $node = $root
+    foreach ($part in @('') + @($Path.Substring($root.Length) -split '[\\/]')) {
+        if ($part) { $node = Join-Path $node $part }
+        try { $item = Get-Item -Force -LiteralPath $node -ErrorAction Stop }
+        catch [System.Management.Automation.ItemNotFoundException] { continue }
+        if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Build paths must not contain links or junctions: $node" }
+    }
+    return [IO.Path]::GetFullPath($Path)
+}
+if ($ReleaseGates) {
+    $ReleaseGates = Resolve-BuildPath $ReleaseGates
+    $auditRoot = Join-Path $RepoRoot "build/audit"
+    if (-not $ReleaseGates.StartsWith($auditRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
+        [IO.Path]::GetExtension($ReleaseGates) -ne ".json" -or -not (Test-Path -LiteralPath $ReleaseGates -PathType Leaf)) {
+        throw "-ReleaseGates must name an existing JSON file under this repository's build/audit/."
+    }
+}
 $About = Get-Content -Raw (Join-Path $RepoRoot "UmiOCR-data\about.json") | ConvertFrom-Json
 $Version = "$($About.version.major).$($About.version.minor).$($About.version.patch)"
 $VersionLabel = if ($About.version.prerelease) {
@@ -35,11 +64,11 @@ $UseDefaultStaging = [string]::IsNullOrWhiteSpace($StagingRoot)
 if ($UseDefaultStaging) { $StagingRoot = Join-Path $RepoRoot "build\staging\$Version-base-$([guid]::NewGuid().ToString('N'))" }
 if (-not $CacheRoot) { $CacheRoot = Join-Path $RepoRoot "build\cache" }
 if (-not $OutputRoot) { $OutputRoot = Join-Path $RepoRoot "release" }
-$StagingRoot = [IO.Path]::GetFullPath($StagingRoot)
-$CacheRoot = [IO.Path]::GetFullPath($CacheRoot)
-$OutputRoot = [IO.Path]::GetFullPath($OutputRoot)
-$ReuseFromStagingRoot = if ($ReuseFromStagingRoot) { [IO.Path]::GetFullPath($ReuseFromStagingRoot) } else { "" }
-$CpuStagingRoot = if ($CpuStagingRoot) { [IO.Path]::GetFullPath($CpuStagingRoot) } else { "" }
+$StagingRoot = Resolve-BuildPath $StagingRoot
+$CacheRoot = Resolve-BuildPath $CacheRoot
+$OutputRoot = Resolve-BuildPath $OutputRoot
+$ReuseFromStagingRoot = if ($ReuseFromStagingRoot) { Resolve-BuildPath $ReuseFromStagingRoot } else { "" }
+$CpuStagingRoot = if ($CpuStagingRoot) { Resolve-BuildPath $CpuStagingRoot } else { "" }
 if ($CpuStagingRoot -and -not (Test-Path -LiteralPath $CpuStagingRoot -PathType Container)) {
     throw "CPU evidence staging does not exist: $CpuStagingRoot"
 }
@@ -217,6 +246,9 @@ function Copy-ReleaseSource([string]$Destination) {
         "build\tools\split_lock.py",
         "build\tools\generate_third_party_components.py",
         "build\tools\verify_release_evidence.py",
+        "build\tools\release_gate_inputs.py",
+        "build\tools\finalize_release.py",
+        "build\windows\Finalize-Release.ps1",
         "build\windows\Audit-Package.ps1",
         "build\windows\Build-Release.ps1",
         "build\windows\Build-GpuPlugin.ps1",
@@ -460,23 +492,32 @@ else {
 Remove-BuildTree (Join-Path $StagingRoot ".build")
 if ($LocalCandidate) {
     & (Join-Path $RepoRoot "build\windows\Audit-Package.ps1") -PackageRoot $StagingRoot -Kind base -CpuStagingRoot $CpuStagingRoot -LocalCandidate
+    if ($LASTEXITCODE -ne 0) { throw "Package audit failed." }
+    if (-not $SkipArchive) {
+        $archive = Join-Path $OutputRoot "Umi-OCR_v${VersionLabel}-local-candidate_Windows_x64.tar.xz"
+        & $python -I -S (Join-Path $RepoRoot "build/tools/package_tar_xz.py") create --root $StagingRoot --output $archive --integrity-output "$archive.integrity.json"
+        if ($LASTEXITCODE -ne 0) { throw "tar.xz candidate packaging or integrity verification failed." }
+        Write-Host "Local-candidate archive (not a public release): $archive"
+    }
+}
+elseif ($SkipArchive) {
+    # A fresh noncandidate tree can be reviewed before public main/tag exists.
+    # This audit records real BLOCKs; it does not grant public-release status.
+    $auditArgs = @{ PackageRoot = $StagingRoot; Kind = "base"; CpuStagingRoot = $CpuStagingRoot }
+    if ($ReleaseGates) { $auditArgs.ReleaseGates = $ReleaseGates }
+    & (Join-Path $RepoRoot "build/windows/Audit-Package.ps1") @auditArgs
+    if ($LASTEXITCODE -ne 0) { throw "Prepared base package audit failed." }
+    Write-Host "Noncandidate base prepared without a formal archive; source/current gates may remain BLOCK."
+    Write-Host "Freeze the same product after real evidence/payload is fixed; do not rerun the Builder over it."
 }
 else {
-    & (Join-Path $RepoRoot "build\windows\Audit-Package.ps1") -PackageRoot $StagingRoot -Kind base -CpuStagingRoot $CpuStagingRoot
-}
-if ($LASTEXITCODE -ne 0) { throw "Package audit failed." }
-
-if (-not $SkipArchive) {
-    if (-not $LocalCandidate) {
-        & $python (Join-Path $RepoRoot "build\tools\verify_release_evidence.py") `
-            --repo-root $RepoRoot --staging-root $StagingRoot --kind base --cache-root $CacheRoot @cpuEvidenceArgs --require-public-release
-        if ($LASTEXITCODE -ne 0) { throw "Public prerelease gate is blocked; no base archive was created." }
-    }
-    $candidateSuffix = if ($LocalCandidate) { "-local-candidate" } else { "" }
-    $archive = Join-Path $OutputRoot "Umi-OCR_v${VersionLabel}${candidateSuffix}_Windows_x64.tar.xz"
-    & $python -I -S (Join-Path $RepoRoot "build/tools/package_tar_xz.py") create --root $StagingRoot --output $archive --integrity-output "$archive.integrity.json"
-    if ($LASTEXITCODE -ne 0) { throw "tar.xz packaging or integrity verification failed." }
-    Write-Host "Base archive extracts directly into the chosen application root: $archive"
+    # The shared restricted entry forwards ReleaseGates to Audit-Package
+    # -RequirePublicRelease and verify_release_evidence --release-gates
+    # --require-public-release, and preserves this exact source/payload tree.
+    $frozen = Join-Path $BuildRoot "audit/frozen-base-$([guid]::NewGuid().ToString('N')).json"
+    $finalizer = Join-Path $RepoRoot "build/windows/Finalize-Release.ps1"
+    & $finalizer -PackageRoot $StagingRoot -Kind base -PythonExe $python -FrozenManifest $frozen -Freeze
+    & $finalizer -PackageRoot $StagingRoot -Kind base -PythonExe $python -FrozenManifest $frozen -ReleaseGates $ReleaseGates -OutputRoot $OutputRoot
 }
 
 Write-Host "Release staging ready: $StagingRoot"

@@ -4,7 +4,7 @@
     构建 Umi-OCR GPU OCR 插件归档（PP-OCRv6 + CUDA 12.6）。
 
 .DESCRIPTION
-    产物是一个自包含的 7z ，直接解压到 Umi-OCR 本体根目录即可使用：
+    产物是一个自包含的 tar.xz，完整解包到 Umi-OCR 本体根目录即可使用：
 
         Umi-OCR/
         └── UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/
@@ -26,6 +26,8 @@ param(
     [string]$BaseStagingRoot = "",
     [string]$ReuseVendorFromStagingRoot = "",
     [string]$CpuStagingRoot = "",
+    [string]$ReleaseGates = "",
+    [string]$OverlayRoot = "",
     [switch]$ReuseDependencies,
     [switch]$SkipModels,
     [switch]$ReuseModels,
@@ -35,7 +37,35 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+if ($LocalCandidate -and $ReleaseGates) { throw "-LocalCandidate is mutually exclusive with -ReleaseGates." }
+if (-not $LocalCandidate -and -not $SkipArchive -and [string]::IsNullOrWhiteSpace($ReleaseGates)) {
+    throw "Formal archives require an explicit -ReleaseGates JSON input. Use a new noncandidate staging with -SkipArchive for review preparation."
+}
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+function Resolve-BuildPath([string]$Path) {
+    if ([string]::IsNullOrWhiteSpace($Path)) { throw "Build paths must not be blank." }
+    # 在任何文件探测前拒绝任意混合分隔符的 UNC/device 前缀。
+    if ($Path -match '^[\\/]{2}') { throw "Network/device build paths are not supported." }
+    if ([IO.Path]::IsPathRooted($Path) -and -not [IO.Path]::IsPathFullyQualified($Path)) { throw "Drive-relative build paths are not supported." }
+    if (-not [IO.Path]::IsPathFullyQualified($Path)) { $Path = Join-Path $RepoRoot $Path }
+    $root = [IO.Path]::GetPathRoot($Path)
+    $node = $root
+    foreach ($part in @('') + @($Path.Substring($root.Length) -split '[\\/]')) {
+        if ($part) { $node = Join-Path $node $part }
+        try { $item = Get-Item -Force -LiteralPath $node -ErrorAction Stop }
+        catch [System.Management.Automation.ItemNotFoundException] { continue }
+        if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Build paths must not contain links or junctions: $node" }
+    }
+    return [IO.Path]::GetFullPath($Path)
+}
+if ($ReleaseGates) {
+    $ReleaseGates = Resolve-BuildPath $ReleaseGates
+    $auditRoot = Join-Path $RepoRoot "build/audit"
+    if (-not $ReleaseGates.StartsWith($auditRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
+        [IO.Path]::GetExtension($ReleaseGates) -ne ".json" -or -not (Test-Path -LiteralPath $ReleaseGates -PathType Leaf)) {
+        throw "-ReleaseGates must name an existing JSON file under this repository's build/audit/."
+    }
+}
 $PluginId = "win32_PaddleOCRv6_CUDA"
 $PluginSource = Join-Path $RepoRoot "UmiOCR-data\plugins\$PluginId"
 $Manifest = Get-Content -Raw (Join-Path $PluginSource "umi-plugin.json") | ConvertFrom-Json
@@ -47,13 +77,31 @@ $Lock = Get-Content -Raw (Join-Path $RepoRoot "build\sources-windows-cu126.lock.
 if (-not $StagingRoot) { $StagingRoot = Join-Path $RepoRoot "build\staging\$Version-gpu-$([guid]::NewGuid().ToString('N'))" }
 if (-not $CacheRoot) { $CacheRoot = Join-Path $RepoRoot "build\cache" }
 if (-not $OutputRoot) { $OutputRoot = Join-Path $RepoRoot "release" }
-$StagingRoot = [IO.Path]::GetFullPath($StagingRoot)
-$CacheRoot = [IO.Path]::GetFullPath($CacheRoot)
-$OutputRoot = [IO.Path]::GetFullPath($OutputRoot)
-$BaseStagingRoot = if ($BaseStagingRoot) { [IO.Path]::GetFullPath($BaseStagingRoot) } else { Join-Path $RepoRoot "build\staging\Umi-OCR_Windows_x64" }
-$ReuseVendorFromStagingRoot = if ($ReuseVendorFromStagingRoot) { [IO.Path]::GetFullPath($ReuseVendorFromStagingRoot) } else { "" }
-$CpuStagingRoot = if ($CpuStagingRoot) { [IO.Path]::GetFullPath($CpuStagingRoot) } else { "" }
+$StagingRoot = Resolve-BuildPath $StagingRoot
+$CacheRoot = Resolve-BuildPath $CacheRoot
+$OutputRoot = Resolve-BuildPath $OutputRoot
+if (-not $BaseStagingRoot) { $BaseStagingRoot = Join-Path $RepoRoot "build\staging\Umi-OCR_Windows_x64" }
+$BaseStagingRoot = Resolve-BuildPath $BaseStagingRoot
+$ReuseVendorFromStagingRoot = if ($ReuseVendorFromStagingRoot) { Resolve-BuildPath $ReuseVendorFromStagingRoot } else { "" }
+$CpuStagingRoot = if ($CpuStagingRoot) { Resolve-BuildPath $CpuStagingRoot } else { "" }
 $BuildRoot = [IO.Path]::GetFullPath((Join-Path $RepoRoot "build"))
+# Preparation normally keeps only the independent staging. Do not duplicate a
+# multi-GB vendor before real GPU evidence/source materials are fixed. An
+# explicit OverlayRoot opts into the additional immutable review product.
+$PrepareOverlay = (-not $SkipArchive) -or -not [string]::IsNullOrWhiteSpace($OverlayRoot)
+if ($LocalCandidate -and $SkipArchive -and $PrepareOverlay) { throw "An explicit -OverlayRoot with -SkipArchive requires noncandidate preparation." }
+if (-not $OverlayRoot) { $OverlayRoot = Join-Path $BuildRoot "artifacts/cuda-overlay-$([guid]::NewGuid().ToString('N'))" }
+$OverlayRoot = Resolve-BuildPath $OverlayRoot
+$artifactRoot = Join-Path $BuildRoot "artifacts"
+if (-not $OverlayRoot.StartsWith($artifactRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw "CUDA overlay must stay under build/artifacts/." }
+if (Test-Path -LiteralPath $OverlayRoot) { throw "Use a new CUDA overlay directory: $OverlayRoot" }
+foreach ($inputRoot in @($StagingRoot, $BaseStagingRoot, $ReuseVendorFromStagingRoot) | Where-Object { $_ }) {
+    if ($OverlayRoot -eq $inputRoot -or
+        $OverlayRoot.StartsWith($inputRoot.TrimEnd('\','/') + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
+        $inputRoot.StartsWith($OverlayRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "CUDA overlay must be disjoint from its staging/runtime/seed inputs."
+    }
+}
 
 if (-not $StagingRoot.StartsWith($BuildRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw "Staging must stay under build/: $StagingRoot" }
 if (Test-Path -LiteralPath $StagingRoot) { throw "Use a new staging directory; existing candidates are never removed: $StagingRoot" }
@@ -259,8 +307,8 @@ function Remove-NonRuntimeFiles([string]$VendorPath) {
 
 # ===================== 1. 安装私有依赖闭包 =====================
 
-$basePython = Join-Path $BaseStagingRoot "UmiOCR-data\runtime\python.exe"
-if (-not (Test-Path -LiteralPath $basePython)) {
+$basePython = Resolve-BuildPath (Join-Path $BaseStagingRoot "UmiOCR-data\runtime\python.exe")
+if (-not (Test-Path -LiteralPath $basePython -PathType Leaf)) {
     throw "需要先构建基础包以提供可移植 Python：$basePython 不存在。请先运行 Build-Release.ps1 或指定 -BaseStagingRoot。"
 }
 
@@ -468,33 +516,51 @@ else {
 
 $previousPath = $env:PATH
 try {
-    # Audit-Package resolves python.exe for plugin-only roots; use the explicit portable base runtime.
+    # The independent staging is structurally audited, but its binding is NOT
+    # the binding of the install overlay that will actually be delivered.
     $env:PATH = "$(Split-Path -Parent $basePython);$previousPath"
     if ($LocalCandidate) {
         & (Join-Path $RepoRoot "build\windows\Audit-Package.ps1") -PackageRoot $StagingRoot -Kind plugin -CpuStagingRoot $CpuStagingRoot -LocalCandidate
     }
     else {
-        & (Join-Path $RepoRoot "build\windows\Audit-Package.ps1") -PackageRoot $StagingRoot -Kind plugin -CpuStagingRoot $CpuStagingRoot
+        $stagingAuditArgs = @{ PackageRoot = $StagingRoot; Kind = "plugin"; CpuStagingRoot = $CpuStagingRoot }
+        if ($ReleaseGates -and -not $PrepareOverlay) { $stagingAuditArgs.ReleaseGates = $ReleaseGates }
+        & (Join-Path $RepoRoot "build/windows/Audit-Package.ps1") @stagingAuditArgs
     }
-    if ($LASTEXITCODE -ne 0) { throw "插件归档审计失败。" }
+    if ($LASTEXITCODE -ne 0) { throw "插件 staging 审计失败。" }
+
+    if ($PrepareOverlay) {
+        & $basePython -B -I -S (Join-Path $RepoRoot "build/tools/prepare_cuda_overlay.py") --staging-root $StagingRoot --output-dir $OverlayRoot
+        if ($LASTEXITCODE -ne 0) { throw "CUDA install overlay preparation failed." }
+        if (-not $LocalCandidate) {
+            if ($SkipArchive) {
+                $auditArgs = @{ PackageRoot = $OverlayRoot; Kind = "plugin"; CpuStagingRoot = $CpuStagingRoot }
+                if ($ReleaseGates) { $auditArgs.ReleaseGates = $ReleaseGates }
+                & (Join-Path $RepoRoot "build/windows/Audit-Package.ps1") @auditArgs
+                if ($LASTEXITCODE -ne 0) { throw "Prepared CUDA overlay audit failed." }
+                Write-Host "Noncandidate CUDA overlay prepared without a formal archive; source/current gates may remain BLOCK: $OverlayRoot"
+                Write-Host "Freeze this actual overlay only after its real evidence/payload is fixed; do not rerun the Builder over it."
+            }
+            else {
+                # Only the shared restricted entry can make a formal archive.
+                # It forwards ReleaseGates to Audit-Package -RequirePublicRelease
+                # and verify_release_evidence --release-gates --require-public-release
+                # for this SAME overlay; it never refreshes source or runtime.
+                $frozen = Join-Path $BuildRoot "audit/frozen-gpu-$([guid]::NewGuid().ToString('N')).json"
+                $finalizer = Join-Path $RepoRoot "build/windows/Finalize-Release.ps1"
+                & $finalizer -PackageRoot $OverlayRoot -Kind gpu -PythonExe $basePython -FrozenManifest $frozen -Freeze
+                & $finalizer -PackageRoot $OverlayRoot -Kind gpu -PythonExe $basePython -FrozenManifest $frozen -ReleaseGates $ReleaseGates -OutputRoot $OutputRoot
+            }
+        }
+        else {
+            $archive = Join-Path $OutputRoot "Umi-OCR-Plugin_GPU-OCR_v${Version}-local-candidate_Windows_x64_CUDA12.6.tar.xz"
+            & $basePython -I -S (Join-Path $RepoRoot "build/tools/package_tar_xz.py") create --root $OverlayRoot --output $archive --integrity-output "$archive.integrity.json"
+            if ($LASTEXITCODE -ne 0) { throw "tar.xz candidate packaging or integrity verification failed." }
+            Write-Host "Local-candidate archive (not a public release): $archive"
+        }
+        Write-Host "CUDA install overlay: $OverlayRoot"
+    }
 }
 finally { $env:PATH = $previousPath }
-
-if (-not $SkipArchive) {
-    if (-not $LocalCandidate) {
-        & $basePython (Join-Path $RepoRoot "build\tools\verify_release_evidence.py") `
-            --repo-root $RepoRoot --staging-root $StagingRoot --kind gpu --cache-root $CacheRoot @cpuEvidenceArgs --require-public-release
-        if ($LASTEXITCODE -ne 0) { throw "Public prerelease gate is blocked; no GPU archive was created." }
-    }
-    $candidateSuffix = if ($LocalCandidate) { "-local-candidate" } else { "" }
-    $archive = Join-Path $OutputRoot "Umi-OCR-Plugin_GPU-OCR_v${Version}${candidateSuffix}_Windows_x64_CUDA12.6.tar.xz"
-    $overlayRoot = Join-Path $BuildRoot "artifacts/cuda-overlay-$([guid]::NewGuid().ToString('N'))"
-    & $basePython -B -I -S (Join-Path $RepoRoot "build/tools/prepare_cuda_overlay.py") --staging-root $StagingRoot --output-dir $overlayRoot
-    if ($LASTEXITCODE -ne 0) { throw "CUDA install overlay preparation failed." }
-    & $basePython -I -S (Join-Path $RepoRoot "build/tools/package_tar_xz.py") create --root $overlayRoot --output $archive --integrity-output "$archive.integrity.json"
-    if ($LASTEXITCODE -ne 0) { throw "tar.xz packaging or integrity verification failed." }
-    Write-Host "Plugin archive overlays UmiOCR-data/plugins at the application root."
-    Write-Host "插件归档: $archive"
-}
 
 Write-Host "GPU OCR 插件构建完成: $StagingRoot"

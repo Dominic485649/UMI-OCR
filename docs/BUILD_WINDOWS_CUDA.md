@@ -1,6 +1,8 @@
 # Windows CUDA 构建文档
 
-本文档适用于 Umi-OCR 3.0.2 本地候选的独立 Windows x64 基础包和 CUDA 12.6 插件。版本从 `UmiOCR-data/about.json` 读取。产品展示名、窗口标题、`Umi-OCR.exe` 和便携设置目录 `.settings` 保持为 `Umi-OCR`。本轮不创建公开标签或 GitHub Release，见 [3.0.2 本地说明](RELEASE_3.0.2_LOCAL.md)。
+本文档说明 Umi-OCR 独立 Windows x64 基础包和 CUDA 12.6 插件的构建契约，产品版本从 `UmiOCR-data/about.json` 读取。展示名、窗口标题、`Umi-OCR.exe` 和便携设置目录 `.settings` 保持为 `Umi-OCR`；Host API 兼容范围不随产品版本变化。
+
+**日期冻结状态（2026-10-22，本轮 fresh 重建开始前）**：3.0.3 的历史 R2 已完成基础/组合、热 GUI、托盘/HTTP/退出、GPU、归档重装和源码/模型核验；两个公开 `v3.0.3` 源码标签已存在，但 binary Release 尚未创建、上传或公开。本轮计划修正正式门禁接线并 fresh noncandidate `-SkipArchive` prepare，此截点尚未构建，不继承 R2 PASS、哈希或审查同意。实际程序及两份文案须再次交审，同意后才更新 main/tag；正式 source gate 等标签匹配后运行，再受限 finalize。详见 [3.0.3 验收契约](RELEASE_3.0.3_ACCEPTANCE.md)、[审查要求](RELEASE_3.0.3_REVIEW.md)和[源码交付契约](../SOURCE-CODE.md)。
 
 ## 构建环境
 
@@ -31,9 +33,11 @@
 pwsh -File .\build\windows\Resolve-Lock.ps1
 ```
 
-## 当前源码离线构建
+## 离线构建示例与本轮正式准备
 
-从仓库根目录执行；以下命令编译本地原生组件、复制和静态审计，不启动产品或 GPU，不下载包或模型。所有输出路径必须全新，seed 只读。构建入口不扫描、删除或重建旧 staging。
+从仓库根目录执行；构建编译本地原生组件、复制和静态审计，不启动产品或 GPU，不下载包或模型。所有输出路径必须全新，seed 只读。构建入口不扫描、删除或重建旧 staging。
+
+下面保留带 `-LocalCandidate` 的开发候选示例，路径名沿用 3.0.2 阶段示例，**不是本轮 3.0.3 正式 prepare/finalize 命令**，也不证明这些旧 seed 仍可用。本轮按已批准方案在新目录走 non-`LocalCandidate`、`-SkipArchive` prepare，实际路径、只读 seed、base 与 CUDA overlay 输出须以本轮具名构建记录为准。独立 GPU staging 不自动等同正式 overlay；应在真实 GPU 回执及材料固定后一次性生成实际 overlay，再冻结该 overlay。完成真实本地验收并冻结实际 source/payload 后先交审；获同意及公开标签匹配后才 fresh gate 和受限 finalize。不能直接省略 `-SkipArchive` 绕过此顺序，下面的开发组装/拆分同样不能替代正式 finalize。
 
 ```powershell
 $repo = (Get-Location).Path
@@ -76,7 +80,9 @@ Base 解压到选择的应用根目录，根下直接出现 `Umi-OCR.exe` 和 `U
 
 ## 验证
 
-以上命令跳过运行时验收；`LocalCandidate` 的 public-release 和当前源码 E2E 门禁保持 BLOCK/NOT_RUN。旧候选的 hash/PASS 不是当前成品证据。只有明确批准后才在当前组装目录执行 `Test-Release.ps1 -StagingRoot $complete -Kind combined -Device gpu:0`，并另行完成人工截图/HDR 验收。
+prepare 与 `-SkipArchive` 不代表 public-release 或当前源码 E2E 已通过，旧 R2 的 hash/PASS 也不是本轮证据。按已批准的本轮范围对实际组装目录执行 `Test-Release.ps1 -StagingRoot $complete -Kind combined -Device gpu:0`，另行记录热 GUI、真实 Windows 托盘/退出前 HTTP 就绪、正常退出、GPU 原始回执、源码/模型及人工限制。GPU 正式门禁须绑定实际 CUDA overlay，不以独立 GPU staging 代替。
+
+先固定本轮实际 base/GPU overlay 的 source/payload 并交审；明确同意后才更新 main/tag。标签匹配后运行 fresh 正式 source/运行门禁，再受限 finalize、生成正式归档、全新重装复验与发布。不能在公开标签匹配前预填正式 PASS；`LocalCandidate` 仅是开发候选路径，不能替代本轮正式流程。
 
 该入口覆盖首屏懒加载与后台预热复用、Qt/QML D3D11 和图像多边形/鼠标锚点缩放、图片解码、UVDoc、截图/批量/PDF、二维码、HTTP/CLI、便携设置、HDR shader、DPI 坐标和自动截图捕获。CUDA 缺失测试会隔离 Paddle GPU wheel或请求不存在的 `gpu:N`，并验证 OCR 明确失败且未出现 CPU fallback。不要在正式 staging 中安装 CPU Paddle wheel来模拟失败。
 
@@ -90,7 +96,9 @@ Base 解压到选择的应用根目录，根下直接出现 `Umi-OCR.exe` 和 `U
 
 ## 许可证与对应源码
 
-本 fork 的新增和修改部分以及含 PyMuPDF 的组合发行物按 AGPL-3.0-or-later 发布；原 MIT `LICENSE`、hiroi-sora 版权和署名保留。源码镜像使用同一公开源码选择器，包含未 tracked 的当前 required files，保留 GPL/AGPL/MPL 对应源码材料。`LocalCandidate` 用本次镜像生成并验证 `source-snapshot.zip`、成员哈希和版本 provenance 后移除新候选自己的展开镜像，不删除旧候选。公开来源未确认前维持 BLOCK，见 [组合发行说明](../LICENSES/COMBINED_DISTRIBUTION.md)。
+本 fork 的新增和修改部分以及含 PyMuPDF 的组合发行物按 AGPL-3.0-or-later 发布；原 MIT `LICENSE`、hiroi-sora 版权和署名保留。源码镜像使用同一公开源码选择器，包含未 tracked 的当前 required files，保留 GPL/AGPL/MPL 对应源码材料。实际 `source/`、`source-snapshot.zip`、成员哈希和 provenance 须与被冻结产品及公开 commit/tag 一致；`LocalCandidate` 的开发记录不替代正式来源门禁。
+
+最终派生 `source-delivery.json`、`current-source-e2e.json` 和 `RELEASE_EVIDENCE.*` 保存在产物 `LICENSES/`，CUDA overlay 使用 `LICENSES/plugins/win32_PaddleOCRv6_CUDA/`。源码冻结后不得将这些新 PASS 回拷进 canonical source、修改镜像或重算快照冒充冻结源码内容；实际是否满足以当轮 fresh gate 为准，不宣称脚本接线已自动通过。见 [组合发行说明](../LICENSES/COMBINED_DISTRIBUTION.md)。
 
 ## 发布约束
 

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verification_date": "2026-10-21",
+  "verification_date": "2026-10-22",
   "artifact_kind": "base",
   "gates": {
     "runtime_vendor": "PASS",
@@ -18,7 +18,8 @@
   },
   "public_prerelease_allowed": false,
   "validation_errors": [],
-  "current_source_e2e": {
+  "local_candidate": true,
+  "source_delivery": {
     "status": "BLOCK",
     "verified": false,
     "previous_recorded_status": "BLOCK",
@@ -26,15 +27,12 @@
       "A fresh --release-gates input and successful verification are required."
     ]
   },
-  "local_candidate": true,
-  "source_delivery": {
+  "current_source_e2e": {
     "status": "BLOCK",
-    "public_source_url": "PENDING",
-    "source_tree": "source-snapshot.zip; exact file hashes and local parent revisions included",
-    "reason": "No user-owned public 3.0.3 source repository is available yet."
-  },
-  "current_source_validation": {
-    "status": "NOT_RUN",
-    "reason": "Static build/audit is not current-artifact E2E. Historical evidence is not current acceptance."
+    "verified": false,
+    "previous_recorded_status": "BLOCK",
+    "blockers": [
+      "A fresh --release-gates input and successful verification are required."
+    ]
   }
 }

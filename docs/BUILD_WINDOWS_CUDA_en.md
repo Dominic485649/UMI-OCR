@@ -1,6 +1,8 @@
 # Windows CUDA Build Guide
 
-This guide builds independent Umi-OCR 3.0.2 local-candidate Windows x64 base and CUDA 12.6 plugin products. Versions come from `UmiOCR-data/about.json`. The product name, window title, `Umi-OCR.exe`, portable `.settings` location, and branding remain `Umi-OCR`. This update creates no public tag or GitHub Release; see the [local delivery notes](RELEASE_3.0.2_LOCAL.md).
+This guide describes the build contract for independent Umi-OCR Windows x64 base and CUDA 12.6 plugin products. Versions come from `UmiOCR-data/about.json`. The product name, window title, `Umi-OCR.exe`, portable `.settings` location and branding remain `Umi-OCR`; the product version does not change Host API compatibility.
+
+**Dated snapshot (2026-10-22, before this round's fresh rebuild):** Historical 3.0.3 R2 completed base/combined, hot GUI, tray/HTTP/exit, GPU, archive reinstallation and source/model checks. Both public `v3.0.3` source tags exist, but neither binary Release has been created, uploaded or published. This round is to repair formal gate wiring and prepare fresh noncandidate products with `-SkipArchive`; that build has not run at this cutoff, and R2 PASS, hashes and approval do not carry over. The user must review this round's actual program and both texts before main/tag updates; the formal source gate waits for matching tags, then restricted finalization follows. See the [3.0.3 acceptance contract](RELEASE_3.0.3_ACCEPTANCE.md), [review requirements](RELEASE_3.0.3_REVIEW.md) and [source-delivery contract](../SOURCE-CODE.md).
 
 ## Prerequisites
 
@@ -30,9 +32,11 @@ Only regenerate the wheel lock when changing dependencies:
 pwsh -File .\build\windows\Resolve-Lock.ps1
 ```
 
-## Offline Current-Source Build
+## Offline Examples and This Round's Formal Preparation
 
-Run from the repository root. These commands compile local native components, copy inputs and perform static audits; they do not start the product or GPU or download dependencies/models. Every output must be new. Seeds are read-only; no old staging directory is scanned, deleted or recreated.
+Run from the repository root. Building compiles local native components, copies inputs and performs static audits; it does not start the product or GPU or download dependencies/models. Every output must be new. Seeds are read-only; no old staging directory is scanned, deleted or recreated.
+
+The following `-LocalCandidate` commands are retained development examples with path names from the 3.0.2 preparation phase, **not this round's formal 3.0.3 prepare/finalize commands** or proof that the old seeds remain available. This round's approved workflow uses fresh non-`LocalCandidate`, `-SkipArchive` preparation; actual paths, read-only seeds and base/CUDA overlay outputs must be identified in its new build records. Independent GPU staging is not automatically a formal overlay: obtain the real GPU receipts and freeze the materials first, then generate the actual overlay once and freeze that overlay. Complete real local acceptance, freeze the actual source/payload and obtain review approval before public-tag matching, fresh gates and restricted finalization. Simply omitting `-SkipArchive`, or using the development assembly/splitting examples below, must not bypass that sequence.
 
 ```powershell
 $repo = (Get-Location).Path
@@ -75,7 +79,9 @@ Extract Base into the chosen application root to create `Umi-OCR.exe` and `UmiOC
 
 ## Verification
 
-These commands skip runtime acceptance. `LocalCandidate` keeps public-release and current-source E2E gates at BLOCK/NOT_RUN. Historical hashes/PASS evidence are not current-artifact acceptance. Only after explicit approval run `Test-Release.ps1 -StagingRoot $complete -Kind combined -Device gpu:0`, then complete manual screenshot/HDR acceptance.
+Preparation and `-SkipArchive` do not mean public-release or current-source E2E has passed; old R2 hashes/PASS are not this round's evidence. Within the approved scope, run `Test-Release.ps1 -StagingRoot $complete -Kind combined -Device gpu:0` against the actual combined tree, and separately record hot GUI, real Windows tray/pre-quit HTTP readiness, normal exit, raw GPU receipts, source/model checks and manual limitations. GPU formal gates bind the actual CUDA overlay, not the independent GPU staging tree.
+
+Freeze the actual base/GPU overlay source and payload, then present the program and both texts for review. Only after explicit approval update main/tags. After tags match, run fresh formal source/runtime gates, then restricted finalization, formal archives, clean reinstallation and publication verification. Do not prefill formal PASS before the tags match. `LocalCandidate` is a development path, not a substitute for this round's formal workflow.
 
 This entry point covers startup lazy imports and warmup reuse, Qt/QML D3D11 and polygon/cursor-anchored image behavior, decoders, UVDoc, screenshot/batch/PDF OCR, QR codes, HTTP/CLI, portable settings, the HDR shader, DPI geometry, and automated screen capture. The CUDA-unavailable checks isolate the GPU wheel or request a missing `gpu:N` device and require an explicit OCR failure with no CPU fallback. Do not install a CPU Paddle wheel into staging for this test.
 
@@ -89,7 +95,9 @@ The release script combines `qmlimportscanner` output with `build/qt-runtime-whi
 
 ## License And Corresponding Source
 
-This fork's changes and the combined distribution containing PyMuPDF are AGPL-3.0-or-later; the original MIT `LICENSE` and hiroi-sora attribution remain. The mirror uses the same public selector, including untracked current required files and GPL/AGPL/MPL corresponding-source materials. `LocalCandidate` freezes and verifies that mirror as `source-snapshot.zip`, member hashes and version provenance, then removes only its own newly generated expanded mirror. Public source publication remains BLOCK until separately confirmed. See the [combined-distribution note](../LICENSES/COMBINED_DISTRIBUTION.md).
+This fork's changes and the combined distribution containing PyMuPDF are AGPL-3.0-or-later; the original MIT `LICENSE` and hiroi-sora attribution remain. The mirror uses the same public selector, including untracked current required files and GPL/AGPL/MPL corresponding-source materials. The actual `source/`, `source-snapshot.zip`, member hashes and provenance must match the frozen product and public commit/tag; `LocalCandidate` development records do not replace the formal source gate.
+
+Final derived `source-delivery.json`, `current-source-e2e.json` and `RELEASE_EVIDENCE.*` belong in artifact `LICENSES/`, with CUDA overlay metadata under `LICENSES/plugins/win32_PaddleOCRv6_CUDA/`. Never copy later PASS reports back into canonical source, change the frozen mirror or regenerate its snapshot to claim that the results were frozen source content. Only this round's fresh gates establish compliance; no automatic success of the script wiring is asserted. See the [combined-distribution note](../LICENSES/COMBINED_DISTRIBUTION.md).
 
 ## Release Rules
 

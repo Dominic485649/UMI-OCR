@@ -17,7 +17,7 @@ TOOLS = {
     "verify_release_evidence.py", "strip_optional_models_3_7.py",
     "derive_uvdoc_grid_model.py", "split_lock.py", "source_snapshot.py",
     "package_tar_xz.py", "export_cuda_source.py", "record_gpu_e2e.py", "verify_public_payload.py", "freeze_gpu_runtime.py", "prepare_cuda_overlay.py",
-    "staging_smoke.py", "measure_closure.py", "release_gate_inputs.py",
+    "staging_smoke.py", "measure_closure.py", "release_gate_inputs.py", "finalize_release.py",
 }
 DOCS = {
     "BUILD_WINDOWS_CUDA.md", "BUILD_WINDOWS_CUDA_en.md", "PLUGIN_API.md", "README_CUDA_PLUGIN.md",
@@ -38,17 +38,21 @@ def selected_sources(repo: Path) -> list[Path]:
                      "UmiOCR-data/py_src/plugins_controller/host_api.py",
                      "build/requirements-gpu-plugin-windows-cu126.lock",
                      "build/sources-windows-cu126.lock.json",
-                     "build/windows/Build-GpuPlugin.ps1", "build/windows/Audit-Package.ps1"} or
-            name.startswith("build/tools/") and relative.name in TOOLS or
+                     "build/windows/Build-GpuPlugin.ps1", "build/windows/Audit-Package.ps1",
+                     "build/windows/Finalize-Release.ps1"} or
+            relative.parent == Path("build/tools") and relative.name in TOOLS or
             name.startswith("docs/") and relative.name in DOCS or
-            name.startswith("tests/") and relative.name in {
+            relative.parent == Path("tests") and relative.name in {
                 "test_cuda_worker_client.py", "test_ocr_workflows.py", "test_public_payload.py",
                 "test_release_evidence_status.py", "test_release_gate_inputs.py",
-                "test_optional_model_strip.py", "test_cuda_overlay.py",
+                "test_optional_model_strip.py", "test_cuda_overlay.py", "test_finalize_release.py",
+                "test_finalize_path_guards.py",
             }):
             selected.append(relative)
     required = {"COPYING", "LICENSE", PLUGIN + "umi-plugin.json", PLUGIN + "api.py", PLUGIN + "worker.py",
-                "build/windows/Build-GpuPlugin.ps1", "build/tools/package_tar_xz.py", "build/tools/source_snapshot.py"}
+                "build/windows/Build-GpuPlugin.ps1", "build/tools/package_tar_xz.py", "build/tools/source_snapshot.py",
+                "build/windows/Finalize-Release.ps1", "build/tools/finalize_release.py", "tests/test_finalize_release.py",
+                "tests/test_finalize_path_guards.py"}
     missing = required - {path.as_posix() for path in selected}
     if missing:
         raise RuntimeError(f"CUDA source export lacks required public files: {sorted(missing)}")
