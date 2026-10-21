@@ -21,6 +21,8 @@ import export_cuda_source as cuda
 import package_tar_xz as packaging
 import prepare_products as products
 import source_snapshot as snapshot
+sys.path.insert(0, str(REPO / "tests"))
+import test_cuda_overlay as cuda_fixtures
 
 
 class LocalBuildToolsTests(unittest.TestCase):
@@ -138,10 +140,9 @@ class LocalBuildToolsTests(unittest.TestCase):
             about.parent.mkdir()
             about.write_text(json.dumps({"version": {"major": 3, "minor": 0, "patch": 0}}), encoding="utf-8")
             complete = repo / "build/complete"
+            gpu = cuda_fixtures.make_gpu(repo / "gpu", version="3.0.0")
             plugin = complete / "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA"
-            plugin.mkdir(parents=True)
-            (plugin / "umi-plugin.json").write_text(json.dumps({"version": "3.0.0"}), encoding="utf-8")
-            (plugin / "api.py").write_text("# offline adapter fixture\n", encoding="utf-8")
+            shutil.copytree(gpu / cuda_fixtures.PLUGIN, plugin)
             licenses = complete / "LICENSES/plugins/win32_PaddleOCRv6_CUDA"
             licenses.mkdir(parents=True)
             (licenses / "THIRD_PARTY_NOTICES.md").write_text("CUDA fixture notices", encoding="utf-8")
@@ -164,6 +165,7 @@ class LocalBuildToolsTests(unittest.TestCase):
             source.write_text("VALUE = 300\n", encoding="utf-8")
             manifest = {"host/small-public-source.py": hashlib.sha256(source.read_bytes()).hexdigest()}
             snapshot.write_snapshot(complete, manifest, {"host": "fixture"}, {"version": "3.0.0", "scope": "public", "boundaries": ["fixture"], "repositories": {"host": repo}})
+            cuda_fixtures.retain_records(gpu, complete / cuda_fixtures.module.SOURCE_NAMESPACE)
             output = repo / "build/products"
             args = ["--repo-root", str(repo), "--complete-root", str(complete), "--products-root", str(output)]
             result = subprocess.run([sys.executable, "-I", "-B", "-S", str(REPO / "build/tools/prepare_products.py"), *args],
@@ -183,8 +185,11 @@ class LocalBuildToolsTests(unittest.TestCase):
             overlay_plugin = overlay / plugin.relative_to(complete)
             self.assertEqual(products.payload(overlay_plugin), products.payload(plugin, exclude=products.cuda_overlay.private_path))
             records = overlay / "LICENSES/plugins/win32_PaddleOCRv6_CUDA"
-            for name in ("COPYING", "LICENSE", "NOTICE.md", "SOURCE-CODE.md", "source-snapshot.zip", "source-snapshot.json", "source-provenance.json"):
-                self.assertEqual((records / name).read_bytes(), (complete / name).read_bytes(), name)
+            for name in ("COPYING", "LICENSE", "NOTICE.md", "VERSION", "SOURCE-CODE.md", "source-snapshot.zip", "source-snapshot.json", "source-provenance.json"):
+                self.assertEqual((records / name).read_bytes(), (gpu / name).read_bytes(), name)
+            self.assertNotEqual((records / "source-snapshot.zip").read_bytes(), (complete / "source-snapshot.zip").read_bytes())
+            self.assertFalse((records / "LICENSES" / cuda_fixtures.module.SOURCE_RECORDS_DIR).exists())
+            self.assertEqual(len(list(overlay.rglob("source-snapshot.zip"))), 1)
             self.assertEqual((records / "LICENSES/THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8"), "CUDA fixture notices")
             self.assertFalse(json.loads((records / "LICENSES/RELEASE_EVIDENCE.json").read_text(encoding="utf-8"))["public_prerelease_allowed"])
             host_records = {name: (base / name).read_bytes() for name in

@@ -1,8 +1,12 @@
-# Umi-OCR 3.0.2 本地候选
+# Umi-OCR 3.0.3 本地候选（R2 待验收/待审）
 
 主仓库：https://github.com/Dominic485649/UMI-OCR
 
-当前 `main` 收录本次及此前更新，包含 **3.0.2 候选**的批量文档动态队列、导入和忽略区域修复。源码更新不代表二进制发行完成，公开门禁尚未通过，不创建正式标签或 GitHub Release。详见 [主程序 Release 草稿](docs/RELEASE_3.0.2_DRAFT.md)、[CUDA 插件草稿](docs/RELEASE_CUDA_3.0.2_DRAFT.md)和[此前本地交付说明](docs/RELEASE_3.0.2_LOCAL.md)。当前已公开的正式版本仍为 `v3.0.1`，下方保留其有效下载链接。
+当前 `main` 准备 **3.0.3 本地候选 R2**，整合 3.0.2 的批量文档动态队列、导入、忽略区域、输出收尾和设置修复，以及旧源码原地刷新工具停用和组合候选 CUDA 源码串包修复。
+
+从组合候选生成 CUDA overlay 时，必须使用插件自己的对应源码、版本、快照和 provenance（来源记录），不再回退到宿主根目录；缺少明确插件来源的旧组合候选会被拒绝并要求重新装配，不自动猜源。本次不升级识别引擎、模型或依赖。
+
+源码和文案更新不代表二进制发行完成。含新修复的 R2 须重建并完成本轮验收，不能直接沿用首轮 R1 的自动回归通过结果或哈希。实际 R2 程序与 Release 文案须先由用户审查、明确同意后才推送，公开发行还须通过相应门禁。当前尚未创建 `v3.0.3` 公开标签或 GitHub Release。详见 [3.0.3 主程序草稿](docs/RELEASE_3.0.3_DRAFT.md)、[3.0.3 CUDA 插件草稿](docs/RELEASE_CUDA_3.0.3_DRAFT.md)和[历史 3.0.2 本地交付说明](docs/RELEASE_3.0.2_LOCAL.md)。当前已公开的正式版本仍为 `v3.0.1`，下方保留其有效下载链接。
 
 作者与来源：Dominic485649（本 fork 作者与维护者）；[hiroi-sora](https://github.com/hiroi-sora/Umi-OCR)（原 Umi-OCR 作者及原始版权来源）。
 
@@ -69,7 +73,7 @@
 
 <div align="center">
   <strong>开源、可批量的离线 OCR 软件</strong><br>
-  <sub>Umi-OCR 3.0.2 本地候选：面向 Windows 10/11 x64</sub>
+  <sub>Umi-OCR 3.0.3 本地候选（待审）：面向 Windows 10/11 x64</sub>
 </div><br>
 
 - **公开版本**：基础程序与 CUDA 插件免费公开提供；第三方插件开发与接入开放。
@@ -108,7 +112,7 @@ PDF 预览、PDF 页面读取、文档 OCR，以及单层和双层可搜索 PDF 
 
 ## 下载发行版
 
-当前已公开的是 **3.0.1 Windows x64 正式 Release**，标签为 `v3.0.1`。以下链接不代表本地候选 3.0.2 已经发布。基础程序与 CUDA 插件分别下载，CPU 与 PaddleOCR-VL 不包含在公开资产中。
+当前已公开的是 **3.0.1 Windows x64 正式 Release**，标签为 `v3.0.1`。以下链接不代表待审的 3.0.3 本地候选已经发布，也不替换历史 3.0.2 候选身份。基础程序与 CUDA 插件分别下载，CPU 与 PaddleOCR-VL 不包含在公开资产中。
 
 - **基础程序**：[主仓库 v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1)。
 - **CUDA 插件**：[插件仓库 v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.1)。

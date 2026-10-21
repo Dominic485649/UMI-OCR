@@ -1,8 +1,12 @@
-# Umi-OCR 3.0.2 Local Candidate
+# Umi-OCR 3.0.3 Local Candidate (R2 Pending Validation and Review)
 
 Main repository: https://github.com/Dominic485649/UMI-OCR
 
-This working tree prepares a **3.0.2 local candidate** with document-queue, import and ignore-region fixes. This update does not create a public tag or GitHub Release. See the [3.0.2 local delivery notes](docs/RELEASE_3.0.2_LOCAL.md). The published stable version remains `v3.0.1`; its valid download links are retained below.
+The current `main` prepares a **3.0.3 local candidate R2**, combining the 3.0.2 document-queue, import, ignore-region, output-finalization and settings fixes with retirement of the old in-place source-refresh tool and a fix for host/plugin source mixing in combined candidates.
+
+When generating a CUDA overlay from a combined candidate, the plugin's own corresponding source, version, snapshot and provenance must be used, without falling back to the host root. An older combined candidate without an explicit plugin source is rejected and must be reassembled; the tool does not guess its source. This does not upgrade the recognition engine, models or dependencies.
+
+Updated source and release text do not mean a binary release is complete. R2 containing the new fix must be rebuilt and validated; R1's successful automated regression results and hashes do not carry over. The user must review the actual R2 application and release text and explicitly approve before any push; public distribution also requires its release gates. No public `v3.0.3` tag or GitHub Release has been created. See the [3.0.3 application draft](docs/RELEASE_3.0.3_DRAFT.md), [3.0.3 CUDA plugin draft](docs/RELEASE_CUDA_3.0.3_DRAFT.md) and [historical 3.0.2 local delivery notes](docs/RELEASE_3.0.2_LOCAL.md). The published stable version remains `v3.0.1`; its valid download links are retained below.
 
 Authors and provenance: Dominic485649 (author and maintainer of this fork); [hiroi-sora](https://github.com/hiroi-sora/Umi-OCR) (original Umi-OCR author and original copyright source).
 
@@ -69,7 +73,7 @@ Authors and provenance: Dominic485649 (author and maintainer of this fork); [hir
 
 <div align="center">
   <strong>Open-source, Batch Offline OCR Software</strong><br>
-  <sub>Umi-OCR 3.0.2 local candidate: Windows 10/11 x64</sub>
+  <sub>Umi-OCR 3.0.3 local candidate (pending review): Windows 10/11 x64</sub>
 </div><br>
 
 - **Public editions**: The base application and CUDA plugin are provided publicly at no charge; third-party plugin development and integration are open.
@@ -93,7 +97,7 @@ PDF preview, PDF page reading, document OCR, and single-layer and layered search
 
 ## Download Releases:
 
-The currently published version is the **3.0.1 Windows x64 stable Release**, tagged `v3.0.1`. These links do not claim that the local 3.0.2 candidate is published. Download the base application and CUDA plugin separately. CPU and PaddleOCR-VL plugins are not public assets in that release.
+The currently published version is the **3.0.1 Windows x64 stable Release**, tagged `v3.0.1`. These links do not claim that the pending-review 3.0.3 local candidate is published or relabel the historical 3.0.2 candidate. Download the base application and CUDA plugin separately. CPU and PaddleOCR-VL plugins are not public assets in that release.
 
 - **Base application**: [Main repository v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1).
 - **CUDA plugin**: [Plugin repository v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.1).

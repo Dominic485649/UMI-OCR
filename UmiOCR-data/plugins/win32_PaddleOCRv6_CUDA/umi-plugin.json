@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "win32_PaddleOCRv6_CUDA",
   "name": "PP-OCRv6 CUDA",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "host_api": ">=2.7,<3.0",
   "platform": [
     "win32"

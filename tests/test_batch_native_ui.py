@@ -521,7 +521,7 @@ def driver(args):
         raise RuntimeError("原生回归必须使用新的输出目录")
     output.mkdir(parents=True)
     version = json.loads((root / "UmiOCR-data/about.json").read_text("utf-8"))["version"]
-    if [version[key] for key in ("major", "minor", "patch")] != [3, 0, 2]:
+    if [version[key] for key in ("major", "minor", "patch")] != [3, 0, 3]:
         raise RuntimeError("不允许把旧版本窗口当作本次验证对象")
     folder = output / "合成 输入"
     folder.mkdir()
@@ -542,7 +542,7 @@ def driver(args):
                                    "last_pid": -1, "last_ptime": -1}), encoding="utf-8")
         client = Client(root, output)
         setup = client.call("setup")
-        assert setup["version"] == "3.0.2", setup
+        assert setup["version"] == "3.0.3", setup
         report["application"] = setup
         native = NativeInput()
         work = wintypes.RECT()

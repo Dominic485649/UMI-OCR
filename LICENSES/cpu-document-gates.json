@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verification_date": "2026-10-20",
+  "verification_date": "2026-10-21",
   "cpu_ocr": {
     "actual_inference_runtime": null,
     "actual_runtime_version": null,

@@ -1,6 +1,6 @@
 # Release Evidence Report
 
-Verification date: `2026-10-20`
+Verification date: `2026-10-21`
 
 Artifact kind: `base`
 

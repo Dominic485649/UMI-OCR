@@ -14,7 +14,7 @@ spec.loader.exec_module(module)
 
 
 def main():
-    for name in (".claude/session.json", ".CoDeX/settings.json", "docs/ClAuDe.Md", "nested/AGENTS.md"):
+    for name in (".claude/session.json", ".CoDeX/settings.json", "CLAUDE.md", "docs/ClAuDe.Md", "nested/AGENTS.md"):
         assert module.forbidden(name), name
     assert not module.forbidden("docs/README.md")
     with tempfile.TemporaryDirectory() as directory:
@@ -38,8 +38,13 @@ def main():
         "docs/RELEASE_3.0.2_DRAFT.md",
         "docs/RELEASE_CUDA_3.0.2_DRAFT.md",
         "docs/RELEASE_3.0.2_REVIEW.md",
+        "docs/RELEASE_3.0.3_DRAFT.md",
+        "docs/RELEASE_CUDA_3.0.3_DRAFT.md",
+        "docs/RELEASE_3.0.3_ACCEPTANCE.md",
+        "docs/RELEASE_3.0.3_REVIEW.md",
     }
     assert required_documents <= exported, sorted(required_documents - exported)
+    assert "CLAUDE.md" not in exported
     assert "cleanup-old-artifacts.ps1" not in exported
     assert all((ROOT / name).is_file() for name in required_documents)
     print("Public payload privacy and CUDA release-document export regressions passed.")
