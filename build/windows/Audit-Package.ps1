@@ -54,6 +54,7 @@ if ($CpuStagingRoot) {
 }
 
 $failures = New-Object System.Collections.Generic.List[string]
+$script:archivedRuntimeFiles = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
 function Fail([string]$message) { $failures.Add($message) }
 function Require([string]$relativePath, [string]$why) {
     if (-not (Test-Path -LiteralPath (Join-Path $root $relativePath))) {
@@ -61,7 +62,9 @@ function Require([string]$relativePath, [string]$why) {
     }
 }
 function RequireFile([string]$relativePath, [string]$why) {
-    if (-not (Test-Path -LiteralPath (Join-Path $root $relativePath) -PathType Leaf)) {
+    $logical = $relativePath.Replace("\", "/")
+    if (-not (Test-Path -LiteralPath (Join-Path $root $relativePath) -PathType Leaf) -and
+        -not $script:archivedRuntimeFiles.Contains($logical)) {
         Fail "缺少${why}: $relativePath"
     }
 }
@@ -163,13 +166,9 @@ $forbiddenNames = @(
     "*PP-OCRv6_small*",
     "*PP-OCRv6_tiny*",
     "*directml*",
-    "*.lib",
-    "*.exp",
-    "*.pdb",
+    # 小文件布局不按静态库、调试符号、类型提示或源码后缀裁剪依赖。
+    # 原生归属、哈希锁、许可和明确模型闭包仍由对应门禁检查。
     "*.pyc",
-    "*.pyi",
-    "*.pyx",
-    "*.pxd",
     "__pycache__"
 )
 if ($evidenceKind -ne "cpu") { $forbiddenNames += "*onnxruntime*" }
@@ -220,6 +219,36 @@ if ($Kind -eq "base") {
     }
 }
 
+# ZIP成员不能凭文件名存在即放行：来源、原生/缓存边界、全部成员及原有禁止内容先核验。
+# 只将成功返回的逻辑文件加入结构检查，不解包，也不把目录/原生文件要求放宽。
+if ($evidenceKind -in @("base", "gpu") -and $evidencePython -and
+    (Test-Path -LiteralPath $evidencePython -PathType Leaf)) {
+    $archiveRoot = if ($evidenceKind -eq "base") { Join-Path $root "UmiOCR-data" }
+                   else { Join-Path $root "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA" }
+    if (Test-Path -LiteralPath (Join-Path $archiveRoot "archive-layout.json")) {
+        Fail "存在不受支持的旧运行容器声明 archive-layout.json"
+    }
+    else {
+        $archiveTool = Join-Path $RepoRoot "build/tools/audit_runtime_archives.py"
+        $archiveArgs = @($archiveTool, "--root", $archiveRoot, "--paths-only")
+        foreach ($pattern in $forbiddenNames) { $archiveArgs += @("--forbid-name", $pattern) }
+        if ($Kind -eq "base") {
+            foreach ($term in $forbiddenText) { $archiveArgs += @("--forbid-text", $term) }
+        }
+        $archiveJson = & $evidencePython -I -B -S -X utf8 @archiveArgs
+        if ($LASTEXITCODE -ne 0) { Fail "运行容器内容或来源核验失败" }
+        else {
+            try {
+                $prefix = [IO.Path]::GetRelativePath($root, $archiveRoot).Replace("\", "/")
+                foreach ($member in @(($archiveJson -join "`n") | ConvertFrom-Json)) {
+                    if ($null -ne $member) { [void]$script:archivedRuntimeFiles.Add($prefix + "/" + [string]$member) }
+                }
+            }
+            catch { Fail "无法读取运行容器逻辑路径清单: $($_.Exception.Message)" }
+        }
+    }
+}
+
 # ===================== 通用：许可证 =====================
 
 function Test-Licenses([string[]]$paths) {
@@ -258,6 +287,7 @@ function Invoke-BaseAudit {
     $requiredRuntime = @(
         "Umi-OCR.exe",
         "UmiOCR-data\main.py",
+        "UmiOCR-data\runtime_archive_bootstrap.py",
         "UmiOCR-data\about.json",
         "UmiOCR-data\native-dlls.lock.json",
         "UmiOCR-data\qt-runtime-whitelist.json",

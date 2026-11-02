@@ -1,6 +1,6 @@
 """Offline, miniature freeze/finalize tests; never build or accept real products.
 
-Synthetic evidence exists only under TemporaryDirectory. Public Git checks and
+Synthetic evidence exists only under owned fixture workspaces. Public Git checks and
 heavy license/runtime checks are substituted in positive unit cases; the real
 publication-input validator, source/overlay checks, and tar.xz writer still run.
 Negative CLI coverage also executes the unmodified real audit/verifier offline.
@@ -9,11 +9,11 @@ All assertions use unittest methods and remain active with Python -O.
 from __future__ import annotations
 
 from contextlib import ExitStack, contextmanager, redirect_stderr, redirect_stdout
+import base64
 import copy
 import importlib.util
 import io
 import json
-import marshal
 import zipfile
 import os
 from pathlib import Path
@@ -24,7 +24,9 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[1]
+WORK = ROOT / "build/tmp/startup-small-files-20261028-r1/formal-container-integration-r1/finalize-tests"
 
 
 def load(name, path):
@@ -38,6 +40,7 @@ finalizer = load("finalize_fixture", ROOT / "build/tools/finalize_release.py")
 verifier = load("finalize_verifier_fixture", ROOT / "build/tools/verify_release_evidence.py")
 cuda = load("finalize_cuda_fixtures", ROOT / "tests/test_cuda_overlay.py")
 exporter = load("finalize_export_fixture", ROOT / "build/tools/export_cuda_source.py")
+merge = load("finalize_merge_fixture", ROOT / "build/tools/merge_runtime.py")
 
 
 def write(path, value):
@@ -52,20 +55,25 @@ def file_bytes(root):
 
 class FinalizeFixtures(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="umi-finalize-test-", dir=ROOT / "build")
-        self.addCleanup(self.temporary.cleanup)
-        self.repo = Path(self.temporary.name) / "repo"
+        merge.layout.plain_path(WORK)
+        WORK.mkdir(parents=True, exist_ok=True)
+        self.temporary = Path(tempfile.mkdtemp(prefix="umi-finalize-test-", dir=WORK))
+        self.addCleanup(self.cleanup_fixture)
+        self.repo = self.temporary / "repo"
         for relative in ("build/staging", "build/artifacts", "build/audit", "release"):
             (self.repo / relative).mkdir(parents=True, exist_ok=True)
         self.version = "3.0.3"
         self.about = {"version": {"major": 3, "minor": 0, "patch": 3, "prerelease": "", "prereleaseNumber": 0}}
         write(self.repo / "UmiOCR-data/about.json", self.about)
+        write(self.repo / "UmiOCR-data/plugins" / finalizer.gates.PLUGIN_ID / "umi-plugin.json", {"version": self.version})
         write(self.repo / "build/sources-windows-cu126.lock.json", {})
         trusted = (
             "build/windows/Finalize-Release.ps1", "build/windows/Audit-Package.ps1",
             "build/tools/finalize_release.py", "build/tools/release_gate_inputs.py",
             "build/tools/verify_release_evidence.py", "build/tools/package_tar_xz.py",
             "build/tools/prepare_cuda_overlay.py", "build/tools/verify_public_payload.py",
+            "build/tools/audit_runtime_archives.py", "build/tools/runtime_archive_layout.py",
+            "build/tools/merge_runtime.py",
         )
         for name in trusted:
             target = self.repo / name
@@ -73,6 +81,13 @@ class FinalizeFixtures(unittest.TestCase):
             shutil.copy2(ROOT / name, target)
         self.counter = 0
         self.commands = []
+
+    def cleanup_fixture(self):
+        # Only this fixture's new workspace is disposable. Do not kill a process
+        # or retry a denied cleanup; retaining it is safer than partial removal.
+        if merge.running_processes(self.temporary):
+            raise RuntimeError("Finalize fixture became occupied; preserving its workspace")
+        shutil.rmtree(self.temporary)
 
     def base(self, name="base", application_sources=None):
         root = self.repo / "build/staging" / name
@@ -102,21 +117,22 @@ class FinalizeFixtures(unittest.TestCase):
         return root
 
     def pack_app(self, root):
-        # Construct the existing merge_runtime representation without importing
-        # or executing application code, then remove only this fixture's loose
-        # Python copies. Canonical source/snapshot are never changed here.
-        from importlib import _bootstrap_external as bytecode
-        directory = root / "UmiOCR-data/py_src"
-        paths = sorted(directory.rglob("*.py"))
-        with zipfile.ZipFile(root / "UmiOCR-data/app.zip", "w", compression=zipfile.ZIP_STORED) as archive:
-            archive.writestr("py_src/", b"")
-            for path in paths:
-                name, data = path.relative_to(directory).as_posix(), path.read_bytes()
-                code = compile(data, name, "exec", dont_inherit=True, optimize=0)
-                archive.writestr("py_src/" + name, data)
-                archive.writestr("py_src/" + name[:-3] + ".pyc", bytecode._code_to_hash_pyc(code, importlib.util.source_hash(data), checked=True))
-        for path in paths:
-            path.unlink()
+        # Use the actual Stored-original-bytes assembly and its complete input,
+        # source and directory declarations. Never compile/execute fixture code
+        # or alter canonical source/snapshot records to manufacture acceptance.
+        return merge.aggregate_runtime(root / "UmiOCR-data", kind="host", project_root=self.repo,
+                                       occupancy_check=lambda _fixture: [])
+
+    def rewrite_app(self, root, mutate):
+        # Negative fixture construction only. Preserve normal ZIP metadata so
+        # content/member mutations cannot be rejected merely for a timestamp.
+        path = root / "UmiOCR-data/app.zip"
+        with zipfile.ZipFile(path) as archive:
+            members = {info.filename: (info, archive.read(info)) for info in archive.infolist()}
+        mutate(members)
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_STORED) as archive:
+            for name, (info, data) in sorted(members.items()):
+                archive.writestr(info, data)
 
     def gpu(self, name="gpu"):
         staging = cuda.make_gpu(self.repo / "build/staging" / name, loose_source=True)
@@ -276,52 +292,164 @@ class FreezeFinalizeTests(FinalizeFixtures):
                     self.freeze(root)
         self.no_archive()
 
-    def test_legal_app_zip_original_text_and_checked_bytecode_pass_without_execution(self):
+    def test_legal_declared_stored_app_original_bytes_pass_without_execution(self):
         root = self.base(application_sources={
             "py_src/run.py": b"raise RuntimeError('application source must never execute in this check')\n",
             "py_src/imports/helper.py": b"assert __debug__\nVALUE = 3\n",
+            "py_src/resources/helper.js": b"// original application resource\n",
+            "py_src/resources/retained.txt": b"Original package resource must not be pruned.\n",
         })
         canonical = file_bytes(root / "source")
+        records = {name: (root / name).read_bytes() for name in finalizer.SOURCE_RECORDS}
         self.pack_app(root)
+        with zipfile.ZipFile(root / "UmiOCR-data/app.zip") as archive:
+            self.assertTrue(all(info.compress_type == zipfile.ZIP_STORED for info in archive.infolist()))
+            self.assertFalse(any(info.filename.endswith((".pyc", ".pyo")) for info in archive.infolist()))
+            self.assertEqual(archive.read("py_src/resources/retained.txt"), canonical["UmiOCR-data/py_src/resources/retained.txt"])
         frozen, receipt = self.freeze(root), self.receipt(root, "base")
         with self.permitted_commands(root):
             result = self.finalize(root, "base", frozen, receipt)
         self.assertEqual(result["sha256"], finalizer.gates.digest(Path(result["archive"])))
         self.assertEqual(file_bytes(root / "source"), canonical)
+        for name, data in records.items():
+            self.assertEqual((root / name).read_bytes(), data)
         self.assertFalse((root / "UmiOCR-data/py_src/run.py").exists())
 
     def test_app_zip_source_bytecode_and_member_mismatches_are_rejected_before_freeze(self):
-        for mutation in ("source", "bytecode", "orphan", "missing", "extra", "escape", "case"):
+        for mutation in ("source", "bytecode", "missing", "extra", "escape", "case", "directory"):
             with self.subTest(mutation=mutation):
                 root = self.base(mutation, {"py_src/run.py": b"VALUE = 3\n"})
                 self.pack_app(root)
-                path = root / "UmiOCR-data/app.zip"
-                with zipfile.ZipFile(path) as archive:
-                    members = {name: archive.read(name) for name in archive.namelist()}
-                if mutation == "source":
-                    members["py_src/run.py"] += b"# different source\n"
-                elif mutation == "bytecode":
-                    # Preserve a genuine canonical-source hash header and forge
-                    # only executable code. Header-only checking must not pass.
-                    code = compile(b"EVIL = True\n", "run.py", "exec", dont_inherit=True, optimize=0)
-                    members["py_src/run.pyc"] = members["py_src/run.pyc"][:16] + marshal.dumps(code)
-                elif mutation == "orphan":
-                    members.pop("py_src/run.py")
-                elif mutation == "missing":
-                    members.pop("py_src/run.py")
-                    members.pop("py_src/run.pyc")
-                elif mutation == "extra":
-                    members["py_src/unpublished.py"] = b"# unexpected module\n"
-                elif mutation == "escape":
-                    members["../outside.py"] = b"# path traversal\n"
-                else:
-                    members["PY_SRC/run.py"] = members["py_src/run.py"]
-                with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_STORED) as archive:
-                    for name, data in members.items():
-                        archive.writestr(name, data)
-                with self.assertRaises((RuntimeError, ValueError)):
+                def change(members):
+                    info, data = members["py_src/run.py"]
+                    if mutation == "source":
+                        members["py_src/run.py"] = info, data + b"# different source\n"
+                    elif mutation == "missing":
+                        members.pop("py_src/run.py")
+                    elif mutation == "directory":
+                        members.pop("py_src/")
+                    else:
+                        name = {"bytecode": "py_src/run.pyc", "extra": "py_src/unpublished.py",
+                                "escape": "../outside.py", "case": "PY_SRC/run.py"}[mutation]
+                        # Deliberately invalid bytes, not compiled fixture code.
+                        members[name] = zipfile.ZipInfo(name, merge.layout.TIMESTAMP), b"forbidden/unlisted member\n"
+                self.rewrite_app(root, change)
+                with self.assertRaises(finalizer.FinalizationError):
                     self.freeze(root)
                 self.no_archive()
+
+    def test_self_consistent_archive_does_not_replace_canonical_execution_source(self):
+        root = self.base(application_sources={"py_src/run.py": b"VALUE = 'canonical'\n"})
+        write(root / "UmiOCR-data/py_src/run.py", b"VALUE = 'changed but internally consistent assembly'\n")
+        self.pack_app(root)
+        with self.assertRaisesRegex(finalizer.FinalizationError, "source/layout"):
+            self.freeze(root)
+        self.no_archive()
+
+    def test_incomplete_corrupt_or_undeclared_runtime_evidence_cannot_freeze(self):
+        for mutation in ("manifest", "inputs", "changed-inputs", "marker", "container", "undeclared"):
+            with self.subTest(mutation=mutation):
+                root = self.base(mutation, {"py_src/run.py": b"VALUE = 3\n"})
+                self.pack_app(root)
+                data = root / "UmiOCR-data"
+                if mutation in ("manifest", "inputs"):
+                    (data / (merge.layout.MANIFEST_NAME if mutation == "manifest" else merge.layout.INPUTS_NAME)).unlink()
+                elif mutation == "changed-inputs":
+                    write(data / merge.layout.INPUTS_NAME, {"schema_version": 1, "files": {}})
+                elif mutation == "marker":
+                    write(data / merge.layout.MARKER_NAME, {"purpose": "fresh-runtime-archive-assembly", "state": "failed"})
+                else:
+                    write(data / ("app.zip" if mutation == "container" else "unlisted.zip"), b"invalid runtime container\n")
+                with self.assertRaises(finalizer.FinalizationError):
+                    self.freeze(root)
+                self.no_archive()
+
+    def test_legacy_declaration_alone_or_with_current_archive_cannot_freeze(self):
+        for archived in (False, True):
+            with self.subTest(archived=archived):
+                root = self.base(str(archived), {"py_src/run.py": b"VALUE = 3\n"})
+                if archived:
+                    self.pack_app(root)
+                write(root / "UmiOCR-data/archive-layout.json", {"legacy": True})
+                with self.assertRaisesRegex(finalizer.FinalizationError, "legacy"):
+                    self.freeze(root)
+                self.no_archive()
+
+    def test_archive_loose_source_shadow_cannot_freeze(self):
+        source = b"VALUE = 3\n"
+        root = self.base(application_sources={"py_src/run.py": source})
+        self.pack_app(root)
+        write(root / "UmiOCR-data/py_src/run.py", source)
+        with self.assertRaisesRegex(finalizer.FinalizationError, "shadows"):
+            self.freeze(root)
+        self.no_archive()
+
+    def test_archive_source_snapshot_mismatch_cannot_use_only_layout_hashes(self):
+        root = self.base(application_sources={"py_src/run.py": b"VALUE = 3\n"})
+        self.pack_app(root)
+        write(root / "source-snapshot.json", {"host/UmiOCR-data/py_src/run.py": "0" * 64})
+        with self.assertRaisesRegex(finalizer.FinalizationError, "source/layout"):
+            self.freeze(root)
+        self.no_archive()
+
+    def test_third_party_runtime_members_still_require_original_record(self):
+        for retained_record in (False, True):
+            with self.subTest(retained_record=retained_record):
+                root = self.base(str(retained_record), {"py_src/run.py": b"VALUE = 3\n"})
+                source = b"raise RuntimeError('third-party fixture must not execute')\n"
+                write(root / "UmiOCR-data/site-packages/six.py", source)
+                if retained_record:
+                    checksum = base64.urlsafe_b64encode(bytes.fromhex(cuda.sha(source))).decode().rstrip("=")
+                    write(root / "UmiOCR-data/site-packages/six-1.0.dist-info/RECORD", f"six.py,sha256={checksum},{len(source)}\n")
+                    write(root / "UmiOCR-data/site-packages/six-1.0.dist-info/METADATA", "Name: six\nVersion: 1.0\n")
+                self.pack_app(root)
+                if retained_record:
+                    self.freeze(root)
+                else:
+                    with self.assertRaisesRegex(finalizer.FinalizationError, "source/layout"):
+                        self.freeze(root)
+                self.no_archive()
+
+    def test_archive_auditor_loading_and_incomplete_results_fail_closed(self):
+        root = self.base(application_sources={"py_src/run.py": b"VALUE = 3\n"})
+        self.pack_app(root)
+        with patch.object(finalizer, "adjacent", side_effect=ImportError("trusted fixture auditor unavailable")):
+            with self.assertRaisesRegex(finalizer.FinalizationError, "ImportError"):
+                self.freeze(root)
+        for result in (None, {"status": "NOT_INCLUDED"}, {"status": "PASS"},
+                       {"status": "PASS", "archives": [], "members": None, "archived_paths": []},
+                       {"status": "PASS", "archives": [], "members": [{}], "archived_paths": []}):
+            with self.subTest(result=result), patch.object(finalizer, "adjacent") as loader:
+                loader.return_value.audit.return_value = result
+                with self.assertRaises(finalizer.FinalizationError):
+                    self.freeze(root)
+        self.no_archive()
+
+    def test_candidate_archive_helpers_are_not_executed_during_freeze(self):
+        sentinel = self.repo / "build/audit/candidate-code-executed"
+        planted = f"from pathlib import Path\nPath({str(sentinel)!r}).write_text('executed')\nraise RuntimeError('candidate helper must not execute')\n"
+        root = self.base(application_sources={"py_src/run.py": b"VALUE = 3\n",
+                                              "audit_runtime_archives.py": planted,
+                                              "runtime_archive_layout.py": planted})
+        self.pack_app(root)
+        sys.path.insert(0, str(root / "UmiOCR-data"))
+        try:
+            self.freeze(root)
+        finally:
+            sys.path.remove(str(root / "UmiOCR-data"))
+        self.assertFalse(sentinel.exists())
+        self.no_archive()
+
+    def test_runtime_archive_records_are_immutable_after_freeze(self):
+        for index, name in enumerate(("app.zip", merge.layout.MANIFEST_NAME, merge.layout.INPUTS_NAME, merge.layout.MARKER_NAME)):
+            with self.subTest(name=name):
+                root = self.base(str(index), {"py_src/run.py": b"VALUE = 3\n"})
+                self.pack_app(root)
+                frozen, receipt = self.freeze(root), self.receipt(root, "base")
+                write(root / "UmiOCR-data" / name, b"changed after review\n")
+                with patch.object(finalizer, "checked_command") as execute:
+                    self.rejected(root, "base", frozen, receipt)
+                    execute.assert_not_called()
 
     def test_pre_freeze_cuda_adapter_mismatch_cannot_hide_behind_fresh_e2e_hashes(self):
         root, _ = self.gpu()
@@ -461,6 +589,32 @@ class FreezeFinalizeTests(FinalizeFixtures):
         self.assertEqual(self.commands[1][self.commands[1].index("--kind") + 1], "gpu")
         current = finalizer.inspect_product(self.repo, root, "gpu")
         finalizer.archive_matches(Path(result["archive"]), current[3], current[4])
+
+    def test_gpu_version_is_independent_of_unchanged_host_version(self):
+        root, _ = self.gpu("independent-304")
+        metadata = root / "LICENSES/plugins" / finalizer.gates.PLUGIN_ID
+        manifest = json.loads((root / cuda.PLUGIN / "umi-plugin.json").read_bytes())
+        manifest["version"] = "3.0.4"
+        write(root / cuda.PLUGIN / "umi-plugin.json", manifest)
+        write(self.repo / "UmiOCR-data/plugins" / finalizer.gates.PLUGIN_ID / "umi-plugin.json", manifest)
+        write(metadata / "VERSION", "3.0.4\n")
+        summary = finalizer.inspect_product(self.repo, root, "gpu")[2]
+        self.assertEqual(summary["release_version"], "3.0.4")
+        self.assertEqual(json.loads((self.repo / "UmiOCR-data/about.json").read_bytes()), self.about)
+        manifest["version"] = "3.0.5"
+        write(self.repo / "UmiOCR-data/plugins" / finalizer.gates.PLUGIN_ID / "umi-plugin.json", manifest)
+        with self.assertRaisesRegex(finalizer.FinalizationError, "product kind"):
+            finalizer.inspect_product(self.repo, root, "gpu")
+
+    def test_only_one_new_derived_license_report_is_mutable(self):
+        self.assertIn("gpu-startup-evidence.json", finalizer.DERIVED_REPORTS)
+        root = self.base("startup-report-mutability")
+        before = finalizer.inspect_product(self.repo, root, "base")[2]
+        write(root / "LICENSES/gpu-startup-evidence.json", {"status": "BLOCK"})
+        self.assertEqual(finalizer.inspect_product(self.repo, root, "base")[2], before)
+        for relative in ("source/build/windows/CudaWorker/worker_main.cpp", "UmiOCR-data/UmiOCR-CudaWorker.exe"):
+            write(root / relative, b"not an exempt source/EXE\n")
+            self.assertNotEqual(finalizer.inspect_product(self.repo, root, "base")[2], before)
 
     def test_missing_receipt_and_wrong_identity_authorization_or_binding_never_archive(self):
         root = self.base()
@@ -710,6 +864,79 @@ class FreezeFinalizeTests(FinalizeFixtures):
         nested = {Path("build/tools/non-public/finalize_release.py"), Path("tests/non-public/test_finalize_release.py")}
         with patch.object(exporter, "files_for_repo", return_value=selected + list(nested)):
             self.assertFalse(nested & set(exporter.selected_sources(ROOT)))
+
+
+class StartupFinalizeReportTests(unittest.TestCase):
+    """Only already-verified fixture receipts; no real archive or application."""
+    def setUp(self):
+        module = load("finalize_startup_input_fixtures", ROOT / "tests/test_release_gate_inputs.py")
+        self.context = module.StartupGateTests("test_complete_scoped_acceptance_keeps_ocr_not_run_and_public_paths_private")
+        self.context.setUp()
+        self.addCleanup(self.context.doCleanups)
+        self.fixture = self.context.fixture
+        self.current = self.context.verify()
+        self.receipt = self.fixture.audit / "release-gates.json"
+        write(self.receipt, {"fixture_only": True})
+        self.report = {
+            "artifact_kind": "gpu", "public_prerelease_allowed": True, "local_candidate": False, "validation_errors": [],
+            "release_gate_input": {"name": self.receipt.name, "sha256": finalizer.gates.digest(self.receipt)},
+            "source_delivery": {"status": "PASS", "verified": True}, "current_source_e2e": self.current,
+            "gpu_worker_startup": self.current["gpu_worker_startup"],
+            "gates": {name: "PASS" for name in ("runtime_vendor", "paddle_models", "cuda", "cudnn", "opencv", "ffmpeg", "mpl", "agpl_nvidia", "cpu_ocr", "document_models", "source_delivery", "gpu_worker_startup")},
+        }
+        self.report["gates"].update({"current_source_e2e": "ACCEPTED_WITH_LIMITATIONS", "gpu_ocr_e2e": "NOT_RUN"})
+
+    def check(self, kind="gpu"):
+        write(self.fixture.metadata / "LICENSES/RELEASE_EVIDENCE.json", self.report)
+        finalizer.check_report(self.fixture.metadata, kind, self.fixture.binding, self.receipt, finalizer.gates.digest(self.receipt))
+
+    def test_complete_current_startup_scope_accepts_only_named_ocr_not_run(self):
+        self.check()
+        self.assertEqual(self.report["gates"]["gpu_ocr_e2e"], "NOT_RUN")
+        self.assertFalse(self.current["gpu_worker_startup"]["public_release_allowed"])
+
+    def test_arbitrary_other_not_run_component_or_missing_scope_gate_never_archives(self):
+        original = copy.deepcopy(self.report)
+        for name in ("runtime_vendor", "paddle_models", "cuda", "cudnn", "opencv", "ffmpeg", "mpl", "agpl_nvidia", "cpu_ocr", "document_models", "gpu_worker_startup"):
+            self.report = copy.deepcopy(original)
+            self.report["gates"][name] = "NOT_RUN"
+            with self.assertRaises(finalizer.FinalizationError, msg=name):
+                self.check()
+        self.report = copy.deepcopy(original)
+        self.report["gates"].pop("gpu_worker_startup")
+        with self.assertRaises(finalizer.FinalizationError):
+            self.check()
+
+    def test_default_full_non_gpu_or_no_current_approval_cannot_borrow_startup_exception(self):
+        original = copy.deepcopy(self.report)
+        for field, value in (("validation_scope", "full"), ("validation_scope", "other"), ("publication_authorized", False), ("verified", False), ("gpu_ocr_e2e", "PASS")):
+            self.report = copy.deepcopy(original)
+            self.report["current_source_e2e"][field] = value
+            with self.assertRaises(finalizer.FinalizationError, msg=field):
+                self.check()
+        self.report = copy.deepcopy(original)
+        self.report["artifact_kind"] = "base"
+        with self.assertRaises(finalizer.FinalizationError):
+            self.check("base")
+        self.report = copy.deepcopy(original)
+        self.report["current_source_e2e"]["user_acceptance"]["release_notes_approved"] = False
+        with self.assertRaises(finalizer.FinalizationError):
+            self.check()
+
+    def test_current_source_block_stale_binding_or_missing_raw_matrix_does_not_authorize(self):
+        original = copy.deepcopy(self.report)
+        for mutation in ("source", "binding", "startup", "ocr-pass"):
+            self.report = copy.deepcopy(original)
+            if mutation == "source":
+                self.report["source_delivery"]["status"] = "BLOCK"
+            elif mutation == "binding":
+                self.report["current_source_e2e"]["binding"] = {}
+            elif mutation == "startup":
+                self.report["gpu_worker_startup"] = {"status": "PASS"}
+            else:
+                self.report["gates"]["gpu_ocr_e2e"] = "PASS"
+            with self.assertRaises(finalizer.FinalizationError, msg=mutation):
+                self.check()
 
 
 class PowerShellEntryTests(FinalizeFixtures):

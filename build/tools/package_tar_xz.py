@@ -56,9 +56,10 @@ def _tar_filter(info: tarfile.TarInfo) -> tarfile.TarInfo:
     return info
 
 
-def _write_tar(root: Path, target: Path) -> int:
+def _write_tar(root: Path, target: Path | None, *, stream=None) -> int:
     members = 0
-    with tarfile.open(target, mode="w", format=tarfile.PAX_FORMAT) as archive:
+    # 流式路径直接把同样的标准PAX tar写入XZ，避免多GB中间tar副本。
+    with tarfile.open(target, fileobj=stream, mode="w|" if stream is not None else "w", format=tarfile.PAX_FORMAT) as archive:
         def add(path: Path, relative: str) -> None:
             nonlocal members
             # tarfile.add does not follow symlinks by default.  The explicit
@@ -157,7 +158,7 @@ def verify_archive(archive_path: Path, sevenzip: str | None = None) -> dict[str,
     }
 
 
-def create_archive(root: Path, output: Path, sevenzip: str | None = None) -> dict[str, object]:
+def create_archive(root: Path, output: Path, sevenzip: str | None = None, *, streaming: bool = False) -> dict[str, object]:
     if output.exists() or output.is_symlink():
         raise ArchiveError(f"refusing to overwrite existing archive: {output}")
     root = _resolve(root)
@@ -169,6 +170,17 @@ def create_archive(root: Path, output: Path, sevenzip: str | None = None) -> dic
     if output == root or root in output.parents:
         raise ArchiveError("archive output must not be inside its input root")
     output.parent.mkdir(parents=True, exist_ok=True)
+    if streaming:
+        if sevenzip is not None:
+            raise ArchiveError("streaming uses the existing Python LZMA2 writer, not an external compressor")
+        # 排他创建最终新路径；失败时保留现场，不覆盖旧归档，也不清理未知文件。
+        with output.open("xb") as destination:
+            with lzma.LZMAFile(destination, mode="w", format=lzma.FORMAT_XZ) as compressed:
+                member_count = _write_tar(root, None, stream=compressed)
+        result = verify_archive(output)
+        result.update(root=str(root), member_count=member_count,
+                      compressor="python-stdlib-streamed-standard-lzma2", temporary_tar_created=False)
+        return result
     candidates = [sevenzip] if sevenzip else list(dict.fromkeys(filter(None, [
         shutil.which("7z.exe"), shutil.which("7z"),
         *[str(Path(part) / "7z.exe") for part in os.environ.get("PATH", "").split(os.pathsep) if part],
@@ -233,6 +245,7 @@ def main(argv: list[str] | None = None) -> int:
     create.add_argument("--root", required=True, type=Path)
     create.add_argument("--output", required=True, type=Path)
     create.add_argument("--sevenzip", default=None)
+    create.add_argument("--streaming", action="store_true", help="用已有标准库直接写tar.xz，不落地中间tar，格式不变")
     create.add_argument("--integrity-output", type=Path, default=None)
     test = subparsers.add_parser("test", help="verify a tar.xz archive")
     test.add_argument("--archive", required=True, type=Path)
@@ -243,7 +256,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.integrity_output and (args.integrity_output.exists() or args.integrity_output.is_symlink()):
             raise ArchiveError(f"refusing to overwrite integrity report: {args.integrity_output}")
         if args.command == "create":
-            result = create_archive(args.root, args.output, args.sevenzip)
+            result = (create_archive(args.root, args.output, args.sevenzip, streaming=True) if args.streaming
+                      else create_archive(args.root, args.output, args.sevenzip))
         else:
             result = verify_archive(args.archive, _find_sevenzip(args.sevenzip))
         if args.integrity_output:

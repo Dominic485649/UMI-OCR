@@ -11,6 +11,9 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot "../.."))
 $About = Get-Content -Raw (Join-Path $RepoRoot "UmiOCR-data/about.json") | ConvertFrom-Json
 $Version = "$($About.version.major).$($About.version.minor).$($About.version.patch)"
+$CudaManifest = Get-Content -Raw (Join-Path $RepoRoot "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/umi-plugin.json") | ConvertFrom-Json
+$CudaVersion = [string]$CudaManifest.version
+if ($CudaManifest.id -cne "win32_PaddleOCRv6_CUDA" -or $CudaVersion -cnotmatch '^\d+\.\d+\.\d+$') { throw "CUDA source manifest has no valid independent version." }
 function Assert-NoLinks([string]$Path, [switch]$Tree) {
     # Check lexical prefixes before GetFullPath can hide a junction followed by '..'.
     $root = [IO.Path]::GetPathRoot($Path)
@@ -39,9 +42,9 @@ function Resolve-RepoPath([string]$Path) {
     Assert-NoLinks $Path
     return [IO.Path]::GetFullPath($Path)
 }
-if (-not $Destination) { $Destination = "build/artifacts/$Version-final/complete" }
+if (-not $Destination) { $Destination = "build/artifacts/$Version-cuda-$CudaVersion-final/complete" }
 if (-not $BaseStagingRoot) { $BaseStagingRoot = "build/staging/$Version-base-current" }
-if (-not $GpuStagingRoot) { $GpuStagingRoot = "build/staging/$Version-gpu-current" }
+if (-not $GpuStagingRoot) { $GpuStagingRoot = "build/staging/$CudaVersion-gpu-current" }
 $Destination = Resolve-RepoPath $Destination
 $BaseStagingRoot = Resolve-RepoPath $BaseStagingRoot
 $GpuStagingRoot = Resolve-RepoPath $GpuStagingRoot
@@ -53,6 +56,8 @@ $baseAboutPath = Join-Path $BaseStagingRoot "UmiOCR-data/about.json"
 if (-not (Test-Path -LiteralPath $baseAboutPath -PathType Leaf)) { throw "Build the current base staging first: $baseAboutPath" }
 $baseAbout = Get-Content -Raw $baseAboutPath | ConvertFrom-Json
 if ("$($baseAbout.version.major).$($baseAbout.version.minor).$($baseAbout.version.patch)" -ne $Version) { throw "Base staging does not match current about.json version: $Version" }
+$baseVersionPath = Join-Path $BaseStagingRoot "VERSION"
+if (-not (Test-Path -LiteralPath $baseVersionPath -PathType Leaf) -or (Get-Content -Raw $baseVersionPath).Trim() -cne $Version) { throw "Base VERSION does not match its about.json: $Version" }
 foreach ($name in @("source-snapshot.zip", "source-snapshot.json", "source-provenance.json")) {
     if (-not (Test-Path -LiteralPath (Join-Path $BaseStagingRoot $name) -PathType Leaf)) { throw "Base staging lacks current source delivery: $name" }
 }
@@ -66,7 +71,12 @@ foreach ($entry in $plugins) {
     $source = Join-Path $entry.built "UmiOCR-data/plugins/$($entry.name)"
     $manifestPath = Join-Path $source "umi-plugin.json"
     if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) { throw "Selected plugin staging is missing: $manifestPath" }
-    if ((Get-Content -Raw $manifestPath | ConvertFrom-Json).version -ne $Version) { throw "Selected plugin staging version does not match $Version" }
+    $selectedManifest = Get-Content -Raw $manifestPath | ConvertFrom-Json
+    # 可选组件以显式输入的插件清单为版本依据，不与主程序强制同版。
+    $selectedVersion = [string]$selectedManifest.version
+    if ($selectedManifest.id -cne $entry.name -or $selectedVersion -cnotmatch '^\d+\.\d+\.\d+$') { throw "Selected plugin staging has invalid identity/version: $($entry.name)" }
+    if ($entry.name -eq $CudaPluginId -and $selectedVersion -cne $CudaVersion) { throw "Selected CUDA staging version does not match current CUDA source: $CudaVersion" }
+    $entry.version = $selectedVersion
     if (-not (Test-Path -LiteralPath (Join-Path $entry.built "LICENSES") -PathType Container)) { throw "Selected plugin staging lacks licenses: $($entry.built)" }
     if ($Destination.StartsWith($entry.built.TrimEnd('\','/') + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw "Destination must not be inside an input staging tree." }
     foreach ($relative in @("UmiOCR-data/plugins/$($entry.name)", "LICENSES/plugins/$($entry.name)")) {
@@ -83,7 +93,7 @@ if (-not (Test-Path -LiteralPath $PythonExe -PathType Leaf)) { throw "Portable P
 $cudaPlan = & $PythonExe -I -B -S (Join-Path $RepoRoot "build/tools/prepare_cuda_overlay.py") --staging-root $GpuStagingRoot --validate-only
 if ($LASTEXITCODE -ne 0) { throw "CUDA source preflight failed; no candidate was created." }
 $cudaSource = $cudaPlan | ConvertFrom-Json
-if ($cudaSource.version -ne $Version) { throw "CUDA source records do not match current version: $Version" }
+if ($cudaSource.version -cne $CudaVersion) { throw "CUDA source records do not match current plugin version: $CudaVersion" }
 # Inputs are already built from current source; do not silently refresh files
 # over their locks/evidence. Assembly is copy integrity, not current E2E.
 Copy-Item -Recurse -LiteralPath $BaseStagingRoot -Destination $Destination
@@ -108,9 +118,11 @@ foreach ($entry in $plugins) {
         }
     }
 }
-Set-Content -Encoding utf8 -LiteralPath (Join-Path $Destination "VERSION") -Value $Version
+$pluginVersions = [ordered]@{}
+foreach ($entry in $plugins) { $pluginVersions[$entry.name] = $entry.version }
 [pscustomobject]@{
     version = $Version
+    plugin_versions = $pluginVersions
     scope = $(if ($CpuStagingRoot -or $VlStagingRoot) { "public-plus-explicit-development" } else { "public-base-and-cuda" })
     current_source_e2e = "NOT_RUN"
     public_release_allowed = $false

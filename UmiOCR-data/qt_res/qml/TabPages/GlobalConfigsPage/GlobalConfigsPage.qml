@@ -12,14 +12,15 @@ TabPage {
     id: tabPage
     property QtObject confComp: qmlapp.globalConfigs.panelComponent
     property var groupList: []
+    function refreshGroupList() { groupList = confComp.getGroupList() }
     onShowPage: {
         qmlapp.globalConfigs.ensurePanel()
-        groupList = confComp.getGroupList()
+        refreshGroupList()
     }
 
-    Component.onCompleted: {
-        const tips = qsTr("1. 快捷键和任务专用选项位于对应功能页。\n2. “高级”只展开 HDR 校准、性能和识别阈值等必要参数，每次启动默认收起。")
-        qmlapp.popup.messageMemory("globalConfigsKey", qsTr("小贴士"), tips)
+    Connections {
+        target: qmlapp.globalConfigs
+        function onPanelRebuilt() { tabPage.refreshGroupList() }
     }
 
     DoubleRowLayout {

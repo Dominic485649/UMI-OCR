@@ -395,5 +395,152 @@ class ReleaseGateTests(unittest.TestCase):
             self.assertRegex(result.stdout + result.stderr, "mutually exclusive|requires an explicit")
 
 
+startup_fixtures = load("release_startup_fixtures", "../../tests/test_gpu_startup_evidence.py")
+
+
+class StartupGateTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix="umi-startup-gates-")
+        self.addCleanup(self.temporary.cleanup)
+        self.fixture = startup_fixtures.StartupFixture(Path(self.temporary.name))
+        self.startup = startup_fixtures.startup
+        self.acceptance_path = self.fixture.audit / "current-review.txt"
+        self.notes = self.fixture.audit / "release-notes.txt"
+        self.write = startup_fixtures.write
+        self.write(self.notes, "3.0.4 program and release notes; OCR not retested.\n")
+        # These exact corresponding-source test members are tiny fixture bytes.
+        for name in gates.STARTUP_TEST_SOURCES:
+            self.write(self.fixture.metadata / "source" / name, "# fixture scoped test source\n")
+        _, self.fixture.binding, _ = gates.artifact_inputs(self.fixture.staging, "gpu")
+        self.fixture.matrix["binding"] = self.fixture.binding
+        host = json.loads(self.fixture.host_path.read_text("utf-8"))
+        host["binding"] = self.fixture.binding
+        self.write(self.fixture.host_path, host)
+        self.fixture.matrix["host_startup"] = self.fixture.ref(self.fixture.host_path)
+        self.fixture.save()
+        binding = self.fixture.binding
+        logs, runs = [], []
+        for optimization in (0, 1):
+            path = self.fixture.audit / f"unit-{optimization}.log"
+            self.write(path, "SYNTHETIC scoped unit test output\nRan 17 tests in 0.01s\n\nOK\n")
+            logs.append(path)
+            runs.append({"optimization": optimization, "exit_code": 0, "log": self.fixture.ref(path)})
+        self.unit_logs = logs
+        self.units = self.fixture.audit / "units.json"
+        self.write(self.units, {"schema_version": 1, "test_type": "cuda_startup_hotfix_unit_tests", "status": "PASS", "binding": binding,
+                                "runs": runs, "test_source_sha256": {name: gates.digest(self.fixture.metadata / "source" / name) for name in gates.STARTUP_TEST_SOURCES}})
+        matrix_ref = self.fixture.ref(self.fixture.matrix_path)
+        quotes = {"program_review_quote": "我已审查本轮程序，同意该程序。", "release_notes_quote": "我已审查本轮文案，同意该文案。",
+                  "limitations_disclosure_quote": "本轮 OCR 未重测，只验证启动，保留 NOT_RUN。", "publication_quote": "同意按所披露限制发布 3.0.4。"}
+        self.write(self.acceptance_path, "\n".join(["3.0.4", gates.STARTUP_SCOPE, binding["payload"]["sha256"], binding["source"]["sha256"],
+                                                  gates.digest(self.notes), matrix_ref["sha256"], *quotes.values()]))
+        self.record = {"validation_scope": gates.STARTUP_SCOPE, "status": "ACCEPTED_WITH_LIMITATIONS", "binding": binding,
+                       "gpu_ocr_e2e": "NOT_RUN", "manual_checks": {name: "NOT_RUN" for name in gates.MANUAL_CHECKS},
+                       "unverified_scenarios": ["OCR workflows not rerun for this startup-only hotfix", "HDR/mixed monitors not rerun"],
+                       "automated_evidence": {"startup_unit_tests": self.fixture.ref(self.units), "gpu_startup_matrix": matrix_ref},
+                       "user_acceptance": {"source": "Current 3.0.4 review conversation", "record": self.fixture.ref(self.acceptance_path),
+                                           "validation_scope": gates.STARTUP_SCOPE, "release_version": "3.0.4", "binding": binding,
+                                           "program_review_approved": True, "release_notes_approved": True, "publish_with_untested_ocr": True,
+                                           "release_notes": self.fixture.ref(self.notes), "evidence_binding": matrix_ref, **quotes}}
+
+    def verify(self, record=None, kind="gpu", authorized=True):
+        with self.fixture.patches(), patch.object(gates, "startup_evidence_module", return_value=self.startup):
+            return gates.verify_current_source(record or self.record, kind, self.fixture.binding, self.fixture.staging, authorized)
+
+    def blocked(self, record=None, kind="gpu", authorized=True):
+        with self.assertRaises((ValueError, OSError, TypeError, KeyError)):
+            self.verify(record, kind, authorized)
+
+    def test_complete_scoped_acceptance_keeps_ocr_not_run_and_public_paths_private(self):
+        result = self.verify()
+        self.assertEqual(result["status"], "ACCEPTED_WITH_LIMITATIONS")
+        self.assertEqual(result["gpu_ocr_e2e"], "NOT_RUN")
+        self.assertEqual(result["gpu_worker_startup"]["status"], "PASS")
+        self.assertTrue(gates.verified_startup_exception(result))
+        self.assertNotIn(str(self.fixture.root), json.dumps(result, ensure_ascii=False))
+        self.assertTrue(all(value == "NOT_RUN" for value in result["manual_checks"].values()))
+
+    def test_scope_cannot_apply_to_base_cpu_unknown_or_default_full(self):
+        self.blocked(kind="base")
+        self.blocked(kind="cpu")
+        for scope in (None, "full", "anything-else"):
+            record = copy.deepcopy(self.record)
+            if scope is None:
+                record.pop("validation_scope")
+            else:
+                record["validation_scope"] = scope
+            self.blocked(record)
+
+    def test_current_publication_authorization_is_not_inferred_from_startup_pass(self):
+        self.blocked(authorized=False)
+        for field in ("program_review_approved", "release_notes_approved", "publish_with_untested_ocr", "record", "release_notes", "evidence_binding", "binding", "release_version"):
+            record = copy.deepcopy(self.record)
+            record["user_acceptance"].pop(field)
+            self.blocked(record)
+
+    def test_old_hdr_approval_or_old_program_note_context_cannot_authorize_hotfix(self):
+        original = self.acceptance_path.read_bytes()
+        self.write(self.acceptance_path, "HDR捕获成功，3.0.3可以发布。")
+        record = copy.deepcopy(self.record)
+        record["user_acceptance"]["record"] = self.fixture.ref(self.acceptance_path)
+        self.blocked(record)
+        self.write(self.acceptance_path, original)
+        for field, value in (("release_version", "3.0.3"), ("limitations_disclosure_quote", "HDR捕获成功"),
+                             ("release_notes_quote", "我没有审查文案"), ("program_review_approved", 1)):
+            record = copy.deepcopy(self.record)
+            record["user_acceptance"][field] = value
+            self.blocked(record)
+
+    def test_negative_review_or_publication_quotes_cannot_become_boolean_approval(self):
+        original = self.acceptance_path.read_text("utf-8")
+        for field, quote in (("program_review_quote", "我不同意本轮程序。"), ("release_notes_quote", "I do not approve these release notes."),
+                             ("publication_quote", "现在不能发布 3.0.4。")):
+            record = copy.deepcopy(self.record)
+            old_quote = record["user_acceptance"][field]
+            record["user_acceptance"][field] = quote
+            self.write(self.acceptance_path, original.replace(old_quote, quote))
+            record["user_acceptance"]["record"] = self.fixture.ref(self.acceptance_path)
+            self.blocked(record)
+        self.write(self.acceptance_path, original)
+
+    def test_ocr_must_remain_explicit_not_run_not_pass_block_or_other_token(self):
+        for value in ("PASS", "BLOCK", "NOT_INCLUDED", None, False):
+            record = copy.deepcopy(self.record)
+            record["gpu_ocr_e2e"] = value
+            self.blocked(record)
+        record = copy.deepcopy(self.record)
+        record["status"] = "PASS"
+        self.blocked(record)
+        record = copy.deepcopy(self.record)
+        record["manual_checks"]["manual_hdr_acceptance"] = "PASS"
+        self.blocked(record)
+
+    def test_only_scoped_unit_evidence_is_accepted_and_must_include_normal_and_optimized_runs(self):
+        record = copy.deepcopy(self.record)
+        record["automated_evidence"]["base_tests"] = record["automated_evidence"]["startup_unit_tests"]
+        self.blocked(record)
+        units = json.loads(self.units.read_text("utf-8"))
+        units["runs"] = units["runs"][:1]
+        self.write(self.units, units)
+        record = copy.deepcopy(self.record)
+        record["automated_evidence"]["startup_unit_tests"] = self.fixture.ref(self.units)
+        self.blocked(record)
+
+    def test_no_public_current_source_is_always_block_even_with_valid_startup_acceptance(self):
+        receipt = {"schema_version": 1, "artifact_kind": "gpu", "release_version": "3.0.4", "publication_authorized": True,
+                   "source_delivery": {"status": "PASS", "repositories": [{"role": "cuda", "url": gates.PUBLIC_REPOSITORIES["cuda"],
+                       "tag": "v3.0.4", "commit": "a" * 40, "checkout": str(self.fixture.root)}]}, "current_source_e2e": self.record}
+        path = self.fixture.audit / "gates.json"
+        self.write(path, receipt)
+        with self.fixture.patches(), patch.object(gates, "startup_evidence_module", return_value=self.startup), patch.object(gates, "public_tag", side_effect=ValueError("Current public v3.0.4 source unavailable")):
+            result = gates.validate_release_gates(path, self.fixture.staging, "gpu")
+        self.assertEqual(result["source_delivery"]["status"], "BLOCK")
+        self.assertEqual(result["current_source_e2e"]["status"], "ACCEPTED_WITH_LIMITATIONS")
+        component_gates = {"source_delivery": result["source_delivery"], "current_source_e2e": result["current_source_e2e"],
+                           "gpu_worker_startup": result["current_source_e2e"]["gpu_worker_startup"],
+                           "gpu_ocr_e2e": {"status": "NOT_RUN", "validation_scope": gates.STARTUP_SCOPE}}
+        self.assertFalse(verifier.public_release_allowed(component_gates))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

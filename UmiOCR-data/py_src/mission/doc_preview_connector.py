@@ -18,6 +18,7 @@ MinSize = 0  # 最小渲染分辨率
 # 文档预览连接器
 class DocPreviewConnector(QObject):
     previewImg = Signal(str)  # imgID
+    previewInfo = Signal("QVariant")  # 实际文档页数，与当前渲染使用同一代次
     previewOcr = Signal("QVariant")  # [path, page, res]
     # 注：信号中含多个变量可能导致崩溃？
 
@@ -59,6 +60,7 @@ class DocPreviewConnector(QObject):
             return
         if revision != self._renderRevision:
             return
+        info = {"path": path, "page": page + 1, "pageCount": 0, "error": ""}
         try:
             key = (session, path, password)
             if key != self._previewKey:
@@ -67,9 +69,13 @@ class DocPreviewConnector(QObject):
                 self._previewKey = key
                 if self._previewDoc.is_encrypted and not self._previewDoc.authenticate(password):
                     self._closePreviewDoc()
-                    CallFunc.now(self._deliverPreview, revision, "[Warning] is_encrypted")
+                    info["error"] = "[Warning] is_encrypted"
+                    CallFunc.now(self._deliverPreviewInfo, revision, info)
+                    CallFunc.now(self._deliverPreview, revision, info["error"])
                     return
             doc = self._previewDoc
+            info["pageCount"] = doc.page_count
+            CallFunc.now(self._deliverPreviewInfo, revision, dict(info))
             if page < 0 or page >= doc.page_count:
                 raise ValueError(f"页数 {page} 超出范围 0-{doc.page_count} 。")
             rect = doc[page].rect
@@ -86,11 +92,17 @@ class DocPreviewConnector(QObject):
             CallFunc.now(self._deliverPreview, revision, image, page, zoom)
         except Exception as exc:
             self._closePreviewDoc()
-            CallFunc.now(self._deliverPreview, revision, f"[Error] 打开文档失败：{path} {exc}")
+            info["error"] = f"[Error] 打开文档失败：{path} {exc}"
+            CallFunc.now(self._deliverPreviewInfo, revision, info)
+            CallFunc.now(self._deliverPreview, revision, info["error"])
         finally:
             # replace 不能取消已在执行的渲染，结束时仍要释放其旧文档资源。
             if revision != self._renderRevision:
                 self._closePreviewDoc()
+
+    def _deliverPreviewInfo(self, revision, info):
+        if revision == self._renderRevision:
+            self.previewInfo.emit(info)
 
     def _deliverPreview(self, revision, result, page=-1, zoom=1):
         # 必须在主线程实际交付时复核，不能只在 worker emit 前判断。

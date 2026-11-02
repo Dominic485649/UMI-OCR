@@ -15,6 +15,23 @@ Item {
     property int historyBytes: 0
     property alias ctrlBar: ctrlBar // 控制栏的引用
 
+    // 警告只用于状态栏、提示和通知，绝不混入 OCR 正文或复制内容。
+    function resultNotice(res) {
+        const warnings = []
+        const source = Array.isArray(res.warnings) ? res.warnings : (res.warnings ? [res.warnings] : [])
+        for(const warning of source) {
+            if(warning === undefined || warning === null) continue
+            const text = String(typeof warning === "object" ? (warning.message || JSON.stringify(warning)) : warning).trim()
+            if(text && warnings.indexOf(text) < 0) warnings.push(text)
+        }
+        const partial = res.partial === true && (res.code === 100 || res.code === 101)
+        return {
+            partial: partial,
+            label: partial ? qsTr("部分结果") : (warnings.length ? qsTr("结果警告") : ""),
+            warningText: warnings.join("\n") || (partial ? qsTr("识别未全部完成，当前仅显示已获得的结果。") : "")
+        }
+    }
+
     // 添加一条OCR结果。元素：
     // timestamp 时间戳，秒为单位
     // title 左边显示标题，可选
@@ -52,6 +69,9 @@ Item {
                 resText = qsTr("异常状态码：%1\n异常信息：%2").arg(res.code).arg(res.data)
                 break
         }
+        const notice = resultNotice(res)
+        if((res.code === 100 || res.code === 101) && notice.label)
+            status_ = notice.partial ? "partial" : "warning"
         // 补充空白标题
         if(res.title === undefined) {
             const t1 = res.time.toFixed(2)
@@ -69,7 +89,8 @@ Item {
         // 添加到列表模型
         resultsModel.append({
             "status__": status_,
-            "title": res.title,
+            "title": notice.label && (res.code === 100 || res.code === 101) ? notice.label + " | " + res.title : res.title,
+            "warningText_": notice.warningText,
             "datetime": dateTimeString,
             "resText": resText,
             "timestamp": res.timestamp,
@@ -155,6 +176,7 @@ Item {
         // ==================== 【元素】 ====================
         delegate: ResultTextContainer {
             status_: status__
+            warningText: warningText_
             textLeft: title
             textRight: datetime
             textMain: resText
@@ -208,6 +230,14 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         property var tableChi: tableView.children[0].children
         hoverEnabled: true
+        property string hoverWarning: ""
+        onExited: hoverWarning = ""
+        ToolTip_ {
+            visible: tableMouseArea.containsMouse && !tableMouseArea.pressed && tableMouseArea.hoverWarning !== ""
+            text: tableMouseArea.hoverWarning
+            x: Math.max(0, Math.min(tableMouseArea.mouseX + size_.spacing, tableMouseArea.width - width))
+            y: tableMouseArea.mouseY + size_.line
+        }
         property int startIndex: -1 // 拖拽开始时，文本框序号
         property int startTextIndex: -1 // 拖拽开始时，字符序号
         property int endIndex: -1 // 拖拽结束时，文本框序号
@@ -420,6 +450,7 @@ Item {
         // 移动
         onPositionChanged: {
             const info = getWhere(pressed)
+            hoverWarning = info && info.where === -1 ? info.obj.warningText : ""
             // 根据所在区域，调整光标
             if(info===undefined) {
                 tableMouseArea.cursorShape = Qt.ArrowCursor

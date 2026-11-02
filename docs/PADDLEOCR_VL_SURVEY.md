@@ -77,17 +77,17 @@
 - 下载量：705,670（远高于所有第三方版本之和）
 - 证据：<https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.6-GGUF>，文件清单 <https://huggingface.co/api/models/PaddlePaddle/PaddleOCR-VL-1.6-GGUF/tree/main?recursive=true>
 
-官方 README 给出的 llama.cpp 用法：
+llama.cpp 用法如下。2026-10-25 已按本机源码及当前上游文档将服务端与客户端示例统一到新默认端口 `9931`；用户显式配置的其他端口仍有效。
 ```bash
 llama-server \
     -m /path/to/PaddleOCR-VL-1.6-GGUF.gguf \
     --mmproj /path/to/PaddleOCR-VL-1.6-GGUF-mmproj.gguf \
-    --port 8080 --host 0.0.0.0 --temp 0
+    --port 9931 --host 127.0.0.1 --temp 0
 ```
 配合 PaddleOCR 侧：
 ```bash
 paddleocr doc_parser -i <image> --pipeline_version v1.6 \
-    --vl_rec_backend llama-cpp-server --vl_rec_server_url http://127.0.0.1:8080/v1
+    --vl_rec_backend llama-cpp-server --vl_rec_server_url http://127.0.0.1:9931/v1
 ```
 官方支持任务：OCR、公式识别、表格识别、图表识别、印章识别、text spotting。
 

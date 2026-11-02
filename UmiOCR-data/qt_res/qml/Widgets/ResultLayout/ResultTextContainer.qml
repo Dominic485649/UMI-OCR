@@ -10,7 +10,8 @@ import "../"
 Item {
     id: resultRoot
 
-    property string status_: "" // 状态， text / noText / error
+    property string status_: "" // 状态，text / noText / partial / warning / error
+    property string warningText: "" // 只用于标题栏提示，不进入可复制正文
     property alias textLeft: textLeft_.text
     property string textRight: ""
     property alias textMain: textMain_.text
@@ -93,7 +94,7 @@ Item {
             anchors.bottom: parent.bottom
             anchors.rightMargin: size_.spacing
             anchors.bottomMargin: size_.smallSpacing
-            color: theme.subTextColor
+            color: status_ === "partial" || status_ === "warning" ? theme.noColor : theme.subTextColor
             font.pixelSize: size_.smallText
             font.family: theme.dataFontFamily
             clip: true

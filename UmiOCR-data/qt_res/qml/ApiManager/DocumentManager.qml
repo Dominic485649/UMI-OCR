@@ -31,6 +31,13 @@ Item {
         "api": {
             "title": qsTr("当前接口"),
             "optionsList": [],
+            "onChanged": (value, old)=>{
+                if(old === undefined) return
+                if(qmlapp.globalConfigs.backendsBusy() || applying || qmlapp.globalConfigs.applyPhase !== 0) {
+                    qmlapp.popup.simple(qsTr("无法切换模型"), qsTr("任务正在运行或模型配置正在应用，请稍后重试。"))
+                    return true
+                }
+            },
         },
     }
 

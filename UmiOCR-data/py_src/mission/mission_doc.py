@@ -1,3 +1,4 @@
+from ..utils.runtime_i18n import tr
 # ===============================================
 # =============== 文档 - 任务管理器 ===============
 # ===============================================
@@ -87,10 +88,11 @@ class _MissionDocClass(Mission):
         except Exception as e:
             return f"[Error] fitz.open error: {msnPath} {e}"
         if doc.is_encrypted and not doc.authenticate(password):
+            doc.close()
             if password:
-                msg = f"[Error] Incorrect password. 文档已加密，密码错误。 [{password}]"
+                msg = tr('[Error] Incorrect password. 文档已加密，密码错误。 [{password}]', password=password)
             else:
-                msg = "[Error] Doc encrypted. 文档已加密，请提供密码。"
+                msg = tr('[Error] Doc encrypted. 文档已加密，请提供密码。')
             return msg
         msnInfo["doc"] = doc
         msnInfo["path"] = msnPath
@@ -107,22 +109,22 @@ class _MissionDocClass(Mission):
                 if b < 0:
                     b += page_count + 1
                 if a < 1:
-                    return f"[Error] pageRange {pageRange} 范围起始不能小于1"
+                    return tr('[Error] pageRange {pagerange} 范围起始不能小于1', pagerange=pageRange)
                 if b > page_count:
-                    return f"[Error] pageRange {pageRange} 范围结束不能大于页数 {doc.page_count}"
+                    return tr('[Error] pageRange {pagerange} 范围结束不能大于页数 {page_count}', pagerange=pageRange, page_count=doc.page_count)
                 if a > b:
-                    return f"[Error] pageRange {pageRange} 范围错误"
+                    return tr('[Error] pageRange {pagerange} 范围错误', pagerange=pageRange)
                 pageList = list(range(a - 1, b))
             else:
                 pageList = list(range(0, page_count))
         # 检查页数列表合法性
         if len(pageList) == 0:
-            return "[Error] 页数列表为空"
+            return tr('[Error] 页数列表为空')
         for p in pageList:
             if not isinstance(p, int):
-                return "[Error] 页数列表内容非整数"
+                return tr('[Error] 页数列表内容非整数')
             if not 0 <= p < page_count:
-                return f"[Error] 页数列表超出 1~{page_count} 范围"
+                return tr('[Error] 页数列表超出 1~{page_count} 范围', page_count=page_count)
         msnInfo["pageList"] = pageList
         # =============== tbpu文本块后处理 msnInfo["tbpu"] ===============
         argd = msnInfo["argd"]  # 参数
@@ -142,7 +144,7 @@ class _MissionDocClass(Mission):
                     igEnd += page_count + 1
                 msnInfo["ignoreArea"]["start"] = igStart - 1  # -1是将起始1页转为起始0页
                 msnInfo["ignoreArea"]["end"] = igEnd - 1
-                logger.debug(f"忽略区域范围： {igStart} ~ {igEnd} 。")
+                logger.debug(tr('忽略区域范围： {igstart} ~ {igend} 。', igstart=igStart, igend=igEnd))
         # 获取排版解析器对象
         if "tbpu.parser" in argd:
             msnInfo["tbpu"].append(getParser(argd["tbpu.parser"]))
@@ -154,10 +156,7 @@ class _MissionDocClass(Mission):
         page = doc[pno]  # 页面对象
         argd = msnInfo["argd"]  # 参数
         extractionMode = argd["doc.extractionMode"]  # OCR内容模式
-        """ mixed - 混合OCR/拷贝文本
-            fullPage - 整页强制OCR
-            imageOnly - 仅OCR图片
-            textOnly - 仅拷贝原有文本 """
+        ' mixed - 混合OCR/拷贝文本\n            fullPage - 整页强制OCR\n            imageOnly - 仅OCR图片\n            textOnly - 仅拷贝原有文本 '
         errMsg = ""  # 本次任务流程的异常信息
 
         # =============== 提取图片和原文本 ===============
@@ -175,6 +174,10 @@ class _MissionDocClass(Mission):
             else:
                 zoom = 1
                 matrix = fitz.Identity
+            import math
+            render_w, render_h = math.ceil(w * zoom), math.ceil(h * zoom)
+            if max(render_w, render_h) > 32768 or render_w * render_h > 32 * 1024 * 1024:
+                raise ValueError(tr('IMAGE_BUDGET_EXCEEDED：文档页面渲染超过尺寸或像素预算，请缩小页面或使用结构化文档识别。'))
             p = page.get_pixmap(matrix=matrix)
             bytes = p.tobytes("png")
             scale = 1 / zoom
@@ -208,7 +211,7 @@ class _MissionDocClass(Mission):
                     scale_h = h1 / h2
                     # 如果图片有绝对旋转，则逆向旋转图片字节
                     if page_rotation != 0 or img_rotation != 0:
-                        logger.debug(f"P{pno}-{len(imgs)} 旋转：页面{page_rotation}°，图片{img_rotation}°，绝对{abs_rotation}°")
+                        logger.debug(tr('P{pno}-{imgs} 旋转：页面{page_rotation}°，图片{img_rotation}°，绝对{abs_rotation}°', pno=pno, imgs=len(imgs), page_rotation=page_rotation, img_rotation=img_rotation, abs_rotation=abs_rotation))
                     if abs_rotation != 0:
                         try:
                             with Image.open(BytesIO(img_bytes)) as pimg:
@@ -224,7 +227,7 @@ class _MissionDocClass(Mission):
                                 img_bytes = buffered.getvalue()
                         except Exception:
                             logger.error(
-                                "旋转文档图片异常。", exc_info=True, stack_info=True
+                                tr('旋转文档图片异常。'), exc_info=True, stack_info=True
                             )
                     # 记录图片
                     imgs.append(
@@ -297,10 +300,14 @@ class _MissionDocClass(Mission):
                     ocrArgd[k] = argd[k]
             ocrArgd["ocr.taskType"] = "document"
             # 调用OCR，堵塞等待任务完成
-            ocrList = MissionOCR.addMissionWait(ocrArgd, imgs)
+            ocr_manager = msnInfo.get("ocrManager", MissionOCR)
+            ocrList = ocr_manager.addMissionWait(ocrArgd, imgs)
             # 整理OCR结果
             for o in ocrList:
                 res = o["result"]
+                if res.get("partial") or res.get("warnings"):
+                    warnings = res.get("warnings") or [tr('图片中的部分区域未完成识别。')]
+                    errMsg += "[Warning] " + "\n".join(str(item) for item in warnings) + "\n"
                 if res["code"] == 100:
                     x, y = o["xy"]
                     scale_w = o["scale_w"]
@@ -330,11 +337,13 @@ class _MissionDocClass(Mission):
 
         # =============== 组装结果字典 resDict ===============
         if errMsg:
-            logger.error(f"文档识别异常。P{pno}, errMsg: {errMsg}")
+            logger.error(tr('文档识别异常。P{pno}, errMsg: {errmsg}', pno=pno, errmsg=errMsg))
             errMsg = f"[Error] Doc P{pno}\n" + errMsg
 
-        if tbs:  # 有文本
+        if tbs:  # 保留成功文本，同时显式报告未完成区域。
             resDict = {"code": 100, "data": tbs}
+            if errMsg:
+                resDict.update({"partial": True, "warnings": [errMsg]})
         elif errMsg:  # 无文本，有异常
             resDict = {"code": 102, "data": errMsg}
         else:  # 无文本，无异常

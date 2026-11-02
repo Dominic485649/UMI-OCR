@@ -8,7 +8,11 @@ import ThemeConnector 1.0
 Item {
     id: manager
     property string followSystemKey: "__follow_system__"
-    property string selectedTheme: "Default Light"
+    property string selectedTheme: followSystemKey
+    // 按实际背景亮度同步原生栏；显式深浅主题不受系统模式替代。
+    property bool appliedDark: (theme.bgColor.r * 0.2126 + theme.bgColor.g * 0.7152 + theme.bgColor.b * 0.0722) < 0.5
+    onAppliedDarkChanged: Qt.callLater(syncNativeTitleBar)
+    function syncNativeTitleBar() { tConn.syncWindowTheme(mainWindowRoot, appliedDark) }
     property string systemLightTheme: "Default Light"
     property string systemDarkTheme: "Neutral Dark"
     // ==================== 【接口】 ====================
@@ -45,6 +49,7 @@ Item {
         for(const k of theme.keys) {
             theme[k] = target[k]
         }
+        Qt.callLater(syncNativeTitleBar)
     }
 
     function configure(th, lightTheme, darkTheme) {
@@ -84,6 +89,9 @@ Item {
     ThemeConnector {
         id: tConn
         onSystemDarkChanged: manager.applyTheme()
+        onNativeThemeFailed: function(message) {
+            qmlapp.popup.simple(qsTr("标题栏主题同步失败"), message)
+        }
     }
 
     // 从json字符串加载主题配置，写入 theme.all 。返回是否成功

@@ -1,3 +1,4 @@
+from ..utils.runtime_i18n import tr
 import os
 import re
 import json
@@ -20,57 +21,57 @@ from ..mission.mission_doc import MissionDOC, DocSuf
 from ..utils.utils import initConfigDict
 from ..ocr.output.tools import getDataText
 
-UPLOAD_DIR = "./temp_doc"  # 上传文件临时目录
+UPLOAD_DIR = "./temp_doc/http-doc"  # 仅本 HTTP 模块创建的任务目录
 TEMP_FILE_RETENTION_DURATION = 24  # 任务临时文件保留时长，小时
 TEMP_FILE_CLEANUP_INTERVAL = 0.5  # 自动清理临时文件的间隔，小时
 
 
 # 获取参数模板字典
-def get_doc_options():
-    opts = get_ocr_options(is_format=False)
+def get_doc_options(backend_id="current", local_options=None):
+    opts = get_ocr_options(is_format=False, backend_id=backend_id, local_options=local_options)
     opts["tbpu.ignoreRangeStart"] = {
-        "title": "忽略区域起始",
-        "toolTip": "忽略区域生效的页数范围起始。从1开始。",
+        "title": tr('忽略区域起始'),
+        "toolTip": tr('忽略区域生效的页数范围起始。从1开始。'),
         "default": 1,
         "isInt": True,
     }
     opts["tbpu.ignoreRangeEnd"] = {
-        "title": "忽略区域结束",
-        "toolTip": "忽略区域生效的页数范围结束。可以用负数表示倒数第X页。",
+        "title": tr('忽略区域结束'),
+        "toolTip": tr('忽略区域生效的页数范围结束。可以用负数表示倒数第X页。'),
         "default": -1,
         "isInt": True,
     }
     opts["pageRangeStart"] = {
-        "title": "OCR页数起始",
-        "toolTip": "OCR的页数范围起始。从1开始。",
+        "title": tr('OCR页数起始'),
+        "toolTip": tr('OCR的页数范围起始。从1开始。'),
         "default": 1,
         "isInt": True,
     }
     opts["pageRangeEnd"] = {
-        "title": "OCR页数结束",
-        "toolTip": "OCR的页数范围结束。可以用负数表示倒数第X页。",
+        "title": tr('OCR页数结束'),
+        "toolTip": tr('OCR的页数范围结束。可以用负数表示倒数第X页。'),
         "default": -1,
         "isInt": True,
     }
     opts["pageList"] = {
-        "title": "OCR页数列表",
-        "toolTip": "数组，可指定单个或多个页数。例：[1,2,5]表示对第1、2、5页进行OCR。如果与页数范围同时填写，则 pageList 优先。",
+        "title": tr('OCR页数列表'),
+        "toolTip": tr('数组，可指定单个或多个页数。例：[1,2,5]表示对第1、2、5页进行OCR。如果与页数范围同时填写，则 pageList 优先。'),
         "default": [],
         "type": "var",
     }
     opts["password"] = {
-        "title": "密码",
-        "toolTip": "如果文档已加密，则填写文档密码。",
+        "title": tr('密码'),
+        "toolTip": tr('如果文档已加密，则填写文档密码。'),
         "default": "",
     }
     opts["doc.extractionMode"] = {
-        "title": "内容提取模式",
-        "toolTip": "若一页文档既存在图片又存在文本，如何进行处理。",
+        "title": tr('内容提取模式'),
+        "toolTip": tr('若一页文档既存在图片又存在文本，如何进行处理。'),
         "optionsList": [
-            ["mixed", "混合OCR/原文本"],
-            ["fullPage", "整页强制OCR"],
-            ["imageOnly", "仅OCR图片"],
-            ["textOnly", "仅拷贝原有文本"],
+            ["mixed", tr('混合OCR/原文本')],
+            ["fullPage", tr('整页强制OCR')],
+            ["imageOnly", tr('仅OCR图片')],
+            ["textOnly", tr('仅拷贝原有文本')],
         ],
     }
     opts = initConfigDict(opts)  # 格式化
@@ -90,80 +91,75 @@ class DocUnitError(Exception):
 
 # 单个任务单元
 class _DocUnit:
-    def __init__(
-        self, dir_id, dir_path, origin_path, origin_name, origin_prefix, options
-    ):
-        # 提取文档信息
+    def __init__(self, dir_id, dir_path, origin_path, origin_name, origin_prefix,
+                 options, backend_id="current"):
+        from .backend_router import select_backend
+        from .request_validation import validate_options, validate_visual_budget
+        from ..mission.backend_runtime import BackendRuntime
         doc_info = MissionDOC.getDocInfo(origin_path)
-        if "error" in doc_info.keys():
-            raise DocUnitError({"code": 201, "data": doc_info["error"]})
-
-        # 补充缺失的默认参数
-        default = get_doc_options()
-        _apply_preset_options(options, default)
-        for key in default:
-            if key not in options:
-                options[key] = default[key]["default"]
-
-        # 提取参数
-        page_range = [options["pageRangeStart"], options["pageRangeEnd"]]  # 识别范围
-        page_list = options["pageList"]  # 页数列表
-        if page_list:  # 下标起始由1转为0
-            page_list = [x - 1 for x in page_list]
-        password = options["password"]  # 密码
-        if not password and doc_info["is_encrypted"]:
-            raise DocUnitError(
-                {
-                    "code": 202,
-                    "data": "The doc is encrypted, please fill in the password.",
-                }
-            )
-
-        # 从 options 中提取一些条目，组装 docArgd 作为 MissionDoc 任务参数字典
-        prefixes = ["ocr.", "doc.", "tbpu."]  # 要提取的条目前缀
-        doc_argd = {}
-        for k, v in options.items():
-            for prefix in prefixes:
-                if k.startswith(prefix):
-                    doc_argd[k] = v
-                    break
-
-        # 任务信息
-        msnInfo = {
-            "onStart": self._onStart,
-            "onGet": self._onGet,
-            "onEnd": self._onEnd,
-            "argd": doc_argd,
-        }
-
-        # 提交任务
-        self.msnID = ""
-        msg = MissionDOC.addMission(
-            msnInfo, origin_path, page_range, page_list, password
-        )
-        if not msg:
-            raise DocUnitError({"code": 203, "data": "addMission unknow."})
-        if msg.startswith("["):
-            raise DocUnitError({"code": 204, "data": msg})
-        page_list = msnInfo["pageList"]
-
-        self.password = password
-        self.dir_id = dir_id
-        self.dir_path = dir_path
-        self.origin_prefix = origin_prefix
-        self.origin_name = origin_name
-        self.origin_path = origin_path
-        self.msnID = msg  # 任务ID
-        self.results = {}  # 任务结果原始字典，键为页数
-        self.pages_count = len(page_list)  # 任务总页数
-        self.processed_count = 0  # 已处理的页数
-        self.unread_list = []  # 未读的任务列表
-        self.is_done = False  # 当前任务是否完成
-        self.state = "waiting"  # 任务状态， waiting running success failure
-        self.message = ""  # 如果任务失败，则记录失败信息
-        self.start_timestamp = time.time()  # 开始时间戳
-        self.end_timestamp = time.time()  # 任务结束的时间戳
-        self._mutex = QMutex()  # 主锁
+        if "error" in doc_info:
+            raise DocUnitError({"code": 201, "data": str(doc_info["error"])})
+        self._selection = None
+        try:
+            if options.get("doc.extractionMode", "mixed") != "textOnly":
+                # current 且未配置 OCR 时仍允许混合模式提取已有文本；只有真的
+                # 遇到图片，旧 MissionOCR 才按既有契约返回未配置后端的错误。
+                self._selection = select_backend("ocr", backend_id)
+            definitions = get_doc_options(
+                self._selection.backend_id if self._selection else backend_id,
+                self._selection.local_options if self._selection else None)
+            _apply_preset_options(options, definitions)
+            options = validate_options(options, definitions)
+            page_range = [options["pageRangeStart"], options["pageRangeEnd"]]
+            page_list = options["pageList"]
+            count = doc_info["page_count"]
+            if page_list and (len(page_list) > 500 or any(type(page) is not int or page < 1 or page > count for page in page_list)):
+                raise DocUnitError({"code": 204, "data": tr('页数列表无效或超过预算。')})
+            start = page_range[0] if page_range[0] > 0 else count + page_range[0] + 1
+            end = page_range[1] if page_range[1] > 0 else count + page_range[1] + 1
+            if not page_list and (start < 1 or end < start or end > count or end - start >= 500):
+                raise DocUnitError({"code": 204, "data": tr('页范围无效或一次超过 500 页。')})
+            page_list = [page - 1 for page in page_list]
+            password = options["password"]
+            if not password and doc_info["is_encrypted"]:
+                raise DocUnitError({"code": 202, "data": tr('文档已加密，请提供密码。')})
+            if self._selection:
+                validate_visual_budget(self._selection.backend_id, self._selection.config,
+                                       options.get("ocr.maxOutputTokens", 4096))
+                if self._selection.private:
+                    self._selection.manager._retain_runtime = True
+        except BaseException:
+            if self._selection:
+                self._selection.close()
+            raise
+        # 接纳前建立回调状态，支持任务立即完成。
+        self.password, self.dir_id, self.dir_path = password, dir_id, dir_path
+        self.origin_prefix, self.origin_name, self.origin_path = origin_prefix, origin_name, origin_path
+        self.msnID = str(uuid4())
+        self.results, self.unread_list = {}, []
+        self.pages_count = len(page_list) if page_list else end - start + 1
+        self.processed_count, self.is_done = 0, False
+        self.state, self.message = "waiting", ""
+        self.start_timestamp = self.end_timestamp = time.time()
+        self._mutex = QMutex()
+        doc_argd = {key: value for key, value in options.items()
+                    if key.startswith(("ocr.", "doc.", "tbpu."))}
+        msnInfo = {"_reserved_msnID": self.msnID, "onStart": self._onStart,
+                   "onGet": self._onGet, "onEnd": self._onEnd, "argd": doc_argd}
+        if self._selection:
+            msnInfo["ocrManager"] = self._selection.manager
+            if self._selection.private:
+                BackendRuntime.reserve(self.msnID, self._selection.backend_id)
+        try:
+            msg = MissionDOC.addMission(msnInfo, origin_path, page_range, page_list, password)
+            if not msg or msg.startswith("["):
+                raise DocUnitError({"code": 204, "data": msg or tr('提交文档任务失败。')})
+            self.pages_count = len(msnInfo["pageList"])
+        except BaseException:
+            BackendRuntime.unreserve(self.msnID)
+            if self._selection:
+                self._selection.close()
+            raise
 
     # ========================= 【接口】 =========================
 
@@ -217,13 +213,13 @@ class _DocUnit:
         ignore_blank=True,  # 忽略空白页数
     ):
         if not self.is_done:
-            return {"code": 201, "data": f"{self.msnID} 任务尚未结束，无法获取文件"}
+            return {"code": 201, "data": tr('{msnid} 任务尚未结束，无法获取文件', msnid=self.msnID)}
         if not self.state == "success":
-            return {"code": 201, "data": f"{self.msnID} 任务处理失败，无法获取文件"}
+            return {"code": 201, "data": tr('{msnid} 任务处理失败，无法获取文件', msnid=self.msnID)}
         if not isinstance(file_types, list) or not isinstance(ignore_blank, bool):
             return {
                 "code": 202,
-                "data": f"参数类型错误： file_types={file_types} , ignore_blank={ignore_blank}",
+                "data": tr('参数类型错误： file_types={file_types} , ignore_blank={ignore_blank}', file_types=file_types, ignore_blank=ignore_blank),
             }
 
         # 删除旧的文件
@@ -252,7 +248,7 @@ class _DocUnit:
             for f in file_types:
                 output.append(Output[f](outputArgd))
         except Exception as e:
-            return {"code": 203, "data": f"初始化输出器失败。{e}"}
+            return {"code": 203, "data": tr('初始化输出器失败。{e}', e=e)}
 
         # 输出
         for o in output:
@@ -260,11 +256,11 @@ class _DocUnit:
                 try:
                     o.print(res)
                 except Exception as e:
-                    return {"code": 204, "data": f"输出失败：{o}\n{e}"}
+                    return {"code": 204, "data": tr('输出失败：{o}\n{e}', o=o, e=e)}
             try:
                 o.onEnd()  # 保存
             except Exception as e:
-                return {"code": 205, "data": f"保存失败：{o}\n{e}"}
+                return {"code": 205, "data": tr('保存失败：{o}\n{e}', o=o, e=e)}
 
         # 收集新的文件
         download_paths = []
@@ -274,7 +270,7 @@ class _DocUnit:
                 download_paths.append(file_path)
         # 如果文件多，则打包zip
         if not download_paths:
-            return {"code": 206, "data": "未找到生成的文件"}
+            return {"code": 206, "data": tr('未找到生成的文件')}
         elif len(download_paths) == 1:
             download_name = os.path.basename(download_paths[0])
         else:
@@ -286,7 +282,7 @@ class _DocUnit:
                     for p in download_paths:
                         zipf.write(p, os.path.basename(p))
             except Exception as e:
-                return {"code": 207, "data": f"无法打包zip：{e}"}
+                return {"code": 207, "data": tr('无法打包zip：{e}', e=e)}
 
         # 组合下载地址
         url = f"{base_url}/api/doc/download/{self.dir_id}/{download_name}"
@@ -295,17 +291,23 @@ class _DocUnit:
 
     # 清理任务
     def clear(self):
-        # 停止任务
         if not self.is_done:
             MissionDOC.stopMissionList([self.msnID])
-            time.sleep(0.1)  # 给一些时间收尾
-        # 尝试删除目录。如果权限原因无法删除，说明OCR线程还在占用，等待OCR结束。
-        for i in range(20):
-            try:
-                if os.path.exists(self.dir_path):
-                    shutil.rmtree(self.dir_path)
-            except PermissionError:
-                time.sleep(1)
+            if self._selection:
+                self._selection.manager.stopAllMissions()
+            return False  # 取消完成前不删除仍可能由 worker 使用的输入。
+        from .structured_document_server import _safe_path
+        root = _safe_path(self.dir_path, UPLOAD_DIR)
+        if root.name != self.dir_id:
+            return False
+        if any(path.is_symlink() or path.is_junction() for path in root.rglob("*")):
+            return False
+        try:
+            if root.exists():
+                shutil.rmtree(root)
+        except OSError:
+            return False
+        return True
 
     # ========================= 【任务控制器的异步回调】 =========================
 
@@ -325,19 +327,26 @@ class _DocUnit:
         self.unread_list.append(page)
         self._mutex.unlock()
 
-    def _onEnd(self, msnInfo, msg):  # 一个文档处理完毕
-        # msg: [Success] [Warning] [Error]
-
-        # 记录信息
+    def _onEnd(self, msnInfo, msg):
+        from ..mission.backend_runtime import BackendRuntime
         self._mutex.lock()
-        self.is_done = True
-        if msg == "[Success]":
-            self.state = "success"
-        else:
-            self.state = "failure"
-            self.message = msg
-        self.end_timestamp = time.time()  # 刷新结束时间戳
-        self._mutex.unlock()
+        try:
+            self.is_done = True
+            incomplete = any(result.get("code") not in (100, 101) or result.get("partial")
+                             for result in self.results.values())
+            if msg == "[Success]" and not incomplete:
+                self.state = "success"
+            else:
+                self.state = "failure"
+                self.message = msg if msg != "[Success]" else tr('部分页或区域未完整识别，请检查逐页结果。')
+            self.end_timestamp = time.time()
+        finally:
+            self._mutex.unlock()
+            BackendRuntime.unreserve(self.msnID)
+            if self._selection:
+                if self._selection.private:
+                    self._selection.manager._retain_runtime = False
+                self._selection.close()
 
 
 # 管理所有任务单元
@@ -359,26 +368,23 @@ class _DocUnitManagerClass:
     # 手动清理一个任务
     def clear(self, id: str):
         with self._lock:
-            unit = self.doc_units.pop(id, None)
-        if unit is None:
+            unit = self.doc_units.get(id)
+        if unit is None or not unit.clear():
             return False
-        unit.clear()
+        with self._lock:
+            if self.doc_units.get(id) is unit:
+                self.doc_units.pop(id, None)
         return True
 
     # 自动清理
     def auto_clear(self):
         now = time.time()
         with self._lock:
-            expired = [
-                (id, unit)
-                for id, unit in self.doc_units.items()
-                if now - unit.end_timestamp > TEMP_FILE_RETENTION_DURATION
-            ]
-            for id, _ in expired:
-                del self.doc_units[id]
-        for id, unit in expired:
-            logger.info(f"超时自动清理 {id}")
-            unit.clear()
+            expired = [id for id, unit in self.doc_units.items()
+                       if unit.is_done and now - unit.end_timestamp > TEMP_FILE_RETENTION_DURATION]
+        for identifier in expired:
+            if self.clear(identifier):
+                logger.info(tr('超时自动清理 {identifier}', identifier=identifier))
         CallFunc.delay(self.auto_clear, TEMP_FILE_CLEANUP_INTERVAL)
 
 
@@ -387,26 +393,22 @@ _DocUnitManager = _DocUnitManagerClass()
 
 # 路由函数
 def init(UmiWeb):
-    # 清空上传文件目录内容
-    if os.path.exists(UPLOAD_DIR):
-        shutil.rmtree(UPLOAD_DIR)
-    os.makedirs(UPLOAD_DIR)
+    # 不删除历史目录或其他任务数据；只管理本进程登记的 HTTP 任务。
+    from .structured_document_server import _safe_path
+    _safe_path(UPLOAD_DIR)
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
     # 启动自动清理循环
     _DocUnitManager.auto_clear()
 
     @UmiWeb.route("/api/doc/get_options")
     def _get_options_json():
-        opts = get_doc_options()
-        res = json.dumps(opts)
-        return res
+        try:
+            opts = get_doc_options(request.query.get("backendId", "current"))
+            return json.dumps(opts)
+        except ValueError as exc:
+            return {"code": 804, "data": str(exc)}
 
-    """
-    上传文档，方法：POST
-    参数：文档内容
-    返回值：
-    成功： {"code": 100, "data": "任务id"}
-    失败： {"code": 不是100的值, "data": "失败原因"}
-    """
+    '\n    上传文档，方法：POST\n    参数：文档内容\n    返回值：\n    成功： {"code": 100, "data": "任务id"}\n    失败： {"code": 不是100的值, "data": "失败原因"}\n    '
 
     @UmiWeb.route("/api/doc/upload", method="POST")
     def _upload():
@@ -479,7 +481,10 @@ def init(UmiWeb):
         except Exception as e:
             return {"code": 107, "data": f"[Error] Invalid options: {e}"}
 
-        # 3. 指定文件编号。创建对应目录，保存文件到 ./temp/dir_id/原文件名
+        with _DocUnitManager._lock:
+            if len(_DocUnitManager.doc_units) >= 32:
+                return {"code": 109, "data": tr('HTTP 文档任务数量已达到上限。')}
+        # 每次只新建唯一目录，不删除或覆盖历史数据。
         dir_id = str(uuid4())
         dir_path = os.path.realpath(os.path.join(UPLOAD_DIR, dir_id))
         file_path = os.path.realpath(os.path.join(dir_path, origin_name))
@@ -492,24 +497,41 @@ def init(UmiWeb):
             return {"code": 104, "data": "[Error] Unauthorized path"}
 
         try:
-            if os.path.exists(dir_path):  # 如果目录存在，则删除该目录
-                shutil.rmtree(dir_path)
-            os.makedirs(dir_path)  # 重新创建目录
+            from .structured_document_server import _safe_path
+            _safe_path(dir_path, UPLOAD_DIR)
+            os.makedirs(dir_path, exist_ok=False)
         except Exception as e:
             return {"code": 105, "data": f"[Error] Failed to create dir_id: {e}"}
         try:
-            upload.save(file_path, overwrite=True)  # 保存文件
+            from .structured_document_server import MAX_UPLOAD_BYTES
+            size = 0
+            with open(file_path, "xb") as stream:
+                while True:
+                    chunk = upload.file.read(1024 * 1024)
+                    if not chunk:
+                        break
+                    size += len(chunk)
+                    if size > MAX_UPLOAD_BYTES:
+                        raise ValueError(tr('上传文件超过大小预算。'))
+                    stream.write(chunk)
+            if not size:
+                raise ValueError(tr('上传文件为空。'))
         except Exception as e:
+            try:
+                shutil.rmtree(_safe_path(dir_path, UPLOAD_DIR))
+            except OSError:
+                pass
             return {"code": 106, "data": f"[Error] Failed to save file: {e}"}
 
         # 5. 构造任务对象
         try:
             doc_unit = _DocUnit(
-                dir_id, dir_path, file_path, origin_name, origin_prefix, options
+                dir_id, dir_path, file_path, origin_name, origin_prefix, options,
+                backend_id=request.forms.get("backendId", "current")
             )
             msnID = doc_unit.msnID
             _DocUnitManager.add(msnID, doc_unit)
-            logger.info(f"添加 HTTP 文档任务: {origin_name}")
+            logger.info(tr('添加 HTTP 文档任务: {origin_name}', origin_name=origin_name))
             return {"code": 100, "data": msnID}
         except DocUnitError as e:
             shutil.rmtree(dir_path)
@@ -518,33 +540,24 @@ def init(UmiWeb):
             shutil.rmtree(dir_path)
             return {"code": 108, "data": f"[Error] Failed to submit mission: {e}"}
 
-    """
-    获取结果，方法：POST
-    json参数：
-    "id"="",  # 任务ID
-    "is_data"=False,  # True 时返回识别内容data
-    "format"="dict",  # 识别内容格式， "dict", "text"
-    "is_unread"=False,  # True 时只返回未读过的识别内容
-
-    返回值： {}
-    """
+    '\n    获取结果，方法：POST\n    json参数：\n    "id"="",  # 任务ID\n    "is_data"=False,  # True 时返回识别内容data\n    "format"="dict",  # 识别内容格式， "dict", "text"\n    "is_unread"=False,  # True 时只返回未读过的识别内容\n\n    返回值： {}\n    '
 
     @UmiWeb.route("/api/doc/result", method="POST")
     def _result():
         try:
             user_data = request.json
         except Exception as e:
-            return {"code": 101, "data": f"请求无法解析为json。"}
+            return {"code": 101, "data": tr('请求无法解析为json。')}
         if not isinstance(user_data, dict):
-            return {"code": 104, "data": "请求必须为JSON对象。"}
+            return {"code": 104, "data": tr('请求必须为JSON对象。')}
         if "id" not in user_data:
-            return {"code": 102, "data": f"未填写id。"}
+            return {"code": 102, "data": tr('未填写id。')}
         msnID = user_data["id"]
         if not isinstance(msnID, str) or not msnID:
-            return {"code": 104, "data": "id 必须为非空字符串。"}
+            return {"code": 104, "data": tr('id 必须为非空字符串。')}
         doc_unit = _DocUnitManager.get(msnID)
         if not doc_unit:
-            return {"code": 103, "data": f"任务 {msnID} 不存在。"}
+            return {"code": 103, "data": tr('任务 {msnid} 不存在。', msnid=msnID)}
         is_data = user_data.get("is_data", False)
         format = user_data.get("format", "dict")
         is_unread = user_data.get("is_unread", True)
@@ -553,36 +566,27 @@ def init(UmiWeb):
             or not isinstance(is_unread, bool)
             or format not in ("dict", "text")
         ):
-            return {"code": 104, "data": "is_data、is_unread 必须为布尔值，format 必须为 dict 或 text。"}
+            return {"code": 104, "data": tr('is_data、is_unread 必须为布尔值，format 必须为 dict 或 text。')}
         return doc_unit.get_result(is_data, format, is_unread)
 
-    """
-    获取文件，方法：POST
-    json参数：
-    "id"="",  # 任务ID
-    "file_types"=["pdfLayered"],  # 输出文件类型，可选：
-    # ["txt", "txtPlain", "jsonl", "csv", "pdfLayered", "pdfOneLayer"]
-    "ignore_blank"=True,  # 忽略空白页数
-
-    返回值： {}
-    """
+    '\n    获取文件，方法：POST\n    json参数：\n    "id"="",  # 任务ID\n    "file_types"=["pdfLayered"],  # 输出文件类型，可选：\n    # ["txt", "txtPlain", "jsonl", "csv", "pdfLayered", "pdfOneLayer"]\n    "ignore_blank"=True,  # 忽略空白页数\n\n    返回值： {}\n    '
 
     @UmiWeb.route("/api/doc/download", method="POST")
     def _download_build():
         try:
             user_data = request.json
         except Exception as e:
-            return {"code": 101, "data": f"请求无法解析为json。"}
+            return {"code": 101, "data": tr('请求无法解析为json。')}
         if not isinstance(user_data, dict):
-            return {"code": 104, "data": "请求必须为JSON对象。"}
+            return {"code": 104, "data": tr('请求必须为JSON对象。')}
         if "id" not in user_data:
-            return {"code": 102, "data": f"未填写id。"}
+            return {"code": 102, "data": tr('未填写id。')}
         msnID = user_data["id"]
         if not isinstance(msnID, str) or not msnID:
-            return {"code": 104, "data": "id 必须为非空字符串。"}
+            return {"code": 104, "data": tr('id 必须为非空字符串。')}
         doc_unit = _DocUnitManager.get(msnID)
         if not doc_unit:
-            return {"code": 103, "data": f"任务 {msnID} 不存在。"}
+            return {"code": 103, "data": tr('任务 {msnid} 不存在。', msnid=msnID)}
 
         file_types = user_data.get("file_types", ["pdfLayered"])
         ignore_blank = user_data.get("ignore_blank", True)

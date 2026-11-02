@@ -13,6 +13,7 @@ umi-plugin.json 是插件的唯一事实源。
   合成一份等价清单，零改动继续可用。3.0 对明确已知的三个 2.x 实现有独立
   技术迁移门禁，且在 import 前生效。适配出来的清单标记 legacy=True 。
 """
+from ..utils.runtime_i18n import tr
 
 import json
 import os
@@ -73,14 +74,14 @@ class EntryRef:
     def parse(cls, raw):
         text = str(raw or "").strip()
         if not text:
-            return None, "入口引用为空。"
+            return None, tr('入口引用为空。')
         if ":" not in text:
-            return None, f'入口引用缺少 ":" 分隔符："{text}"，应形如 "api:Api" 。'
+            return None, tr('入口引用缺少 ":" 分隔符："{text}"，应形如 "api:Api" 。', text=text)
         module, _, attr = text.partition(":")
         module = module.strip().strip(".")
         attr = attr.strip()
         if not attr:
-            return None, f'入口引用缺少属性名："{text}" 。'
+            return None, tr('入口引用缺少属性名："{text}" 。', text=text)
         return cls(module, attr, text), ""
 
     def moduleName(self, pluginId):
@@ -102,6 +103,8 @@ def _translateConfig(node, tr):
         for key, value in node.items():
             if key in ("title", "toolTip", "unit") and isinstance(value, str):
                 result[key] = tr(value)
+            elif key == "nameFilters" and isinstance(value, list):
+                result[key] = [tr(item) if isinstance(item, str) else item for item in value]
             elif key == "optionsList" and isinstance(value, list):
                 options = []
                 for pair in value:
@@ -277,29 +280,24 @@ def checkKnownPluginMigration(pluginId, version=None, legacy=False):
     if pluginId not in KNOWN_PLUGIN_IDS_REQUIRING_3X:
         return ""
     nextStep = (
-        f"请安装已完成 3.x 技术迁移、带有 {MANIFEST_NAME} 且 version >= "
-        f"{KNOWN_PLUGIN_MIN_VERSION} 的更新插件；不要仅修改旧实现的版本号。"
-        "应用版本为 3.0，宿主 API 仍为 2.8。"
+        tr('请安装已完成 3.x 技术迁移、带有 {manifest_name} 且 version >= {known_plugin_min_version} 的更新插件；不要仅修改旧实现的版本号。应用版本为 3.0，宿主 API 仍为 2.8。', manifest_name=MANIFEST_NAME, known_plugin_min_version=KNOWN_PLUGIN_MIN_VERSION)
     )
     if legacy:
         return (
-            f'已知插件 "{pluginId}" 没有 {MANIFEST_NAME}，属于 2.x 旧版实现；'
-            f"Umi-OCR 3.0 不兼容该实现。{nextStep}"
+            tr('已知插件 "{pluginid}" 没有 {manifest_name}，属于 2.x 旧版实现；Umi-OCR 3.0 不兼容该实现。{nextstep}', pluginid=pluginId, manifest_name=MANIFEST_NAME, nextstep=nextStep)
         )
     text = str(version or "").strip()
     if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){0,2}(?:[-+][0-9A-Za-z][0-9A-Za-z.+-]*)?", text):
         return (
-            f'已知插件 "{pluginId}" 的 version "{text}" 无法进行 3.x 技术迁移校验。'
-            f"{nextStep}"
+            tr('已知插件 "{pluginid}" 的 version "{text}" 无法进行 3.x 技术迁移校验。{nextstep}', pluginid=pluginId, text=text, nextstep=nextStep)
         )
     try:
         current = parseVersion(text)
     except (TypeError, ValueError, OverflowError):
-        return f'已知插件 "{pluginId}" 的 version 无法进行 3.x 技术迁移校验。{nextStep}'
+        return tr('已知插件 "{pluginid}" 的 version 无法进行 3.x 技术迁移校验。{nextstep}', pluginid=pluginId, nextstep=nextStep)
     if current < parseVersion(KNOWN_PLUGIN_MIN_VERSION):
         return (
-            f'已知插件 "{pluginId}" 的 version "{text}" 属于 2.x 旧版实现；'
-            f"Umi-OCR 3.0 不兼容该实现。{nextStep}"
+            tr('已知插件 "{pluginid}" 的 version "{text}" 属于 2.x 旧版实现；Umi-OCR 3.0 不兼容该实现。{nextstep}', pluginid=pluginId, text=text, nextstep=nextStep)
         )
     return ""
 
@@ -311,78 +309,78 @@ def loadManifest(pluginId, pluginDir, translator=None):
         with open(path, "r", encoding="utf-8") as stream:
             raw = json.load(stream)
     except Exception as e:
-        return None, f"读取 {MANIFEST_NAME} 失败：{e}"
+        return None, tr('读取 {manifest_name} 失败：{e}', manifest_name=MANIFEST_NAME, e=e)
     if not isinstance(raw, dict):
-        return None, f"{MANIFEST_NAME} 顶层必须是对象。"
+        return None, tr('{manifest_name} 顶层必须是对象。', manifest_name=MANIFEST_NAME)
 
     schema = raw.get("schema_version")
     if schema not in SUPPORTED_SCHEMA_VERSIONS:
         supported = ", ".join(str(v) for v in SUPPORTED_SCHEMA_VERSIONS)
-        return None, f"不支持的 schema_version：{schema}（宿主支持：{supported}）。"
+        return None, tr('不支持的 schema_version：{schema}（宿主支持：{supported}）。', schema=schema, supported=supported)
 
     declaredId = str(raw.get("id") or "").strip()
     if not declaredId:
-        return None, "清单缺少 id 。"
+        return None, tr('清单缺少 id 。')
     if declaredId != pluginId:
-        return None, f'清单 id "{declaredId}" 与目录名 "{pluginId}" 不一致。'
+        return None, tr('清单 id "{declaredid}" 与目录名 "{pluginid}" 不一致。', declaredid=declaredId, pluginid=pluginId)
 
     manifest = PluginManifest(pluginId, pluginDir)
 
-    def tr(text):
+    def plugin_tr(text):
         text = str(text or "")
         if translator and text:
             return translator(text)
         return text
 
-    manifest.name = tr(raw.get("name") or pluginId)
+    manifest.name = plugin_tr(raw.get("name") or pluginId)
     manifest.version = str(raw.get("version") or "").strip()
     if not manifest.version:
-        return None, "清单缺少 version 。"
+        return None, tr('清单缺少 version 。')
     manifest.hostApi = str(raw.get("host_api") or "*").strip()
     manifest.platforms = [str(v) for v in _asList(raw.get("platform"))]
     manifest.arches = [str(v) for v in _asList(raw.get("arch"))]
     manifest.vendor = str(raw.get("vendor") or "")
     manifest.license = str(raw.get("license") or "")
-    manifest.description = tr(raw.get("description") or "")
+    manifest.description = plugin_tr(raw.get("description") or "")
     manifest.homepage = str(raw.get("homepage") or "")
     manifest.conflicts = [str(v) for v in _asList(raw.get("conflicts"))]
     manifest.i18nFile = str(raw.get("i18n") or "")
 
     runtime = raw.get("runtime") or {}
     if not isinstance(runtime, dict):
-        return None, "runtime 必须是对象。"
+        return None, tr('runtime 必须是对象。')
     manifest.pythonArchives = [str(v) for v in _asList(runtime.get("python_archives"))]
     manifest.resourceArchives = [str(v) for v in _asList(runtime.get("resource_archives"))]
     for archive in manifest.pythonArchives + manifest.resourceArchives:
         target = os.path.abspath(os.path.join(pluginDir, archive))
         if os.path.commonpath([os.path.abspath(pluginDir), target]) != os.path.abspath(pluginDir):
-            return None, "归档路径必须位于插件目录内。"
+            return None, tr('归档路径必须位于插件目录内。')
         if not os.path.isfile(target):
-            return None, f"插件归档不存在：{archive}"
+            return None, tr('插件归档不存在：{archive}', archive=archive)
     manifest.vendorDirs = [str(v) for v in _asList(runtime.get("vendor_dirs"))]
     manifest.dllDirs = [str(v) for v in _asList(runtime.get("dll_dirs"))]
     manifest.closureLock = str(runtime.get("closure_lock") or "")
     priority = str(runtime.get("priority") or PRIORITY_APPEND).strip().lower()
     if priority not in (PRIORITY_APPEND, PRIORITY_PREPEND):
-        return None, f'runtime.priority 只能是 "{PRIORITY_APPEND}" 或 "{PRIORITY_PREPEND}" 。'
+        return None, tr('runtime.priority 只能是 "{priority_append}" 或 "{priority_prepend}" 。', priority_append=PRIORITY_APPEND, priority_prepend=PRIORITY_PREPEND)
     manifest.priority = priority
 
     capabilities = _asList(raw.get("capabilities"))
     if not capabilities:
-        return None, "清单必须至少声明一项 capabilities 。"
+        return None, tr('清单必须至少声明一项 capabilities 。')
     for index, item in enumerate(capabilities):
         if not isinstance(item, dict):
-            return None, f"capabilities[{index}] 必须是对象。"
+            return None, tr('capabilities[{index}] 必须是对象。', index=index)
         capType = str(item.get("type") or "").strip()
         if not capType:
-            return None, f"capabilities[{index}] 缺少 type 。"
+            return None, tr('capabilities[{index}] 缺少 type 。', index=index)
         entry, err = EntryRef.parse(item.get("entry"))
         if not entry:
             return None, f"capabilities[{index}].entry {err}"
         configValue = item.get("config")
         config = None
         if isinstance(configValue, dict):
-            config = _translateConfig(configValue, tr)  # 内联配置，零导入
+            config = _translateConfig(configValue, plugin_tr)  # 内联配置，零导入
         elif configValue:
             config, err = EntryRef.parse(configValue)
             if not config:
@@ -394,19 +392,19 @@ def loadManifest(pluginId, pluginDir, translator=None):
     serviceIds = set()
     for index, item in enumerate(_asList(raw.get("services"))):
         if not isinstance(item, dict):
-            return None, f"services[{index}] 必须是对象。"
+            return None, tr('services[{index}] 必须是对象。', index=index)
         serviceId = str(item.get("id") or "").strip()
         if not serviceId:
-            return None, f"services[{index}] 缺少 id 。"
+            return None, tr('services[{index}] 缺少 id 。', index=index)
         if serviceId in serviceIds:
-            return None, f"services 中的 id 重复：{serviceId} 。"
+            return None, tr('services 中的 id 重复：{serviceid} 。', serviceid=serviceId)
         entry, err = EntryRef.parse(item.get("entry"))
         if not entry:
             return None, f"services[{index}].entry {err}"
         configValue = item.get("config")
         config = None
         if isinstance(configValue, dict):
-            config = _translateConfig(configValue, tr)
+            config = _translateConfig(configValue, plugin_tr)
         elif configValue:
             config, err = EntryRef.parse(configValue)
             if not config:
@@ -419,26 +417,25 @@ def loadManifest(pluginId, pluginDir, translator=None):
     for index, capability in enumerate(manifest.capabilities):
         refs = capability.meta.get("serviceRefs") or []
         if not isinstance(refs, list) or not all(isinstance(item, str) for item in refs):
-            return None, f"capabilities[{index}].meta.serviceRefs 必须是字符串列表。"
+            return None, tr('capabilities[{index}].meta.serviceRefs 必须是字符串列表。', index=index)
         missing = [ref for ref in refs if ref not in serviceIds]
         if missing:
             return None, (
-                f"capabilities[{index}].meta.serviceRefs 引用了未声明的服务："
-                f"{', '.join(missing)} 。"
+                tr('capabilities[{index}].meta.serviceRefs 引用了未声明的服务：{items} 。', index=index, items=', '.join(missing))
             )
 
     for index, item in enumerate(_asList(raw.get("pages"))):
         if not isinstance(item, dict):
-            return None, f"pages[{index}] 必须是对象。"
+            return None, tr('pages[{index}] 必须是对象。', index=index)
         key = str(item.get("key") or "").strip()
         if not key:
-            return None, f"pages[{index}] 缺少 key 。"
+            return None, tr('pages[{index}] 缺少 key 。', index=index)
         qml = str(item.get("qml") or "").strip()
         if not qml:
-            return None, f"pages[{index}] 缺少 qml 。"
+            return None, tr('pages[{index}] 缺少 qml 。', index=index)
         qmlPath = os.path.join(pluginDir, qml)
         if not os.path.isfile(qmlPath) and not manifest.resourceArchives:
-            return None, f"pages[{index}] 的 qml 文件不存在：{qmlPath}"
+            return None, tr('pages[{index}] 的 qml 文件不存在：{qmlpath}', index=index, qmlpath=qmlPath)
         controller = None
         if item.get("controller"):
             controller, err = EntryRef.parse(item.get("controller"))
@@ -449,8 +446,8 @@ def loadManifest(pluginId, pluginDir, translator=None):
                 key,
                 qmlPath,
                 controller,
-                tr(item.get("title") or key),
-                tr(item.get("intro") or ""),
+                plugin_tr(item.get("title") or key),
+                plugin_tr(item.get("intro") or ""),
                 dict(item.get("meta") or {}),
             )
         )
@@ -472,12 +469,12 @@ def adaptLegacyPluginInfo(pluginId, pluginDir, pluginInfo):
     调用方通过 resolvedEntry 拿到它，无需再次 import 。
     """
     if not isinstance(pluginInfo, dict):
-        return None, "PluginInfo 必须是字典。"
+        return None, tr('PluginInfo 必须是字典。')
     group = str(pluginInfo.get("group") or "").strip()
     if not group:
-        return None, "PluginInfo 中未定义 group 。"
+        return None, tr('PluginInfo 中未定义 group 。')
     if "api_class" not in pluginInfo:
-        return None, "PluginInfo 中未定义 api_class 。"
+        return None, tr('PluginInfo 中未定义 api_class 。')
 
     manifest = PluginManifest(pluginId, pluginDir)
     manifest.legacy = True
@@ -502,14 +499,14 @@ def adaptLegacyPluginInfo(pluginId, pluginDir, pluginInfo):
     page = pluginInfo.get("page")
     if page:
         if not isinstance(page, dict):
-            return None, "PluginInfo.page 必须是字典。"
+            return None, tr('PluginInfo.page 必须是字典。')
         key = str(page.get("key") or "").strip()
         qml = str(page.get("qml") or "").strip()
         if not key or not qml:
-            return None, "PluginInfo.page 缺少 key 或 qml 。"
+            return None, tr('PluginInfo.page 缺少 key 或 qml 。')
         qmlPath = os.path.join(pluginDir, qml)
         if not os.path.isfile(qmlPath) and not manifest.resourceArchives:
-            return None, f"插件页面不存在：{qmlPath}"
+            return None, tr('插件页面不存在：{qmlpath}', qmlpath=qmlPath)
         manifest.pages.append(
             PageSpec(
                 key,
@@ -527,15 +524,14 @@ def checkCompatibility(manifest, hostApiVersion, platform, arch):
     """返回 "" 表示兼容，否则返回不兼容原因。"""
     if not matchVersionRange(hostApiVersion, manifest.hostApi):
         return (
-            f"插件要求宿主 API {manifest.hostApi} ，"
-            f"当前宿主为 {hostApiVersion} 。请升级 Umi-OCR 或改用匹配的插件版本。"
+            tr('插件要求宿主 API {hostapi} ，当前宿主为 {hostapiversion} 。请升级 Umi-OCR 或改用匹配的插件版本。', hostapi=manifest.hostApi, hostapiversion=hostApiVersion)
         )
     if not matchTokenList(platform, manifest.platforms):
         supported = ", ".join(manifest.platforms) or "-"
-        return f"插件仅支持平台 {supported} ，当前平台为 {platform} 。"
+        return tr('插件仅支持平台 {supported} ，当前平台为 {platform} 。', supported=supported, platform=platform)
     if not matchTokenList(arch, manifest.arches):
         supported = ", ".join(manifest.arches) or "-"
-        return f"插件仅支持架构 {supported} ，当前架构为 {arch} 。"
+        return tr('插件仅支持架构 {supported} ，当前架构为 {arch} 。', supported=supported, arch=arch)
     return ""
 
 
@@ -548,5 +544,5 @@ def loadTranslator(pluginDir, i18nFile):
 
         return Translator(os.path.join(pluginDir, MANIFEST_NAME), i18nFile)
     except Exception:
-        logger.error(f"加载插件翻译失败：{pluginDir} / {i18nFile}", exc_info=True)
+        logger.error(tr('加载插件翻译失败：{plugindir} / {i18nfile}', plugindir=pluginDir, i18nfile=i18nFile), exc_info=True)
         return None

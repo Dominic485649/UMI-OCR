@@ -221,10 +221,8 @@ def prepare_plugin(
 
 def prepare_cuda(complete: Path, target: Path, version: str) -> None:
     manifest = complete / "UmiOCR-data/plugins" / cuda_overlay.PLUGIN_ID / "umi-plugin.json"
-    if manifest.is_file():
-        plugin_version = str(json.loads(manifest.read_text(encoding="utf-8")).get("version", ""))
-        if plugin_version and plugin_version != version:
-            raise PreparationError(f"plugin {cuda_overlay.PLUGIN_ID} version {plugin_version!r} != {version!r}")
+    if version_from_about(manifest) != version:
+        raise PreparationError("CUDA product version differs from its plugin manifest")
     try:
         cuda_overlay.prepare(complete, target, combined=True)
     except RuntimeError as exc:
@@ -281,8 +279,11 @@ def main(argv: list[str] | None = None) -> int:
             raise PreparationError("no product selected")
         report = products_root / "prepared-products.json"
         ensure_new(report, description="prepared-products report")
+        versions = {"base": version}
+        if "cuda" in selected:
+            versions["cuda"] = safe_component(version_from_about(complete / "UmiOCR-data/plugins" / cuda_overlay.PLUGIN_ID / "umi-plugin.json"))
         for product in selected:
-            ensure_new(products_root / product_name(version, label, product), description=f"{product} product")
+            ensure_new(products_root / product_name(versions[product], label, product), description=f"{product} product")
         for plugin_id, _ in optional:
             ensure_new(products_root / product_name(version, label, "optional", plugin_id), description="optional product")
         products_root.mkdir(parents=True, exist_ok=True)
@@ -296,14 +297,15 @@ def main(argv: list[str] | None = None) -> int:
         }
 
         for product in selected:
-            target = ensure_new(products_root / product_name(version, label, product), description=f"{product} product")
+            product_version = versions[product]
+            target = ensure_new(products_root / product_name(product_version, label, product), description=f"{product} product")
             if product == "base":
                 prepare_base(complete, target)
                 expected_source = complete
             else:
                 plugin_id = "win32_PaddleOCRv6_CUDA"
                 source = complete / "UmiOCR-data" / "plugins" / plugin_id
-                prepare_cuda(complete, target, version)
+                prepare_cuda(complete, target, product_version)
                 expected_source = source
             expected = payload(expected_source, exclude=base_excluded if product == "base" else cuda_overlay.private_path)
             actual_root = target if product == "base" else target / "UmiOCR-data" / "plugins" / "win32_PaddleOCRv6_CUDA"
@@ -313,6 +315,7 @@ def main(argv: list[str] | None = None) -> int:
             result["products"][product] = {
                 "name": target.name,
                 "path": str(target),
+                "version": product_version,
                 "plugin_id": None if product == "base" else "win32_PaddleOCRv6_CUDA",
                 "files": len(actual),
                 "sha256": hashlib.sha256(json.dumps(actual, sort_keys=True).encode("utf-8")).hexdigest(),

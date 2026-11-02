@@ -5,8 +5,10 @@
 // qml的 api key 与 python api.ocr 中的字典要一致
 
 import QtQuick 2.15
+import "../Configs"
 
 Item {
+    id: ocrManager
     property bool applying: false
     property var applyCallback: null
 
@@ -21,7 +23,8 @@ Item {
         "btns": {
             "title": qsTr("操作"),
             "btnsList": [
-                {"text":qsTr("强制终止任务"), "onClicked": stopAllMissions, "textColorKey":"noColor"},
+                {"text":qsTr("预热当前模型"), "onClicked": ()=>warmup(true), "textColorKey":"yesColor"},
+                {"text":qsTr("终止文字识别任务"), "onClicked": stopAllMissions, "textColorKey":"noColor"},
                 // {"text":qsTr("测试API"), "onClicked":()=>{}},
 
             ],
@@ -37,7 +40,7 @@ Item {
                     ["lazy", qsTr("首次使用时加载")],
                 ],
                 "toolTip": qsTr("延迟预热会在启动后按设定时间加载模型，提前占用显存和内存以降低首次 OCR 等待；首次使用时加载不会提前占用资源。"),
-                "onChanged": scheduleWarmup,
+                "onChanged": ()=>Qt.callLater(scheduleWarmup),
             },
             "warmupDelayMinutes": {
                 "title": qsTr("预热延迟"),
@@ -47,7 +50,7 @@ Item {
                 "isInt": true,
                 "unit": qsTr("分钟"),
                 "toolTip": qsTr("仅用于“延迟预热”。0 表示界面启动后立即在后台加载；提高数值可推迟显存和内存占用。"),
-                "onChanged": scheduleWarmup,
+                "onChanged": ()=>Qt.callLater(scheduleWarmup),
             },
             "cleanupPolicy": {
                 "title": qsTr("自动清理模型"),
@@ -71,8 +74,16 @@ Item {
             },
         },
         "api": {
-            "title": qsTr("当前接口"),
+            "title": qsTr("识别模型"),
+            "toolTip": qsTr("截图、批量图片和批量文档共用此模型选择；各页面的识别参数分别保存。"),
             "optionsList": [],
+            "onChanged": (value, old)=>{
+                if(old === undefined) return
+                if(qmlapp.globalConfigs.backendsBusy() || applying || qmlapp.globalConfigs.applyPhase !== 0) {
+                    qmlapp.popup.simple(qsTr("无法切换模型"), qsTr("任务正在运行或模型配置正在应用，请稍后重试。"))
+                    return true
+                }
+            },
         },
     }
 
@@ -83,20 +94,6 @@ Item {
     // 应用更改，showSuccess=false时不显示成功提示
     function applyConfigs(showSuccess=true) {
 
-        // 成功应用修改之后的刷新函数
-        function successUpdate() {
-            // 刷新qml各个页面的独立配置
-            for (let key in deployDict) {
-                const p = deployDict[key].page
-                if(!p.configDict) { // 页面已经不存在了，则从记录字典中删除
-                    delete deployDict[key]
-                    continue
-                }
-                const k = deployDict[key].configKey
-                p.configDict[k] = localOptions[apiKey] // 刷新页面设置
-                p.reload() // 刷新页面UI
-            }
-        }
 
         // 验证
         if(Object.keys(localOptions).length === 0){
@@ -140,7 +137,7 @@ Item {
         // 成功，写入记录
         if(msg.startsWith("[Success]")) {
             apiKey = nowKey
-            successUpdate()
+            refreshDeployedPages()
             scheduleWarmup()
             refreshModelState(false)
             if(showSuccess) { // 显示弹窗
@@ -176,8 +173,49 @@ Item {
         qmlapp.popup.dialog("", s, callback, "warning", argd)
     }
 
-    // 部署进一个Configs的配置项里，可动态改变配置页。
-    // 传入configs页引用和所在字典键（只能在最外层）
+    // 各任务类别只保留一个轻量来源，关闭任务页面不销毁识别参数。
+    property var taskSources: ({})
+    property int taskSourcesRevision: 0
+    Component {
+        id: taskSourceComponent
+        Configs { autoLoad: false; lazyPanel: true; preserveCacheOnReload: true }
+    }
+    function taskSource(category) {
+        if(["ScreenshotOCR", "BatchOCR", "BatchPDF"].indexOf(category) < 0)
+            throw new Error("Unknown OCR settings category: " + category)
+        if(taskSources[category]) return taskSources[category]
+        const source = taskSourceComponent.createObject(ocrManager, {
+            category_: category, configDict: {ocr: localOptions[apiKey] || {title: "", type: "group"}}
+        })
+        if(!source) throw new Error("Cannot create OCR settings source: " + category)
+        source.reload()
+        const sources = Object.assign({}, taskSources)
+        sources[category] = source
+        taskSources = sources
+        taskSourcesRevision++
+        return source
+    }
+    function ensureTaskSources() {
+        for(const category of ["ScreenshotOCR", "BatchOCR", "BatchPDF"]) taskSource(category)
+    }
+    function taskParameterItems(source) {
+        // 重载会先清空 originDict；空组时也要跟踪定义完成通知，避免绑定停在缺组布局。
+        const revision = source.definitionRevision
+        const group = source.originDict.ocr
+        if(!group) return []
+        function reference(entry) {
+            const result = {key: entry.key, sourceConfigs: source, sourceKey: entry.key}
+            if(entry.items !== undefined) result.items = entry.items.map(reference)
+            return result
+        }
+        return source.defaultPanelLayout(group).filter(entry => {
+            if(entry.key === "ocr.preset") return false
+            const origin = source.originDict[entry.key]
+            return !(entry.key === "ocr.detModel" && origin.optionsList && origin.optionsList.length <= 1)
+        }).map(reference)
+    }
+
+    // 兼容其他插件部署局部配置；内置任务改用应用级来源。
     function deploy(page, configKey) {
         // 记录已部署页面
         const pageId = page.toString()
@@ -197,21 +235,77 @@ Item {
         }
     }
 
-    // 初始化1：传入python ocr信息，整理信息，返回全局配置字典
+    // 只移动展示入口，模型共用全局值，识别参数仍属于各任务类别。
+    function modelPanelLayout(page) {
+        const global = qmlapp.globalConfigs
+        const globalRevision = global.definitionRevision
+        const layout = page.defaultPanelLayout().filter(entry => entry.key !== "ocr")
+        const items = []
+        if(global.originDict["ocr.api"])
+            items.push({key: "ocr.api", sourceConfigs: global, sourceKey: "ocr.api"})
+        const source = page.valueSources.ocr
+        if(source) items.push(...taskParameterItems(source))
+        if(items.length)
+            layout.unshift({key: "ocr", origin: {title: qsTr("文字识别"), type: "group"}, items: items})
+        return layout
+    }
+
+    function modelDisplayName(option, key) {
+        const global = option.global_options || ({})
+        const local = option.local_options || ({})
+        const declared = (option.meta && option.meta.modelName) || global.modelName || local.modelName
+        if(typeof declared === "string" && declared.trim()) return declared
+        // 单模型插件可直接提供其真实枚举键；宿主不识别任何特定插件或产品名。
+        const detector = local.detModel
+        if(detector && detector.optionsList && detector.optionsList.length === 1) {
+            const model = detector.optionsList[0][0]
+            if(typeof model === "string" && model.trim()) return model
+        }
+        return global.title || local.title || key
+    }
+
+    function refreshDeployedPages() {
+        const options = localOptions[apiKey] || {title: "", type: "group"}
+        for(const category in taskSources) {
+            const source = taskSources[category]
+            source.configDict = {ocr: options}
+            source.reload()
+        }
+        taskSourcesRevision++
+        for(const key in deployDict) {
+            const entry = deployDict[key]
+            if(!entry.page || !entry.page.configDict) { delete deployDict[key]; continue }
+            entry.page.configDict[entry.configKey] = options
+            entry.page.reload()
+        }
+    }
+
+    function orderedModelKeys(options) {
+        return Object.keys(options).map((key, index) => ({key: key, index: index})).sort((left, right) => {
+            const a = (options[left.key].meta || {}).settingsOrder
+            const b = (options[right.key].meta || {}).settingsOrder
+            const first = typeof a === "number" && isFinite(a) ? a : Infinity
+            const second = typeof b === "number" && isFinite(b) ? b : Infinity
+            return first === second ? left.index - right.index : (first < second ? -1 : 1)
+        }).map(entry => entry.key)
+    }
+    // 初始化1：只调整模型展示和新配置默认值，不改变插件加载顺序。
     function init1(options) {
         localOptions = {}
         serviceRefs = ({})
         globalOptions = makeGlobalOptions()
-        for (var key in options) {
+        for (const key of orderedModelKeys(options)) {
             const gOpt = options[key].global_options
             const lOpt = options[key].local_options
-            serviceRefs[key] = (options[key].meta && options[key].meta.serviceRefs) || []
+            // QVariantList 在 QML 中是 V4Sequence，先复制为 JS 数组以统一共享服务判断。
+            const refs = (options[key].meta && options[key].meta.serviceRefs) || []
+            serviceRefs[key] = Array.prototype.slice.call(refs)
             if(gOpt) { // 有全局配置
-                globalOptions.api.optionsList.push([key, gOpt.title])
+                globalOptions.api.optionsList.push([key, modelDisplayName(options[key], key)])
                 globalOptions[key] = gOpt
             }
             else { // 无全局配置
-                globalOptions.api.optionsList.push([key, key])
+                globalOptions.api.optionsList.push([key, modelDisplayName(options[key], key)])
                 globalOptions[key] = {"title":key, "type":"group"}
             }
             if(lOpt) // 有局部配置
@@ -224,7 +318,8 @@ Item {
             delete qmlapp.globalConfigs.configDict.ocr
             return
         }
-        const preferred = ["win32_PaddleOCRv6_CPU", "win32_PaddleOCRv6_CUDA"].find(key => localOptions.hasOwnProperty(key)) || Object.keys(localOptions)[0]
+        // 新配置按插件注册表顺序选择；已有有效选择仍由 Configs 原样恢复。
+        const preferred = Object.keys(localOptions)[0]
         if(preferred) globalOptions.api.default = preferred
         qmlapp.globalConfigs.configDict.ocr = globalOptions // 写入全局预配置
     }
@@ -238,6 +333,8 @@ Item {
     function init2() {
         if(Object.keys(localOptions).length === 0) {
             apiKey = ""
+            refreshDeployedPages()
+            warmupTimer.stop()
             qmlapp.msnConnector.callPy("ocr", "setApi", ["", {}])
             return
         }
@@ -249,36 +346,38 @@ Item {
         if(!apiKey || !localOptions.hasOwnProperty(apiKey))
             return undefined
         const info = {}
-        const options = localOptions[apiKey]
-        const prefix = "ocr." + apiKey + "."
-        for(const key in options) {
-            const option = options[key]
-            if(typeof option !== "object" || !option.hasOwnProperty("default"))
-                continue
-            const fullKey = prefix + key
-            info[fullKey] = UmiSettings.contains("ScreenshotOCR", fullKey)
-                ? UmiSettings.value("ScreenshotOCR", fullKey, option.default)
-                : option.default
+        // 页面实际持久化键是 ocr.<参数>，不包含后端 id。
+        function collect(group, prefix="ocr.") {
+            for(const key in group) {
+                const option = group[key]
+                if(!option || typeof option !== "object") continue
+                const fullKey = prefix + key
+                if(option.type === "group") collect(option, fullKey + ".")
+                else if(option.hasOwnProperty("default")) {
+                    info[fullKey] = UmiSettings.contains("ScreenshotOCR", fullKey)
+                        ? UmiSettings.value("ScreenshotOCR", fullKey, option.default) : option.default
+                }
+            }
         }
+        collect(localOptions[apiKey])
         info["ocr.taskType"] = "screenshot"
         return info
     }
 
     function warmup(showMessage=false) {
-        // A plugin-declared service has its own global lifecycle policy.  Do
-        // not start a second worker/server path through the legacy OCR
-        // warm-up controls; the tray action (when invoked programmatically)
-        // merely asks that one shared service to prestart.
+        if(qmlapp.globalConfigs.backendsBusy() || applying || qmlapp.globalConfigs.backendApplyPending || qmlapp.globalConfigs.applyPhase !== 0)
+            return "[Warning] " + qsTr("任务正在运行或配置正在应用，跳过后台预热。")
+        // 统一策略只启动现有共享服务，绝不另起 VL worker。
         if(usesSharedService()) {
             const refs = serviceRefs[apiKey] || []
-            qmlapp.globalConfigs.configurePluginService(apiKey, refs[0])
-            return "[Success] 模型服务正在后台预启动。"
+            const result = qmlapp.globalConfigs.configurePluginService(apiKey, refs[0])
+            return result.ok ? "[Success] " + qsTr("模型服务正在后台预启动。") : "[Warning] " + result.message
         }
         const info = buildWarmupInfo()
-        if(!info) return "[Error] OCR 接口尚未初始化。"
+        if(!info) return "[Error] " + qsTr("OCR 接口尚未初始化。")
         modelState = "warming"
         qmlapp.msnConnector.requestCall("ocr", "warmup", [info])
-        return "[Success] 模型正在后台预热。"
+        return "[Success] " + qsTr("模型正在后台预热。")
     }
     Connections {
         target: qmlapp.msnConnector
@@ -292,8 +391,6 @@ Item {
 
     function scheduleWarmup() {
         warmupTimer.stop()
-        if(usesSharedService())
-            return
         if(!apiKey || qmlapp.globalConfigs.getValue("ocr.lifecycle.warmupMode") !== "delayed")
             return
         refreshModelState(false)
@@ -343,10 +440,17 @@ Item {
     }
 
     function releaseModel(showMessage=true) {
-        if(usesSharedService()) {
-            if(showMessage)
-                qmlapp.popup.simple(qsTr("模型服务由全局设置管理"), qsTr("请在全局设置的模型服务区域调整预启动和空闲策略。"))
+        if(qmlapp.globalConfigs.backendsBusy()) {
+            if(showMessage) qmlapp.popup.simple(qsTr("无法清理 OCR 后台"), qsTr("任务正在运行。"))
             return false
+        }
+        if(usesSharedService()) {
+            refreshModelState(false)
+            if(modelBusy || pluginsConnector.isBusy()) return false
+            const refs = serviceRefs[apiKey] || []
+            // stop_owned 再次检查 OCR/document 租约及等待请求，绝不使用强制 shutdown。
+            pluginsConnector.requestOperation("stop_owned", apiKey, refs[0], null)
+            return true
         }
         const status = refreshModelState(false)
         if(!status || modelBusy) {
@@ -380,30 +484,27 @@ Item {
     }
 
     function checkCleanup() {
-        if(usesSharedService())
-            return
+        if(qmlapp.globalConfigs.backendsBusy() || applying || qmlapp.globalConfigs.backendApplyPending) return
         const policy = qmlapp.globalConfigs.getValue("ocr.lifecycle.cleanupPolicy")
-        if(policy === "never")
-            return
+        if(policy === "never") return
         if(policy === "memory") {
             memoryCheckTicks += 1
-            if(memoryCheckTicks < 6)
-                return
+            if(memoryCheckTicks < 6) return
             memoryCheckTicks = 0
-        }
-        const status = refreshModelState(false)
-        if(!status || modelState !== "loaded" || modelBusy)
-            return
-        if(policy === "memory") {
             const percent = Number(qmlapp.msnConnector.callPy("ocr", "getSystemMemoryPercent", []))
-            if(percent > 90)
-                releaseModel(false)
+            if(percent <= 90 || isNaN(percent)) return
+            qmlapp.globalConfigs.maintainPluginServices("memory")
+            if(!usesSharedService()) releaseModel(false)
+            return
         }
-        else if(policy === "idle") {
-            const minutes = Number(qmlapp.globalConfigs.getValue("ocr.lifecycle.idleCleanupMinutes"))
-            if(modelIdleSeconds >= Math.max(5, Math.min(120, isNaN(minutes) ? 30 : minutes)) * 60)
-                releaseModel(false)
-        }
+        // 即便 GUI 当前选 PP，也维护由文档任务使用过的同一 VL 服务。
+        qmlapp.globalConfigs.maintainPluginServices("idle")
+        if(usesSharedService()) return
+        const status = refreshModelState(false)
+        if(!status || modelState !== "loaded" || modelBusy) return
+        const minutes = Number(qmlapp.globalConfigs.getValue("ocr.lifecycle.idleCleanupMinutes"))
+        if(modelIdleSeconds >= Math.max(5, Math.min(120, isNaN(minutes) ? 30 : minutes)) * 60)
+            releaseModel(false)
     }
 
     Connections {
@@ -430,12 +531,10 @@ Item {
     property real modelIdleSeconds: 0
     property string lastModelError: ""
     property int memoryCheckTicks: 0
-    property string modelActionText: usesSharedService()
-        ? qsTr("模型服务由全局设置管理")
-        : (modelState === "loaded"
-            ? qsTr("清理 OCR 后台")
-            : (modelState === "warming" ? qsTr("OCR 模型预热中") : qsTr("预热 OCR 模型")))
-    property bool modelActionEnabled: apiKey !== "" && !usesSharedService() && modelState !== "warming"
+    property string modelActionText: modelState === "loaded"
+        ? qsTr("清理 OCR 后台")
+        : (modelState === "warming" ? qsTr("OCR 模型预热中") : qsTr("预热 OCR 模型"))
+    property bool modelActionEnabled: apiKey !== "" && !modelBusy && !applying && modelState !== "warming"
 
     function usesSharedService() {
         return apiKey !== "" && Array.isArray(serviceRefs[apiKey]) && serviceRefs[apiKey].length > 0
@@ -444,7 +543,15 @@ Item {
     Timer {
         id: warmupTimer
         repeat: false
-        onTriggered: warmup(false)
+        onTriggered: {
+            if(qmlapp.globalConfigs.backendsBusy() || applying || qmlapp.globalConfigs.backendApplyPending || qmlapp.globalConfigs.applyPhase !== 0 || pluginsConnector.isBusy()) {
+                // 预热低优先级，只保留这一份待执行计划，任务结束后再尝试。
+                interval = 1000
+                start()
+                return
+            }
+            warmup(false)
+        }
     }
     Timer {
         interval: 3000

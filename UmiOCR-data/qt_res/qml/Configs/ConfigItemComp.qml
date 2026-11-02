@@ -6,8 +6,13 @@ import QtQuick 2.15
 import "../Widgets"
 
 Item {
-    property string key: "" // valueDict的键
-    property var configs: undefined // 保存对Configs组件的引用
+    id: itemRoot
+    property string key: "" // 展示入口的键
+    property var configs: undefined // 所属展示面板
+    property var sourceConfigs: configs // 规范配置来源，跨页引用不创建本地副本
+    property string sourceKey: key
+    property bool updatingUI: false
+    property bool itemReady: false
     property var updateUI: ()=>{console.log(`${key} 更新设置UI为${value()}`)} // 更新UI函数，子类重写，通过value()获取最新值
     property int cursorShape_: Qt.ArrowCursor // 鼠标指针
 
@@ -22,11 +27,12 @@ Item {
     height: (advanced&&!configs.advanced) ? 0 : (size_.line + size_.spacing)
     visible: !(advanced&&!configs.advanced)
 
-    // 初始化
+    // 初始化只读规范值，禁止控件重建时反向提交。
     Component.onCompleted: {
-        origin = configs.originDict[key]
+        origin = sourceConfigs.originDict[sourceKey]
         title = origin.title
-        updateUI()
+        refreshValue()
+        itemReady = true
         // 如果设定了提示，则加载提示组件
         if(origin.toolTip) {
             toolTipLoader.sourceComponent = toolTip
@@ -39,14 +45,29 @@ Item {
             mouseAreaBackgroud.hoverEnabled = true
         })
     }
-    // 获取或设置值
+    function refreshValue() {
+        updatingUI = true
+        try { updateUI() }
+        finally { updatingUI = false }
+    }
+    Connections {
+        target: sourceConfigs
+        function onValueCommitted(changedKey, newValue) {
+            if(itemReady && changedKey === sourceKey) refreshValue()
+        }
+        function onConfigurationReloaded() {
+            if(!itemReady || !sourceConfigs.originDict[sourceKey]) return
+            origin = sourceConfigs.originDict[sourceKey]
+            title = (origin.advanced ? "* " : "") + origin.title
+            refreshValue()
+        }
+    }
+    // 所有入口均走规范来源的 getValue/setValue；拒绝提交时也恢复此入口。
     function value(v=undefined) {
-        if(v===undefined) { // 获取
-            return configs.getValue(key)
-        }
-        else { // 设置
-            configs.setValue(key, v)
-        }
+        if(v === undefined) return sourceConfigs.getValue(sourceKey)
+        if(updatingUI || !itemReady) return
+        sourceConfigs.setValue(sourceKey, v, true)
+        refreshValue()
     }
     
     // 左边 标题

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verification_date": "2026-10-22",
+  "verification_date": "2026-11-01",
   "component": "opencv-contrib-python",
   "version": "4.10.0.84",
   "upstream_source": "https://pypi.org/project/opencv-contrib-python/4.10.0.84/",

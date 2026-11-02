@@ -14,6 +14,7 @@ param(
     [string]$ReuseFromStagingRoot = "",
     [string]$CpuStagingRoot = "",
     [string]$ReleaseGates = "",
+    [ValidateSet("loose", "stored")][string]$RuntimeLayout = "loose",
     [switch]$ReuseDependencies,
     [switch]$SkipTests,
     [switch]$Offline,
@@ -125,80 +126,6 @@ function Expand-Zip([string]$Archive, [string]$Destination) {
     if ($zip -ne $Archive) { Remove-Item -LiteralPath $zip }
 }
 
-function Remove-NonRuntimeFiles([string]$SitePackagesRoot, [string]$PortableDataRoot) {
-    $removedFiles = 0
-    $removedBytes = [int64]0
-    $allowedRoot = [IO.Path]::GetFullPath($SitePackagesRoot) + [IO.Path]::DirectorySeparatorChar
-
-    # nvidia / paddle 的头文件目录只会出现在 GPU 插件的 vendor 里；
-    # 这里保留探测是为了让本函数在两条产线上都能复用。
-    $directories = @(
-        Get-ChildItem -Recurse -Directory -LiteralPath (Join-Path $SitePackagesRoot "nvidia") -Filter "include" -ErrorAction SilentlyContinue
-        Get-Item -LiteralPath (Join-Path $SitePackagesRoot "paddle\include") -ErrorAction SilentlyContinue
-    )
-    foreach ($directory in $directories) {
-        $full = [IO.Path]::GetFullPath($directory.FullName)
-        if (-not $full.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase)) {
-            throw "Refusing to trim outside site-packages: $full"
-        }
-        $files = Get-ChildItem -Recurse -File -Force -LiteralPath $full
-        $removedFiles += $files.Count
-        $removedBytes += [int64](($files | Measure-Object Length -Sum).Sum)
-        Remove-Item -Recurse -Force -LiteralPath $full
-    }
-
-    $developmentFiles = Get-ChildItem -Recurse -File -Force -LiteralPath $SitePackagesRoot |
-        Where-Object Extension -In ".lib", ".exp", ".pdb", ".pyi", ".pyx", ".pxd"
-    foreach ($file in $developmentFiles) {
-        $removedFiles += 1
-        $removedBytes += [int64]$file.Length
-        Remove-Item -Force -LiteralPath $file.FullName
-    }
-
-    $testDirs = Get-ChildItem -Recurse -Directory -Force -LiteralPath $SitePackagesRoot |
-        Where-Object Name -In "test", "tests" |
-        Sort-Object { $_.FullName.Length } -Descending
-    foreach ($directory in $testDirs) {
-        if (-not (Test-Path -LiteralPath $directory.FullName)) { continue }
-        $files = Get-ChildItem -Recurse -File -Force -LiteralPath $directory.FullName
-        $removedFiles += $files.Count
-        $removedBytes += [int64](($files | Measure-Object Length -Sum).Sum)
-        Remove-Item -Recurse -Force -LiteralPath $directory.FullName
-    }
-
-    $bytecodeDirs = Get-ChildItem -Recurse -Directory -Force -LiteralPath $PortableDataRoot -Filter "__pycache__" |
-        Sort-Object { $_.FullName.Length } -Descending
-    foreach ($directory in $bytecodeDirs) {
-        if (-not (Test-Path -LiteralPath $directory.FullName)) { continue }
-        $files = Get-ChildItem -Recurse -File -Force -LiteralPath $directory.FullName
-        $removedFiles += $files.Count
-        $removedBytes += [int64](($files | Measure-Object Length -Sum).Sum)
-        Remove-Item -Recurse -Force -LiteralPath $directory.FullName
-    }
-
-    # Do not ship third-party development trees named src/ in the base
-    # runtime (for example NumPy's f2py source helpers). They are not used by
-    # Umi-OCR and the local-candidate source policy forbids them in the base
-    # package just like a complete source/ mirror.
-    $sourceDirs = @(
-        Get-ChildItem -Recurse -Directory -Force -LiteralPath $SitePackagesRoot -Filter "src" -ErrorAction SilentlyContinue
-        Get-ChildItem -Recurse -Directory -Force -LiteralPath $PortableDataRoot -Filter "src" -ErrorAction SilentlyContinue
-    ) | Sort-Object { $_.FullName.Length } -Descending
-    foreach ($directory in $sourceDirs) {
-        if (-not (Test-Path -LiteralPath $directory.FullName)) { continue }
-        $full = [IO.Path]::GetFullPath($directory.FullName)
-        if (-not $full.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase) -and
-            -not $full.StartsWith([IO.Path]::GetFullPath($PortableDataRoot) + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
-            throw "Refusing to trim src outside the portable build roots: $full"
-        }
-        $files = Get-ChildItem -Recurse -File -Force -LiteralPath $full
-        $removedFiles += $files.Count
-        $removedBytes += [int64](($files | Measure-Object Length -Sum).Sum)
-        Remove-Item -Recurse -Force -LiteralPath $full
-    }
-    Write-Host "Trimmed $removedFiles non-runtime files ($([math]::Round($removedBytes / 1MB, 2)) MiB)."
-}
-
 function Remove-PortableState([string]$PortableDataRoot) {
     foreach ($name in ".settings", ".pre_settings", "themes.json", "startup_error.log", "logs", "temp", "temp_doc") {
         $path = Join-Path $PortableDataRoot $name
@@ -255,6 +182,7 @@ function Copy-ReleaseSource([string]$Destination) {
         "build\tools\source_snapshot.py",
         "build\tools\prepare_products.py",
         "build\tools\package_tar_xz.py",
+        "UmiOCR-data\runtime_archive_bootstrap.py",
         "UmiOCR-data\py_src\plugins_controller\services.py",
         "UmiOCR-data\py_src\server\http_utils.py",
         "UmiOCR-data\py_src\ocr\score.py",
@@ -407,7 +335,8 @@ $nativeRoot = Join-Path $DataRoot "native"
 New-Item -ItemType Directory -Force -Path $nativeRoot | Out-Null
 Copy-Item -Force -LiteralPath (Join-Path $hdrBuild "Release\UmiOCR-HdrCapture.dll") -Destination $nativeRoot
 
-Remove-NonRuntimeFiles $SitePackages $DataRoot
+# 小文件优化只改变容器布局，不按后缀或 tests/src 等目录名删减依赖。
+# 依赖种子的既有裁剪来自其独立构建记录，本次保留全部输入文件。
 
 # Umi-OCR does not use OpenCV video I/O. Its bundled FFmpeg backend is a
 # static LGPL build, so keep this optional feature out of the public closure.
@@ -488,6 +417,14 @@ else {
     foreach ($name in @("source-snapshot.zip", "source-snapshot.json", "source-provenance.json")) {
         Copy-Item -LiteralPath (Join-Path $snapshotRoot $name) -Destination $StagingRoot
     }
+}
+# 在源码记录齐备、所有运行状态清理之后聚合，冻结/归档之后不再改布局。
+if ($RuntimeLayout -eq "stored") {
+    & $python -I -B -S -X utf8 (Join-Path $RepoRoot "build/tools/merge_runtime.py") $DataRoot `
+        --kind host --policy (Join-Path $RepoRoot "build/windows/runtime_archives_host.json") --project-root $RepoRoot
+    if ($LASTEXITCODE -ne 0) { throw "Host Stored-ZIP aggregation failed." }
+    & $python -I -B -S -X utf8 (Join-Path $RepoRoot "build/tools/audit_runtime_archives.py") --root $DataRoot
+    if ($LASTEXITCODE -ne 0) { throw "Host Stored-ZIP source verification failed." }
 }
 Remove-BuildTree (Join-Path $StagingRoot ".build")
 if ($LocalCandidate) {

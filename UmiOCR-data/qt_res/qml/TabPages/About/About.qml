@@ -106,19 +106,26 @@ TabPage {
 
                 Row {
                     anchors.left: parent.left
+                    anchors.right: parent.right
+                    spacing: size_.spacing
                     Text_ {
+                        id: systemInfoTitle
+                        width: Math.max(0, parent.width - copyInfoButton.width - parent.spacing)
                         font.pixelSize: size_.smallText
-                        height: size_.smallLine + size_.spacing*2
+                        height: Math.max(implicitHeight, size_.smallLine + size_.spacing*2)
+                        wrapMode: Text.Wrap
                         verticalAlignment: Text.AlignVCenter
                         text: qsTr("运行环境信息（如需请求协助，请提供给开发者）")
                     }
                     Button_ {
+                        id: copyInfoButton
+                        anchors.verticalCenter: systemInfoTitle.verticalCenter
                         height: size_.smallLine + size_.spacing*2
                         textSize: size_.smallText
                         text_: qsTr("复制")
                         textColor_: theme.yesColor
                         onClicked: {
-                            const info = JSON.stringify(UmiAbout.app, null, 2)
+                            const info = UmiSystemInfo.infoJson
                             qmlapp.utilsConnector.copyText(info)
                         }
                     }
@@ -126,9 +133,21 @@ TabPage {
                 Text_ {
                     anchors.left: parent.left
                     anchors.leftMargin: size_.line * 2
-                    wrapMode: Text.WordWrap
+                    anchors.right: parent.right
+                    wrapMode: Text.Wrap
                     font.pixelSize: size_.smallText
-                    text: JSON.stringify(UmiAbout.app, null, 2)
+                    visible: text.length > 0
+                    text: UmiSystemInfo.state === "pending" ? qsTr("正在后台采集系统信息…")
+                        : UmiSystemInfo.state === "failed" ? qsTr("系统信息采集失败：%1").arg(UmiSystemInfo.error)
+                        : UmiSystemInfo.state === "cancelled" ? qsTr("系统信息采集已取消") : ""
+                }
+                Text_ {
+                    anchors.left: parent.left
+                    anchors.leftMargin: size_.line * 2
+                    anchors.right: parent.right
+                    wrapMode: Text.Wrap
+                    font.pixelSize: size_.smallText
+                    text: UmiSystemInfo.infoJson
                 }
 
                 Item {width: 1; height: size_.line}

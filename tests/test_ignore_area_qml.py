@@ -121,12 +121,18 @@ def test_preview_connector_races(app, source_root):
         def __init__(self):
             super().__init__()
             self.images = []
+            self.infos = []
             self.ocr = []
 
         @Slot(str)
         def image(self, img_id):
             assert app.thread().isCurrentThread()
             self.images.append(img_id)
+
+        @Slot("QVariant")
+        def info(self, value):
+            assert app.thread().isCurrentThread()
+            self.infos.append(plain(value))
 
         @Slot("QVariant")
         def result(self, value):
@@ -136,6 +142,7 @@ def test_preview_connector_races(app, source_root):
     def new_connector():
         connector, receiver = connector_module.DocPreviewConnector(), Receiver()
         connector.previewImg.connect(receiver.image)
+        connector.previewInfo.connect(receiver.info)
         connector.previewOcr.connect(receiver.result)
         connectors.append((connector, receiver))
         return connector, receiver
@@ -163,6 +170,8 @@ def test_preview_connector_races(app, source_root):
         assert len(receiver.images) == 1, receiver.images
         assert len(cache.entries) == 1, cache.entries
         assert cache.entries[receiver.images[0]] == {"color": "#0000ff", "main_thread": True}
+        assert len(receiver.infos) == 1 and receiver.infos[0]["path"].startswith("B"), receiver.infos
+        assert receiver.infos[0]["pageCount"] == 1 and not receiver.infos[0]["error"]
 
     with patch.dict(sys.modules, {"fitz": fake_fitz}), patch.object(connector_module, "PixmapProvider", cache):
         try:
@@ -197,7 +206,7 @@ def test_preview_connector_races(app, source_root):
                 connector.clear()
                 connector.preview("B-queued.pdf", 1, "")
                 workers_done()
-                assert len(held) == 2, held
+                assert len(held) == 4, held  # A/B 各有元信息和图片两个交付
                 worker_call(lambda: [real_dispatch.now(func, *args) for func, args in reversed(held)])
                 assert receiver.images == []
                 app.processEvents()
@@ -214,14 +223,35 @@ def test_preview_connector_races(app, source_root):
             connector.clear()
             workers_done()
             app.processEvents()
-            assert receiver.images == [] and cache.entries == {}
+            assert receiver.images == [] and receiver.infos == [] and cache.entries == {}
             connector.preview("missing.pdf", 1, "")
             workers_done()
             connector.clear()
             workers_done()
             app.processEvents()
-            assert receiver.images == [] and cache.entries == {}
+            assert receiver.images == [] and receiver.infos == [] and cache.entries == {}
             cases.append("clear_after_queued_render_and_error")
+
+            # 页数在渲染完成前即可交付；任意翻页仍使用当前渲染代次。
+            cache.entries.clear()
+            connector, receiver = new_connector()
+            started, release = Event(), Event()
+            blockers["A-three-pages.pdf"] = (started, release)
+            with patch.object(FakeDoc, "page_count", 3):
+                connector.preview("A-three-pages.pdf", 1, "")
+                assert started.wait(5)
+                app.processEvents()
+                assert receiver.images == []
+                assert receiver.infos == [{"path": "A-three-pages.pdf", "page": 1, "pageCount": 3, "error": ""}]
+                connector.preview("A-three-pages.pdf", 3, "")
+                release.set()
+                workers_done()
+                app.processEvents()
+                assert len(receiver.images) == 1
+                assert receiver.infos[-1] == {"path": "A-three-pages.pdf", "page": 3, "pageCount": 3, "error": ""}
+                connector.clear()
+                workers_done()
+            cases.append("metadata_before_render_and_third_page_without_parsing")
 
             submitted = []
 

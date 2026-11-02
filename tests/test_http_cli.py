@@ -267,9 +267,10 @@ def main():
                         time.sleep(0.25)
 
                 assert "ocr.language" not in options
-                assert options["ocr.preset"]["default"] == "accuracy"
+                assert "ocr.preset" not in options, options
                 assert options["ocr.detModel"]["default"] == "PP-OCRv6_medium"
                 assert options["ocr.recModel"]["default"] == "PP-OCRv6_medium"
+                assert options["ocr.longSide"]["default"] == 4000
 
                 response = _request(
                     opener,
@@ -322,8 +323,22 @@ def main():
                 custom = _wait_qml_values(
                     opener,
                     base_url,
-                    {"ocr.longSide": 3000, "ocr.preset": "custom"},
+                    {"ocr.longSide": 3000},
                 )
+                assert "ocr.preset" not in custom, custom
+
+                # 旧HTTP预设仍兼容，但不得重新生成GUI预设或改写当前页参数。
+                legacy = _request(
+                    opener,
+                    base_url + "/api/ocr",
+                    {
+                        "base64": base64.b64encode(image_bytes).decode("ascii"),
+                        "options": {"ocr.preset": "accuracy", "tbpu.parser": "none"},
+                    },
+                )
+                assert legacy["code"] == 100 and legacy["data"], legacy
+                unchanged = _wait_qml_values(opener, base_url, {"ocr.longSide": 3000})
+                assert "ocr.preset" not in unchanged, unchanged
 
                 _argv(
                     opener,
@@ -333,15 +348,12 @@ def main():
                         "ScreenshotOCR",
                         "--func",
                         "setValue",
-                        "ocr.preset",
-                        "accuracy",
+                        "ocr.longSide",
+                        "4000",
                     ],
                 )
-                accuracy = _wait_qml_values(
-                    opener,
-                    base_url,
-                    {"ocr.preset": "accuracy", "ocr.longSide": 4000},
-                )
+                restored = _wait_qml_values(opener, base_url, {"ocr.longSide": 4000})
+                assert "ocr.preset" not in restored, restored
 
                 quit_result = subprocess.run(
                     [str(executable), "--quit"],
@@ -358,7 +370,7 @@ def main():
             print(
                 f"HTTP/CLI tests passed on port {port}: options, Base64 OCR, "
                 f"QR round trip, document upload/result/searchable PDF/download/clear, "
-                f"path OCR, preset/custom, output file, clean quit "
+                f"path OCR, page parameters, legacy HTTP preset without GUI mutation, output file, clean quit "
                 f"({len(response['data'])} items)."
             )
     finally:

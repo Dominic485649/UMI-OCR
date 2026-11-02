@@ -5,6 +5,7 @@ import base64
 import hashlib
 import json
 from pathlib import Path
+import re
 import shutil
 import stat
 import sys
@@ -159,7 +160,8 @@ def validate_records(records, plugin, *, require_version):
             about_version = ".".join(str(about_version.get(key)) for key in ("major", "minor", "patch"))
         version_bytes = archive.read("host/VERSION")
         if (source_manifest.get("id") != PLUGIN_ID or source_manifest.get("version") != version or
-                about_version != version or version_bytes.decode("utf-8-sig").strip() != version or
+                not isinstance(about_version, str) or not re.fullmatch(r"\d+\.\d+\.\d+", about_version) or
+                version_bytes.decode("utf-8-sig").strip() != version or
                 file_digest(plugin / "umi-plugin.json") != manifest["host/" + plugin_record]):
             raise RuntimeError("CUDA source snapshot version/plugin identity does not match the staged plugin")
     if (records / "VERSION").exists() and (records / "VERSION").read_text(encoding="utf-8-sig").strip() != version:

@@ -1,12 +1,14 @@
 # Windows CUDA Build Guide
 
-This guide describes the build contract for independent Umi-OCR Windows x64 base and CUDA 12.6 plugin products. Versions come from `UmiOCR-data/about.json`. The product name, window title, `Umi-OCR.exe`, portable `.settings` location and branding remain `Umi-OCR`; the product version does not change Host API compatibility.
+This guide describes the build contract for independent Umi-OCR Windows x64 base and CUDA 12.6 plugin products. The base version comes from `UmiOCR-data/about.json`; the CUDA version comes from its `umi-plugin.json`. These product versions may differ: compatibility is determined by the Host API range. The product name, window title, `Umi-OCR.exe`, portable `.settings` location and branding remain `Umi-OCR`.
+
+**Current preparation scope (2026-10-24):** CUDA plugin `3.0.4` targets the published base `3.0.3` without rebuilding or modifying the base. The source-built `UmiOCR-CudaWorker.exe` embeds `activeCodePage=UTF-8` in the process that loads Python/Paddle; it does not patch the original Python EXE, change the Windows global code page or relocate models. This round's real regression is limited to startup, CUDA/model initialization and normal shutdown. Image/PDF OCR is not rerun and historical E2E PASS is not this round's result. Preparation does not authorize acceptance or publication: the existing formal gate rules and BLOCK remain. See the [CUDA 3.0.4 draft](RELEASE_CUDA_3.0.4_DRAFT.md) and [current review scope](RELEASE_CUDA_3.0.4_REVIEW.md).
 
 **Dated snapshot (2026-10-22, before this round's fresh rebuild):** Historical 3.0.3 R2 completed base/combined, hot GUI, tray/HTTP/exit, GPU, archive reinstallation and source/model checks. Both public `v3.0.3` source tags exist, but neither binary Release has been created, uploaded or published. This round is to repair formal gate wiring and prepare fresh noncandidate products with `-SkipArchive`; that build has not run at this cutoff, and R2 PASS, hashes and approval do not carry over. The user must review this round's actual program and both texts before main/tag updates; the formal source gate waits for matching tags, then restricted finalization follows. See the [3.0.3 acceptance contract](RELEASE_3.0.3_ACCEPTANCE.md), [review requirements](RELEASE_3.0.3_REVIEW.md) and [source-delivery contract](../SOURCE-CODE.md).
 
 ## Prerequisites
 
-- Windows 10/11 x64.
+- Windows 10/11 x64; the CUDA 3.0.4 native UTF-8 worker requires Windows 10 1903+ or Windows 11.
 - An NVIDIA GPU with Windows driver `560.76` or newer. A system CUDA Toolkit is not required; the locked CUDA 12.6 and cuDNN DLLs ship in the portable package. A Toolkit installed through Scoop or elsewhere neither replaces nor participates in resolving the bundled runtime DLLs.
 - Visual Studio 2026, MSVC 14.51, Windows SDK 10.0.28000.0, and the Desktop development with C++ workload. Scripts locate Visual Studio through `vswhere` and do not contain machine-specific absolute paths.
 - CMake, Git, PowerShell 7, and `7z.exe` on `PATH`; Windows `tar.exe` and `curl.exe` are also used.
@@ -32,7 +34,9 @@ Only regenerate the wheel lock when changing dependencies:
 pwsh -File .\build\windows\Resolve-Lock.ps1
 ```
 
-## Offline Examples and This Round's Formal Preparation
+## Offline Examples and Independent Product Versions
+
+For the CUDA-only 3.0.4 update, point `-BaseStagingRoot` at a verified extraction of base 3.0.3 and `-ReuseVendorFromStagingRoot` at a complete, verified CUDA 3.0.3 extraction. Use a new `-StagingRoot` with `-ReuseDependencies -ReuseModels -SkipModels -Offline -SkipArchive`. Run only `Build-GpuPlugin.ps1`, not `Build-Release.ps1`: the plugin version becomes 3.0.4 while the base retains its original 3.0.3 bytes. A previously trimmed, incomplete staging tree is not a valid seed.
 
 Run from the repository root. Building compiles local native components, copies inputs and performs static audits; it does not start the product or GPU or download dependencies/models. Every output must be new. Seeds are read-only; no old staging directory is scanned, deleted or recreated.
 
@@ -78,6 +82,10 @@ Both Build scripts invoke `build/tools/package_tar_xz.py`: an inner POSIX tar an
 Extract Base into the chosen application root to create `Umi-OCR.exe` and `UmiOCR-data/` directly. Extract CUDA into that same root to overlay `UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/`; there is no additional product-directory prefix. CUDA license and corresponding-source materials live under `LICENSES/plugins/win32_PaddleOCRv6_CUDA/`, preserving the host's root licenses, version and source records. GUI tools may require extracting both xz and tar layers; Windows `tar.exe -xf archive.tar.xz -C <application-root>` handles both.
 
 ## Verification
+
+This CUDA 3.0.4 round runs only startup, CUDA/model initialization and normal shutdown, recorded by `record_gpu_startup.py`. That record does not authorize publication or replace the existing full gates below. Do not invoke the full combined image/PDF OCR regression for this startup-only round; retain untested coverage and formal BLOCK honestly.
+
+### Existing full validation path, outside this startup-only scope
 
 Preparation and `-SkipArchive` do not mean public-release or current-source E2E has passed; old R2 hashes/PASS are not this round's evidence. Within the approved scope, run `Test-Release.ps1 -StagingRoot $complete -Kind combined -Device gpu:0` against the actual combined tree, and separately record hot GUI, real Windows tray/pre-quit HTTP readiness, normal exit, raw GPU receipts, source/model checks and manual limitations. GPU formal gates bind the actual CUDA overlay, not the independent GPU staging tree.
 

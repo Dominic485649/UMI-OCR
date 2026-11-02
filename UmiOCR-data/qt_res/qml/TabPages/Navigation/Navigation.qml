@@ -27,12 +27,24 @@ TabPage {
 
 
 
-`+qsTr("当前版本")+`   •   ${UmiAbout.version.string}
-
-`+qsTr("项目链接")+`   •   [`+qsTr("官方网站")+`](${UmiAbout.url.home})    [`+qsTr("插件拓展")+`](${UmiAbout.url.plugins})    [`+qsTr("问题反馈")+`](${UmiAbout.url.issue})
+`+qsTr("项目链接")+`   •   [`+qsTr("仓库链接")+`](${UmiAbout.url.home})    [`+qsTr("插件拓展")+`](${UmiAbout.url.plugins})    [`+qsTr("问题反馈")+`](${UmiAbout.url.issue})
 
 `
 
+    // 独立版本区不参与悬停简介替换，只显示真实安装清单。
+    property var installedVersions: versionLines()
+    function versionLines() {
+        const lines = ["Umi-OCR  " + UmiAbout.version.string]
+        for(const info of qmlapp.globalConfigs.pluginStates) {
+            const state = info.state === "ready" ? "" : "  [" + qmlapp.globalConfigs.pluginStateText(info.state) + "]"
+            lines.push((info.name || info.id) + "  " + (info.version || "-") + state)
+        }
+        return lines
+    }
+    Connections {
+        target: qmlapp.tab
+        function onInfoListChanged() { initData() }
+    }
     // 初始化数据
     Component.onCompleted: initData()
     function initData() {
@@ -119,9 +131,33 @@ TabPage {
             
             MarkdownView {
                 id: introView
-                anchors.fill: parent
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: versionBlock.top
                 anchors.margins: size_.spacing * 2
                 text: introText
+            }
+            Column {
+                id: versionBlock
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: size_.spacing * 2
+                spacing: size_.smallSpacing
+                Text_ {
+                    text: qsTr("当前版本")
+                    color: theme.subTextColor
+                }
+                Repeater {
+                    model: installedVersions
+                    Text_ {
+                        width: versionBlock.width
+                        text: modelData
+                        color: theme.subTextColor
+                        wrapMode: Text.Wrap
+                    }
+                }
             }
         }
     }

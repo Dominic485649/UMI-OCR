@@ -28,6 +28,7 @@ param(
     [string]$CpuStagingRoot = "",
     [string]$ReleaseGates = "",
     [string]$OverlayRoot = "",
+    [ValidateSet("loose", "stored")][string]$RuntimeLayout = "loose",
     [switch]$ReuseDependencies,
     [switch]$SkipModels,
     [switch]$ReuseModels,
@@ -68,10 +69,10 @@ if ($ReleaseGates) {
 }
 $PluginId = "win32_PaddleOCRv6_CUDA"
 $PluginSource = Join-Path $RepoRoot "UmiOCR-data\plugins\$PluginId"
-$Manifest = Get-Content -Raw (Join-Path $PluginSource "umi-plugin.json") | ConvertFrom-Json
-$About = Get-Content -Raw (Join-Path $RepoRoot "UmiOCR-data/about.json") | ConvertFrom-Json
-$Version = "$($About.version.major).$($About.version.minor).$($About.version.patch)"
-if ([string]$Manifest.version -ne $Version) { throw "CUDA manifest version must match about.json: $Version" }
+$PluginManifestPath = Join-Path $PluginSource "umi-plugin.json"
+$Manifest = Get-Content -Raw $PluginManifestPath | ConvertFrom-Json
+$Version = [string]$Manifest.version
+if ($Manifest.id -cne $PluginId -or $Version -cnotmatch '^\d+\.\d+\.\d+$') { throw "CUDA manifest must identify this plugin and its independent release version." }
 $Lock = Get-Content -Raw (Join-Path $RepoRoot "build\sources-windows-cu126.lock.json") | ConvertFrom-Json
 
 if (-not $StagingRoot) { $StagingRoot = Join-Path $RepoRoot "build\staging\$Version-gpu-$([guid]::NewGuid().ToString('N'))" }
@@ -136,7 +137,14 @@ function Remove-BuildTree([string]$Path) {
     if (-not $full.StartsWith($StagingRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
         throw "Refusing to remove a path outside this new staging directory: $full"
     }
-    if (Test-Path -LiteralPath $full) { Remove-Item -Recurse -Force -LiteralPath $full }
+    if (Test-Path -LiteralPath $full) {
+        $occupied = @(Get-Process | Where-Object { $_.Path -like ($full.TrimEnd('\','/') + '\*') } | Select-Object Id,ProcessName,Path)
+        if ($occupied.Count) {
+            $occupied | Format-Table -AutoSize
+            throw "构建临时目录有进程占用；请正常退出后重试，不会终止进程或删除目录：$full"
+        }
+        Remove-Item -Recurse -Force -LiteralPath $full
+    }
 }
 
 function Copy-GpuPluginSource([string]$Destination) {
@@ -144,7 +152,7 @@ function Copy-GpuPluginSource([string]$Destination) {
     if (-not $full.StartsWith($StagingRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
         throw "Refusing to create source mirror outside staging: $full"
     }
-    if (Test-Path -LiteralPath $full) { Remove-Item -Recurse -Force -LiteralPath $full }
+    if (Test-Path -LiteralPath $full) { Remove-BuildTree $full }
     & $basePython -I -S (Join-Path $RepoRoot "build/tools/export_cuda_source.py") --repo-root $RepoRoot --output-dir $full --source-cache (Join-Path $CacheRoot "sources")
     if ($LASTEXITCODE -ne 0) { throw "Public CUDA source export failed." }
 }
@@ -170,7 +178,7 @@ function Write-LocalCandidateSourceNotice([string]$Destination) {
     $snapshotRoot = Join-Path $StagingRoot ".build/source-snapshot"
     $sourceRoot = Join-Path $StagingRoot "source"
     Copy-Item -Force -LiteralPath (Join-Path $StagingRoot "LICENSES/RELEASE_EVIDENCE.json") -Destination (Join-Path $sourceRoot "LICENSES/RELEASE_EVIDENCE.json")
-    & $basePython -I -S (Join-Path $RepoRoot "build/tools/source_snapshot.py") --repo-root $RepoRoot --mirror-source $sourceRoot --output-dir $snapshotRoot
+    & $basePython -I -S (Join-Path $RepoRoot "build/tools/source_snapshot.py") --repo-root $RepoRoot --about $PluginManifestPath --mirror-source $sourceRoot --output-dir $snapshotRoot
     if ($LASTEXITCODE -ne 0) { throw "Current CUDA source snapshot failed." }
     foreach ($name in @("source-snapshot.zip", "source-snapshot.json", "source-provenance.json")) { Copy-Item -LiteralPath (Join-Path $snapshotRoot $name) -Destination $Destination }
     $commit = (& git -C $RepoRoot rev-parse HEAD).Trim()
@@ -239,72 +247,6 @@ function Remove-UnsupportedPaddleXConfigs([string]$VendorPath) {
     Write-Host "裁掉 $($removed.Count) 个不支持的 PaddleX 模型配置。"
 }
 
-function Remove-NonRuntimeFiles([string]$VendorPath) {
-    $removedFiles = 0
-    $removedBytes = [int64]0
-    $allowedRoot = [IO.Path]::GetFullPath($VendorPath) + [IO.Path]::DirectorySeparatorChar
-
-    $directories = @(
-        Get-ChildItem -Recurse -Directory -LiteralPath (Join-Path $VendorPath "nvidia") -Filter "include" -ErrorAction SilentlyContinue
-        Get-Item -LiteralPath (Join-Path $VendorPath "paddle\include") -ErrorAction SilentlyContinue
-    )
-    foreach ($directory in $directories) {
-        $full = [IO.Path]::GetFullPath($directory.FullName)
-        if (-not $full.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase)) {
-            throw "拒绝裁剪 vendor 之外的路径: $full"
-        }
-        $files = Get-ChildItem -Recurse -File -Force -LiteralPath $full
-        $removedFiles += $files.Count
-        $removedBytes += [int64](($files | Measure-Object Length -Sum).Sum)
-        Remove-Item -Recurse -Force -LiteralPath $full
-    }
-
-    $developmentFiles = Get-ChildItem -Recurse -File -Force -LiteralPath $VendorPath |
-        Where-Object Extension -In ".lib", ".exp", ".pdb", ".pyi", ".pyx", ".pxd"
-    foreach ($file in $developmentFiles) {
-        $removedFiles += 1
-        $removedBytes += [int64]$file.Length
-        Remove-Item -Force -LiteralPath $file.FullName
-    }
-
-    $testDirs = Get-ChildItem -Recurse -Directory -Force -LiteralPath $VendorPath |
-        Where-Object Name -In "test", "tests" |
-        Sort-Object { $_.FullName.Length } -Descending
-    foreach ($directory in $testDirs) {
-        if (-not (Test-Path -LiteralPath $directory.FullName)) { continue }
-        $files = Get-ChildItem -Recurse -File -Force -LiteralPath $directory.FullName
-        $removedFiles += $files.Count
-        $removedBytes += [int64](($files | Measure-Object Length -Sum).Sum)
-        Remove-Item -Recurse -Force -LiteralPath $directory.FullName
-    }
-
-    Get-ChildItem -Recurse -Directory -Force -LiteralPath $StagingRoot -Filter "__pycache__" |
-        Sort-Object { $_.FullName.Length } -Descending |
-        ForEach-Object {
-            if (Test-Path -LiteralPath $_.FullName) {
-                $files = Get-ChildItem -Recurse -File -Force -LiteralPath $_.FullName
-                $removedFiles += $files.Count
-                $removedBytes += [int64](($files | Measure-Object Length -Sum).Sum)
-                Remove-Item -Recurse -Force -LiteralPath $_.FullName
-            }
-        }
-    Get-ChildItem -Recurse -Directory -Force -LiteralPath $VendorPath -Filter "src" |
-        Sort-Object { $_.FullName.Length } -Descending |
-        ForEach-Object {
-            if (Test-Path -LiteralPath $_.FullName) {
-                $full = [IO.Path]::GetFullPath($_.FullName)
-                if (-not $full.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase)) {
-                    throw "Refusing to trim src outside vendor: $full"
-                }
-                $files = Get-ChildItem -Recurse -File -Force -LiteralPath $full
-                $removedFiles += $files.Count
-                $removedBytes += [int64](($files | Measure-Object Length -Sum).Sum)
-                Remove-Item -Recurse -Force -LiteralPath $full
-            }
-        }
-    Write-Host "裁掉 $removedFiles 个非运行时文件（$([math]::Round($removedBytes / 1MB, 2)) MiB）。"
-}
-
 # ===================== 1. 安装私有依赖闭包 =====================
 
 $basePython = Resolve-BuildPath (Join-Path $BaseStagingRoot "UmiOCR-data\runtime\python.exe")
@@ -340,7 +282,7 @@ elseif (-not (Test-Path -LiteralPath $VendorRoot)) {
 
 # ===================== 2. 插件源码 =====================
 
-& $basePython -I -S (Join-Path $RepoRoot "build/tools/source_snapshot.py") --repo-root $RepoRoot --plugin-dir $PluginRoot
+& $basePython -I -S (Join-Path $RepoRoot "build/tools/source_snapshot.py") --repo-root $RepoRoot --about $PluginManifestPath --plugin-dir $PluginRoot
 if ($LASTEXITCODE -ne 0) { throw "Current public CUDA source copy failed." }
 Copy-Item -Force -LiteralPath (Join-Path $RepoRoot "build\requirements-gpu-plugin-windows-cu126.lock") `
     -Destination (Join-Path $PluginRoot "runtime-requirements.lock")
@@ -375,9 +317,10 @@ if (-not $SkipModels) {
     Remove-Item -Recurse -Force -LiteralPath $uvdoc
 }
 
-# ===================== 5. 裁剪非运行时文件 =====================
+# ===================== 5. 保留依赖与明确的分发边界 =====================
 
-Remove-NonRuntimeFiles $VendorRoot
+# 不按后缀或 tests/src/include 等目录名删减依赖；小文件仅按白名单聚合。
+# 下方仅保留已有且明确列名的原生分发闭包排除规则。
 
 # Umi-OCR does not expose OpenCV video I/O. The bundled FFmpeg backend lacks
 # a closed source/configuration record, so keep this optional DLL out of the
@@ -394,10 +337,28 @@ if (Test-Path -LiteralPath $excludedCudaDll) {
     Write-Host "Excluded unlisted CUDA binary: $excludedCudaDll"
 }
 
-# ===================== 6. 依赖闭包锁 =====================
-# 只对原生二进制（dll / pyd）做哈希：它们是完整性与安全性的关键，
-# 逐个哈希上万个 .py 既拖慢构建也拖慢用户端校验。
+$cudaWorkerSource = Resolve-BuildPath (Join-Path $RepoRoot "build/windows/CudaWorker")
+$cudaWorkerBuild = Resolve-BuildPath (Join-Path $StagingRoot ".build/cuda_worker")
+$cudaWorkerTarget = Resolve-BuildPath (Join-Path $PluginRoot "UmiOCR-CudaWorker.exe")
+if (Test-Path -LiteralPath $cudaWorkerBuild) { throw "Use a new CUDA worker build directory: $cudaWorkerBuild" }
+if (Test-Path -LiteralPath $cudaWorkerTarget) { throw "CUDA worker output already exists: $cudaWorkerTarget" }
+cmake.exe -S $cudaWorkerSource -B $cudaWorkerBuild -G "Visual Studio 18 2026" -A x64 "-DCMAKE_SYSTEM_VERSION=10.0.28000.0" "-DUMIOCR_VERSION=$Version"
+if ($LASTEXITCODE -ne 0) { throw "CUDA worker configure failed." }
+cmake.exe --build $cudaWorkerBuild --config Release --parallel --target UmiOCR-CudaWorker
+if ($LASTEXITCODE -ne 0) { throw "CUDA worker build failed." }
+$cudaWorkerBinary = Resolve-BuildPath (Join-Path $cudaWorkerBuild "Release/UmiOCR-CudaWorker.exe")
+if (-not (Test-Path -LiteralPath $cudaWorkerBinary -PathType Leaf)) { throw "CUDA worker executable is missing: $cudaWorkerBinary" }
+Copy-Item -LiteralPath $cudaWorkerBinary -Destination $cudaWorkerTarget
 
+# ===================== 6. 私有容器与依赖闭包锁 =====================
+
+if ($RuntimeLayout -eq "stored") {
+    & $basePython -I -B -S -X utf8 (Join-Path $RepoRoot "build/tools/merge_runtime.py") $PluginRoot `
+        --kind plugin --policy (Join-Path $RepoRoot "build/windows/runtime_archives_cuda.json") --project-root $RepoRoot
+    if ($LASTEXITCODE -ne 0) { throw "CUDA Stored-ZIP aggregation failed." }
+    & $basePython -I -B -S -X utf8 (Join-Path $RepoRoot "build/tools/audit_runtime_archives.py") --root $PluginRoot
+    if ($LASTEXITCODE -ne 0) { throw "CUDA Stored-ZIP source verification failed." }
+}
 & $basePython -B -I -S (Join-Path $RepoRoot "build/tools/freeze_gpu_runtime.py") $PluginRoot
 if ($LASTEXITCODE -ne 0) { throw "GPU native closure lock generation failed." }
 
@@ -504,7 +465,7 @@ else {
     Copy-Item -LiteralPath (Join-Path $RepoRoot "SOURCE-CODE.md") -Destination $StagingRoot
     Set-Content -Encoding utf8 -LiteralPath (Join-Path $StagingRoot "VERSION") -Value $Version
     $snapshotRoot = Join-Path $StagingRoot ".build/source-snapshot"
-    & $basePython -I -S (Join-Path $RepoRoot "build/tools/source_snapshot.py") --repo-root $RepoRoot --mirror-source (Join-Path $StagingRoot "source") --output-dir $snapshotRoot
+    & $basePython -I -S (Join-Path $RepoRoot "build/tools/source_snapshot.py") --repo-root $RepoRoot --about $PluginManifestPath --mirror-source (Join-Path $StagingRoot "source") --output-dir $snapshotRoot
     if ($LASTEXITCODE -ne 0) { throw "Public CUDA source snapshot failed." }
     foreach ($name in @("source-snapshot.zip", "source-snapshot.json", "source-provenance.json")) {
         Copy-Item -LiteralPath (Join-Path $snapshotRoot $name) -Destination $StagingRoot

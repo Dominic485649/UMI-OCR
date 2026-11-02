@@ -25,10 +25,10 @@ EXCLUDED_PARTS = {
     "runtime", "site-packages", "downloads", "wheels", "tmp",
     ".claude", ".codex", ".agents", "claude.md", "codex.md", "agents.md", "gemini.md",
 }
-SOURCE_ROOTS = {"umiocr-data", "build", "tests", "docs", "licenses", "third_party", ".github", "dev-tools", "pystand_for_umiocr"}
+SOURCE_ROOTS = {"umiocr-data", "build", "tests", "benchmarks", "docs", "licenses", "third_party", ".github", "dev-tools", "pystand_for_umiocr"}
 ROOT_FILES = {"copying", "license", "source-code.md", "change_log.md", "pyproject.toml", ".gitignore", ".gitattributes", "version", "source-export.json"}
 SOURCE_SUFFIXES = {".py", ".ps1", ".qml", ".js", ".json", ".md", ".c", ".cpp", ".h", ".hpp", ".cmake", ".in", ".lock", ".yaml", ".yml", ".bat", ".cmd", ".sh", ".toml", ".ini", ".ts", ".po", ".png", ".jpg", ".jpeg", ".svg", ".ico", ".qrc", ".ttf", ".otf", ".webp", ".gif", ".qm", ".txt"}
-SOURCE_SUFFIXES.update({".rc", ".manifest", ".xml", ".qss", ".hlsl", ".glsl", ".vert", ".frag"})
+SOURCE_SUFFIXES.update({".rc", ".manifest", ".xml", ".qss", ".hlsl", ".glsl", ".vert", ".frag", ".csv"})
 EXCLUDED_PLUGIN_ROOTS = {
     "win32_paddleocrv6_cpu",
     "win32_paddleocrvl_1_6",
@@ -82,8 +82,10 @@ def is_excluded(relative: Path, *, public: bool) -> bool:
         return len(lowered) != 1 or not (lowered[0] in ROOT_FILES or lowered[0].startswith(("readme", "contributing", "notice")))
     if lowered[0] == "build" and (len(lowered) < 2 or lowered[1] not in {"tools", "windows"}):
         return len(lowered) != 2 or not (lowered[1] == "qt-runtime-whitelist.json" or "lock" in lowered[1] or lowered[1].startswith(("requirements-", "constraints-")))
+    if lowered[0] == "benchmarks" and (len(lowered) != 2 or relative.suffix.casefold() != ".py"):
+        return True  # 交付测量工具源码，不混入旧结果或本地机器数据。
     if lowered[0] == "umiocr-data":
-        if len(lowered) < 2 or lowered[1] not in {"main.py", "about.json", "version.py", "help 帮助.txt", "py_src", "qt_res", "i18n", "plugins"}:
+        if len(lowered) < 2 or lowered[1] not in {"main.py", "about.json", "version.py", "runtime_archive_bootstrap.py", "help 帮助.txt", "py_src", "qt_res", "i18n", "plugins"}:
             return True
     if lowered[0] not in {"licenses", "third_party", "tests"} and relative.suffix.casefold() not in SOURCE_SUFFIXES and relative.name != "CMakeLists.txt":
         return True

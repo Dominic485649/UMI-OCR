@@ -4,6 +4,7 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Window 2.15
 
 
 ToolTip {
@@ -11,6 +12,11 @@ ToolTip {
 
     delay: 500
     timeout: 0 // 不自动关闭
+    margins: size_.spacing
+    readonly property real textWidthLimit: 480 * size_.scale
+    readonly property var ownerWindow: parent ? parent.Window.window : null
+    readonly property real windowWidthLimit: ownerWindow ? Math.max(1, ownerWindow.width - margins * 2) : textWidthLimit
+    width: Math.min(implicitWidth, textWidthLimit, windowWidthLimit)
 
     MouseArea {
         id: mouseArea
@@ -23,6 +29,8 @@ ToolTip {
 
     contentItem: Text { // 前景文字
         text: rootToolTip.text
+        textFormat: Text.PlainText
+        wrapMode: Text.Wrap
         font.family: theme.fontFamily
         font.pixelSize: size_.smallText
         color: theme.textColor

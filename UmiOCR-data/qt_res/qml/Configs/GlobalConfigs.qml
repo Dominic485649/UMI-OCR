@@ -13,6 +13,7 @@ Configs {
     lazyPanel: true
     category_: "Global"
     autoLoad: false
+    panelLayout: buildPanelLayout()
     // ========================= 【全局配置项】 =========================
     configDict: makeConfigDict()
     function makeConfigDict() { return {
@@ -57,7 +58,7 @@ Configs {
             "theme": {
                 "title": qsTr("主题"),
                 "optionsList": theme.manager.getOptionsList(), // 从全局主题管理器中取列表
-                "default": "Default Light",
+                "default": theme.manager.followSystemKey,
                 "onChanged": (val, old)=>{
                     applyThemeSettings(val)
                     if(old)
@@ -98,7 +99,7 @@ Configs {
             },
             "scale": {
                 "title": qsTr("界面与文字大小"),
-                "default": 1,
+                "default": 1.25,
                 "optionsList": [
                     [0.5, "50%"],
                     [0.75, "75%"],
@@ -112,19 +113,6 @@ Configs {
                     size_.scale = val
                 },
             },
-            "disableEffect": {
-                "title": qsTr("禁用美化效果"),
-                "default": false,
-                "toolTip": qsTr("在低配置机器上，禁用动画、阴影等效果可减少部分资源占用"),
-                "onChanged": (flag)=>{
-                    qmlapp.enabledEffect = !flag
-                },
-            },
-            "imgShowOverlay": {
-                "title": qsTr("图片预览默认显示叠加层"),
-                "default": true,
-                "toolTip": qsTr("默认开启/关闭叠加层显示\n对所有图片预览组件生效"),
-            }
         },
 
         // 窗口
@@ -327,7 +315,30 @@ Configs {
     property var pluginHost: ({})
     property string pluginsPath: ""
     property var pluginServiceSpecs: ({})
-    property var pluginServiceStarts: ({})
+    property var cudaDeviceSnapshot: ({state: "pending", devices: [], message: ""})
+    property int cudaDiscoverySequence: 0
+    property string cudaDiscoveryRequest: ""
+    property bool cudaDiscoveryPending: false
+
+    function refreshCudaDevices(force=false) {
+        if(cudaDiscoveryPending && !force) return
+        cudaDiscoveryRequest = "cuda:" + (++cudaDiscoverySequence)
+        cudaDiscoveryPending = true
+        cudaDeviceSnapshot = {state: "pending", devices: [], message: ""}
+        pluginsConnector.discoverCudaDevices(cudaDiscoveryRequest, force)
+    }
+    Connections {
+        target: pluginsConnector
+        function onCudaDevicesDiscovered(requestId, result) {
+            if(requestId !== cudaDiscoveryRequest) return
+            cudaDiscoveryPending = false
+            cudaDeviceSnapshot = result || {state: "failed", devices: [], message: ""}
+        }
+    }
+    Connections {
+        target: ocrManager
+        function onApiKeyChanged() { gRoot.refreshServiceActions() }
+    }
 
     // 插件状态 → 界面文案。每种状态都必须有明确说法，不存在"静默消失"。
     function pluginStateText(state) {
@@ -357,13 +368,6 @@ Configs {
                     {"text": qsTr("刷新插件列表"), "onClicked": requestPluginRefresh},
                 ],
             },
-            "hostApi": {
-                "title": qsTr("宿主插件 API"),
-                "type": "text",
-                "save": false,
-                "default": `${host.hostApiVersion||"?"}   ${host.platform||"?"}/${host.arch||"?"}   Python ${host.python||"?"}`,
-                "toolTip": qsTr("插件通过清单中的 host_api 字段声明支持的宿主范围。"),
-            },
         }
         if(pluginStates.length === 0) {
             group.empty = {
@@ -385,7 +389,7 @@ Configs {
                 tip += "\n\n" + info.message
             tip += "\n\n" + qsTr("卸载：禁用插件后删除 %1，再刷新列表。").arg(info.path||"")
             group["enable_"+info.id] = {
-                "title": `${info.name||info.id}  [${pluginStateText(info.state)}]`,
+                "title": qsTr("启用插件") + `  [${pluginStateText(info.state)}]`,
                 "default": info.state !== "disabled",
                 "toolTip": tip,
                 "onChanged": (newFlag, oldFlag)=>{
@@ -446,6 +450,7 @@ Configs {
 
     function getPluginServiceValues(pluginId, serviceIds) {
         const values = {}
+        if(!serviceIds || serviceIds.length === 0) return values
         const all = getValueDict()
         for(const serviceId of (serviceIds || [])) {
             const prefix = "pluginServices." + pluginId + "." + serviceId + "."
@@ -454,10 +459,18 @@ Configs {
                     values[key.substring(prefix.length)] = all[key]
             }
         }
+        // 唯一共享策略映射到已有服务接口，不再采用插件旧生命周期副本。
+        const cleanup = getValue("ocr.lifecycle.cleanupPolicy") || "never"
+        values["lifecycle.prestartMode"] = "lazy"
+        values["lifecycle.prestartDelayMinutes"] = 0
+        values["lifecycle.autoStopMode"] = cleanup === "idle" ? "stop" : "never"
+        values["lifecycle.idleStopMinutes"] = Number(getValue("ocr.lifecycle.idleCleanupMinutes") || 30)
         return values
     }
 
     function configurePluginService(pluginId, serviceId) {
+        if(backendsBusy() || backendApplyPending || applyPhase !== 0 || pluginsConnector.isBusy())
+            return {ok: false, message: qsTr("任务正在运行，请稍后重试。")}
         pluginsConnector.requestOperation("prestart", pluginId, serviceId,
                                           getPluginServiceValues(pluginId, [serviceId]))
         return {ok: true, message: qsTr("正在后台启动服务。")}
@@ -467,8 +480,28 @@ Configs {
                                           getPluginServiceValues(pluginId, [serviceId]))
     }
 
+    function serviceActionButtons(pluginId, serviceId) {
+        const buttons = [
+            {text: qsTr("检查服务"), onClicked: ()=>showPluginServiceHealth(pluginId, serviceId)},
+            {text: qsTr("预启动服务"), onClicked: ()=>configurePluginService(pluginId, serviceId), textColorKey: "yesColor"},
+        ]
+        const refs = ocrManager.serviceRefs[ocrManager.apiKey] || []
+        if(ocrManager.apiKey === pluginId && refs[0] === serviceId)
+            buttons.push({text: qsTr("终止文字识别任务"), onClicked: ()=>ocrManager.stopAllMissions(), textColorKey: "noColor"})
+        return buttons
+    }
+    function refreshServiceActions() {
+        for(const pluginId in pluginServiceSpecs) {
+            for(const spec of pluginServiceSpecs[pluginId]) {
+                const origin = originDict["pluginServices." + pluginId + "." + spec.id + ".btns"]
+                if(origin) origin.btnsList = serviceActionButtons(pluginId, spec.id)
+            }
+        }
+        definitionRevision++
+    }
     function buildPluginServicesConfig(services) {
-        const root = {"title": qsTr("模型服务"), "type": "group"}
+        // 规范树保留原服务键，实际显示由 panelLayout 放入对应插件。
+        const root = {"type": "group"}
         pluginServiceSpecs = services || ({})
         for(const pluginId in pluginServiceSpecs) {
             for(const spec of pluginServiceSpecs[pluginId]) {
@@ -476,26 +509,8 @@ Configs {
                 const group = Object.assign({}, spec.config || {})
                 if(!group.title) group.title = serviceId
                 if(!group.type) group.type = "group"
-                // JSON manifests cannot carry QML callbacks.  Add the small
-                // lifecycle hooks here so a newly selected delayed/immediate
-                // prestart policy takes effect without waiting for an app
-                // restart.  setValue invokes onChanged before storing the
-                // value, hence defer the re-read by one event-loop turn.
-                if(group.lifecycle && group.lifecycle.prestartMode)
-                    group.lifecycle.prestartMode.onChanged = ()=>Qt.callLater(schedulePluginServices)
-                if(group.lifecycle && group.lifecycle.prestartDelayMinutes)
-                    group.lifecycle.prestartDelayMinutes.onChanged = ()=>Qt.callLater(schedulePluginServices)
-                if(group.lifecycle && group.lifecycle.autoStopMode)
-                    group.lifecycle.autoStopMode.onChanged = ()=>Qt.callLater(maintainPluginServices)
-                if(group.lifecycle && group.lifecycle.idleStopMinutes)
-                    group.lifecycle.idleStopMinutes.onChanged = ()=>Qt.callLater(maintainPluginServices)
-                group.btns = {
-                    "title": qsTr("操作"),
-                    "btnsList": [
-                        {"text":qsTr("检查服务"), "onClicked":()=>showPluginServiceHealth(pluginId, serviceId)},
-                        {"text":qsTr("预启动服务"), "onClicked":()=>configurePluginService(pluginId, serviceId), "textColorKey":"yesColor"},
-                    ],
-                }
+                if(group.lifecycle) group.lifecycle = Object.assign({}, group.lifecycle, {title: undefined})
+                group.btns = {title: qsTr("操作"), btnsList: serviceActionButtons(pluginId, serviceId)}
                 root[pluginId] = root[pluginId] || {
                     "title": (spec.meta && spec.meta.pluginName) || group.title || pluginId,
                     "type": "group"
@@ -506,27 +521,88 @@ Configs {
         return Object.keys(pluginServiceSpecs).length ? root : undefined
     }
 
-    function schedulePluginServices() {
-        const starts = ({})
-        const now = Date.now()
+    // 生命周期只由 OcrManager 的全局计时器调度，不再为每个服务建第二份预热计划。
+    function schedulePluginServices() { ocrManager.scheduleWarmup() }
+
+    function orderedPluginStates() {
+        return pluginStates.map((info, index) => ({info: info, index: index})).sort((left, right) => {
+            const a = typeof left.info.settingsOrder === "number" && isFinite(left.info.settingsOrder) ? left.info.settingsOrder : Infinity
+            const b = typeof right.info.settingsOrder === "number" && isFinite(right.info.settingsOrder) ? right.info.settingsOrder : Infinity
+            return a === b ? left.index - right.index : (a < b ? -1 : 1)
+        }).map(entry => entry.info)
+    }
+    function modelSettingsLayout() {
+        if(!originDict["ocr.api"]) return null
+        const items = []
+        for(const key of ["ocr.lifecycle.warmupMode", "ocr.lifecycle.warmupDelayMinutes",
+                          "ocr.lifecycle.cleanupPolicy", "ocr.lifecycle.idleCleanupMinutes"])
+            if(originDict[key]) items.push({key: key})
+        if(!ocrManager.usesSharedService() && originDict["ocr.btns"]) items.push({key: "ocr.btns"})
+        return {key: "plugins.models", origin: {title: qsTr("模型设置"), type: "group"}, items: items}
+    }
+    // 从任意嵌套组提取设备项，规范键和来源不变，设备选择统一放插件末尾。
+    function withoutDeviceItems(entries, devices) {
+        const result = []
+        for(const entry of entries) {
+            const origin = entry.origin || originDict[entry.key]
+            if(origin && origin.deviceProvider === "nvidia-cuda") { devices.push(entry); continue }
+            if(entry.items !== undefined) {
+                const nested = withoutDeviceItems(entry.items, devices)
+                if(nested.length) result.push(Object.assign({}, entry, {items: nested}))
+            } else result.push(entry)
+        }
+        return result
+    }
+    function buildPanelLayout() {
+        const revision = definitionRevision
+        const layout = defaultPanelLayout().filter(entry => entry.key !== "ocr" && entry.key !== "pluginServices")
+        const document = layout.find(entry => entry.key === "document")
+        if(document) {
+            const backendKeys = pluginStates.map(info => "document." + info.id)
+            document.items = document.items.filter(entry => backendKeys.indexOf(entry.key) < 0)
+        }
+        const plugins = layout.find(entry => entry.key === "plugins")
+        if(!plugins) return layout
+        plugins.items = [{key: "plugins.btns"}]
+        const models = modelSettingsLayout()
+        if(models) plugins.items.push(models)
+        if(pluginStates.length === 0) plugins.items.push({key: "plugins.empty"})
+        for(const info of orderedPluginStates()) {
+            const items = [{key: "plugins.enable_" + info.id}], devices = []
+            if(info.state === "ready") {
+                for(const spec of (pluginServiceSpecs[info.id] || [])) {
+                    const origin = originDict["pluginServices." + info.id + "." + spec.id]
+                    if(origin) items.push(...withoutDeviceItems(defaultPanelLayout(origin), devices))
+                }
+                for(const kind of ["ocr", "document"]) {
+                    const origin = originDict[kind + "." + info.id]
+                    if(origin) items.push(...withoutDeviceItems(defaultPanelLayout(origin), devices))
+                }
+            }
+            items.push(...devices)
+            plugins.items.push({key: "plugins." + info.id,
+                origin: {title: info.name || info.id, type: "group"}, items: items})
+        }
+        return layout
+    }
+
+    function publishBackendSnapshots() {
+        const values = Object.assign({}, getValueDict())
         for(const pluginId in pluginServiceSpecs) {
             for(const spec of pluginServiceSpecs[pluginId]) {
                 const config = getPluginServiceValues(pluginId, [spec.id])
-                const mode = config["lifecycle.prestartMode"] || "lazy"
-                if(mode === "delayed") {
-                    const minutes = Number(config["lifecycle.prestartDelayMinutes"] || 0)
-                    starts[pluginId+"/"+spec.id] = now + Math.max(0, minutes) * 60000
-                }
-                else if(mode === "immediate") {
-                    configurePluginService(pluginId, spec.id)
-                }
+                const prefix = "pluginServices." + pluginId + "." + spec.id + "."
+                for(const key in config) values[prefix + key] = config[key]
             }
         }
-        // Reassign instead of mutating the existing var object.  QML binding
-        // notifications are emitted for the property assignment, ensuring the
-        // delayed-prestart Timer actually starts and stops as the schedule
-        // changes.
-        pluginServiceStarts = starts
+        // 此接口只发布轻量快照；不启动模型，也不改变 GUI 的当前后端。
+        qmlapp.msnConnector.callPy("ocr", "configureBackends", [values])
+    }
+
+    function syncModelLifecycle() {
+        publishBackendSnapshots()
+        ocrManager.scheduleWarmup()
+        maintainPluginServices()
     }
 
     // Older document plugins stored shared model paths under
@@ -551,11 +627,22 @@ Configs {
         }
     }
 
-    function maintainPluginServices() {
+    function maintainPluginServices(reason="") {
+        // 不因 OCR 页空闲就清理仍被结构化文档或 HTTP 占用的服务。
+        if(backendsBusy() || backendApplyPending || applyPhase !== 0 || pluginsConnector.isBusy()) return
         for(const pluginId in pluginServiceSpecs) {
             for(const spec of pluginServiceSpecs[pluginId]) {
-                pluginsConnector.requestOperation("maintain",
-                    pluginId, spec.id, getPluginServiceValues(pluginId, [spec.id]))
+                const status = pluginsConnector.getServiceStatus(pluginId, spec.id) || ({})
+                if(Number(status.activeLeases || 0) > 0 || Number(status.waitingRequests || 0) > 0) continue
+                const values = getPluginServiceValues(pluginId, [spec.id])
+                if(reason === "memory") values.reason = "memory"
+                else if(reason === "idle") {
+                    const minutes = Number(getValue("ocr.lifecycle.idleCleanupMinutes") || 30)
+                    if(Number(status.idleSeconds || 0) >= Math.max(5, Math.min(120, minutes)) * 60)
+                        values.reason = "idle"
+                }
+                // reason 为本次维护指令，不持久化，也不混入识别任务的配置快照。
+                pluginsConnector.requestOperation("maintain", pluginId, spec.id, values)
             }
         }
     }
@@ -573,6 +660,8 @@ Configs {
         // 初始化配置项
         reload()
         migrateLegacyPluginServicePaths()
+        publishBackendSnapshots()
+        if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.stage("S3")
         // 检查权限和异常情况
         checkAccess()
         // 应用各能力类型的接口信息
@@ -583,6 +672,7 @@ Configs {
         schedulePluginServices()
         console.log("GlobalConfig 初始化全局配置完毕！")
         // 延迟执行
+        if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.scheduled("cli-http-dispatch", true)
         Qt.callLater(()=>{
             setQmlToCmd()  // 将qml模块字典传入cmd执行模块
             // 启动web服务
@@ -591,6 +681,7 @@ Configs {
                 const host = getValue("server.host")
                 globalConfigConn.runUmiWeb(gRoot, "setRealPort", host)
             }
+            if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.completed("cli-http-dispatch")
         })
     }
 
@@ -605,6 +696,8 @@ Configs {
     }
     function requestPluginRefresh() { pluginRefreshPending = true; requestBackendApply() }
     function backendsBusy() {
+        // MissionOCR 聚合 GUI、HTTP、执行中和排队请求；文档队列另作兼容兜底。
+        if(qmlapp.msnConnector.callPy("ocr", "backendsBusy", [])) return true
         for(const kind of ["ocr", "document"]) {
             const lengths = qmlapp.msnConnector.callPy(kind, "getMissionListsLength", [])
             if(Object.keys(lengths).length) return true
@@ -612,8 +705,14 @@ Configs {
         return false
     }
     onValueCommitted: function(key, value) {
-        if(key.startsWith("ocr.") || key.startsWith("document.") || key.startsWith("pluginServices."))
+        if(key.startsWith("ocr.lifecycle.")) {
+            // 生命周期不改变识别参数，不重建后端；忙时维护由全局周期稍后补做。
+            Qt.callLater(syncModelLifecycle)
+        }
+        else if(key.startsWith("ocr.") || key.startsWith("document.") || key.startsWith("pluginServices.")) {
+            publishBackendSnapshots()
             requestBackendApply()
+        }
     }
     Timer {
         id: applyTimer
@@ -629,6 +728,9 @@ Configs {
                     qmlapp.msnConnector.callPy(kind, "deferAdmissions", [false])
                 applyPhase = 0
                 stop()
+                syncModelLifecycle()
+                // 排空且接口重建完成后再刷新已打开页面的配置和文案快照。
+                qmlapp.pubSub.publish("<<settingsReload>>")
                 return
             }
             if(pluginRefreshPending && applyPhase === 0) {
@@ -644,6 +746,7 @@ Configs {
                 reload()
             }
             backendApplyPending = false
+            publishBackendSnapshots()
             applyPhase = 2
             ocrManager.init2()
             documentManager.init2()
@@ -705,30 +808,6 @@ Configs {
             qmlapp.tab.page.registerPluginPages(pluginInfos.pages)
     }
 
-    Timer {
-        interval: 1000
-        repeat: true
-        running: Object.keys(pluginServiceStarts).length > 0
-        onTriggered: {
-            const now = Date.now()
-            const remaining = ({})
-            for(const key in pluginServiceStarts) {
-                if(now < pluginServiceStarts[key]) {
-                    remaining[key] = pluginServiceStarts[key]
-                    continue
-                }
-                const parts = key.split("/")
-                configurePluginService(parts[0], parts.slice(1).join("/"))
-            }
-            pluginServiceStarts = remaining
-        }
-    }
-    Timer {
-        interval: 60000
-        repeat: true
-        running: Object.keys(pluginServiceSpecs).length > 0
-        onTriggered: maintainPluginServices()
-    }
 
     function applyThemeSettings(selected=undefined, light=undefined, dark=undefined) {
         theme.manager.configure(
@@ -771,7 +850,7 @@ Configs {
             optionsList.push([code, text])
         }
         return {
-            "title": "语言 / Language",
+            "title": "语言/language",
             "save": false,
             "default": lang,
             "optionsList": optionsList,

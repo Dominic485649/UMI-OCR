@@ -14,6 +14,7 @@ PyStand_for_UmiOCR/build
 *.exe
 *.txt
 !build/windows/PyStand/CMakeLists.txt
+!build/windows/CudaWorker/CMakeLists.txt
 # Release license texts are evidence, not disposable text files.
 !LICENSES/Apache-2.0.txt
 !LICENSES/GPL-3.0.txt
@@ -34,6 +35,7 @@ dev-tools/*.zip
 # 排除一级目录
 UmiOCR-data/*
 !UmiOCR-data/main.py
+!UmiOCR-data/runtime_archive_bootstrap.py
 !UmiOCR-data/version.py
 !UmiOCR-data/Help 帮助.txt
 # 允许二级目录

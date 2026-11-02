@@ -23,6 +23,8 @@ Window {
     visibility: Window.Hidden // 在 MainWindowManager 中启用可见性
     // 窗口 | 自定义标题栏 | 有标题 | 有系统菜单 | 有最小最大化按钮 | 有关闭按钮 | 根据条件是否置顶
     property bool isMainWindowTop: false
+    onIsMainWindowTopChanged: Qt.callLater(() => theme.manager.syncNativeTitleBar())
+    onVisibleChanged: { if(visible) Qt.callLater(() => theme.manager.syncNativeTitleBar()) }
     flags: Qt.Window | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowSystemMenuHint 
         | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint | (isMainWindowTop?Qt.WindowStaysOnTopHint:0)
 
@@ -70,12 +72,14 @@ Window {
         property alias utilsConnector: utilsConnector
         property alias systemTray: systemTray
         property alias mainWin: mainWin
-        property bool enabledEffect: false // 全局是否启用动画
+        readonly property bool enabledEffect: true // 美化效果固定开启
 
         Component.onCompleted: {
-            // 延时加载标签页
+            // 延时加载标签页；观测关闭时不创建任何计时对象。
+            if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.scheduled("restore-pages", true)
             Qt.callLater(()=>{
                 qmlapp.tab.init()
+                if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.completed("restore-pages")
             })
         }
     }

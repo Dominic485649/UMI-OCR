@@ -1,3 +1,4 @@
+from ..utils.runtime_i18n import tr
 import json
 
 from bottle import request
@@ -5,201 +6,134 @@ from ..mission.mission_ocr import MissionOCR
 from ..utils.utils import initConfigDict
 from ..ocr.output.tools import getDataText
 from .http_utils import is_valid_base64
+from .backend_router import backend_options, select_backend, available_backends
+from .request_validation import validate_options, validate_visual_budget
 
 
-# 获取ocr配置字典。 is_format=False 时不含 format 选项。
-def get_ocr_options(is_format=True):
-    opts = {}
-    # OCR 的参数
-    ocr_opts = MissionOCR.getLocalOptions()
-    for key in ocr_opts:
-        opts[f"ocr.{key}"] = ocr_opts[key]
-    # 排版解析的参数
+# 仅为旧 HTTP 客户端保留，不再进入 GUI 配置或作为第二套模型默认。
+_LEGACY_PRESETS = {
+    "speed": {"docOrientation": False, "undistort": "off", "textlineOrientation": "off",
+              "longSide": 1600, "recBatchSize": 16, "scoreThreshold": 0.60},
+    "balanced": {"docOrientation": True, "undistort": "auto", "textlineOrientation": "on",
+                 "longSide": 2560, "recBatchSize": 12, "scoreThreshold": 0.50},
+    "accuracy": {"docOrientation": True, "undistort": "auto", "textlineOrientation": "on",
+                 "longSide": 4000, "recBatchSize": 6, "scoreThreshold": 0.45},
+}
+
+
+def get_ocr_options(is_format=True, backend_id="current", local_options=None):
+    source = backend_options("ocr", backend_id) if local_options is None else local_options
+    opts = {f"ocr.{key}": value for key, value in source.items()}
     opts["tbpu.parser"] = {
-        "title": "排版解析方案",
-        "toolTip": "按什么方式，解析和排序图片中的文字块",
-        "default": "multi_para",
-        "optionsList": [
-            ["multi_para", "多栏-按自然段换行"],
-            ["multi_line", "多栏-总是换行"],
-            ["multi_none", "多栏-无换行"],
-            ["single_para", "单栏-按自然段换行"],
-            ["single_line", "单栏-总是换行"],
-            ["single_none", "单栏-无换行"],
-            ["single_code", "单栏-保留缩进"],
-            ["none", "不做处理"],
-        ],
+        "title": tr('排版解析方案'), "toolTip": tr('解析和排序图片中的文字块'), "default": "multi_para",
+        "optionsList": [["multi_para", tr('多栏-按自然段换行')], ["multi_line", tr('多栏-总是换行')],
+                        ["multi_none", tr('多栏-无换行')], ["single_para", tr('单栏-按自然段换行')],
+                        ["single_line", tr('单栏-总是换行')], ["single_none", tr('单栏-无换行')],
+                        ["single_code", tr('单栏-保留缩进')], ["none", tr('不做处理')]],
     }
-    # 忽略区域
-    opts["tbpu.ignoreArea"] = {
-        "title": "忽略区域",
-        "toolTip": "数组，每一项为[[左上角x,y],[右下角x,y]]。",
-        "default": [],
-        "type": "var",
-    }
-    # 输出格式
+    opts["tbpu.ignoreArea"] = {"title": tr('忽略区域'), "default": [], "type": "var",
+                               "toolTip": tr('每项为 [[x1,y1],[x2,y2]]。')}
     if is_format:
-        opts["data.format"] = {
-            "title": "数据返回格式",
-            "toolTip": '返回值字典中，["data"] 按什么格式表示OCR结果数据',
-            "default": "dict",
-            "optionsList": [
-                ["dict", "含有位置等信息的原始字典"],
-                ["text", "纯文本"],
-            ],
-        }
-    opts = initConfigDict(opts)  # 格式化
-    return opts
+        opts["data.format"] = {"title": tr('数据返回格式'), "default": "dict",
+                               "optionsList": [["dict", tr('原始字典')], ["text", tr('纯文本')]]}
+    return initConfigDict(opts)
 
 
-# 检查ocr参数字典，返回修改后字典
 def check_ocr_options(opts):
-    # 检查忽略区域参数
-    if opts["tbpu.ignoreArea"]:
-        new_ia = []
-        ia = opts["tbpu.ignoreArea"]
-        for a in ia:
-            if (
-                not isinstance(a, list)
-                or len(a) != 2
-                or not isinstance(a[0], list)
-                or len(a[0]) != 2
-                or not isinstance(a[1], list)
-                or len(a[1]) != 2
-                or not all(
-                    isinstance(x, (int, float))
-                    for x in [a[0][0], a[0][1], a[1][0], a[1][1]]
-                )
-            ):
-                raise Exception(
-                    f"tbpu.ignoreArea 中，每一项的格式必须是 [[x1,y1],[x2,y2]] 。当前值不合法： {ia}"
-                )
-            new_ia.append([[a[0][0], a[0][1]], [], [a[1][0], a[1][1]], []])
-        opts["tbpu.ignoreArea"] = new_ia
+    import math
+    areas = opts.get("tbpu.ignoreArea", [])
+    if len(areas) > 256:
+        raise ValueError(tr('忽略区域不能超过 256 项。'))
+    result = []
+    for area in areas:
+        if (not isinstance(area, list) or len(area) != 2
+                or any(not isinstance(point, list) or len(point) != 2 for point in area)
+                or any(isinstance(value, bool) or not isinstance(value, (int, float))
+                       or not math.isfinite(value) for point in area for value in point)):
+            raise ValueError(tr('tbpu.ignoreArea 每项必须为有限数值的 [[x1,y1],[x2,y2]]。'))
+        result.append([area[0], [], area[1], []])
+    opts["tbpu.ignoreArea"] = result
     return opts
 
 
 def _apply_preset_options(opts, definitions):
+    # 支持旧 schema 测试及旧插件；新 PP-OCR 界面不再声明 preset。
+    found = False
     for preset_key, definition in definitions.items():
         preset_values = definition.get("presetValues")
         if not preset_values:
             continue
+        found = True
         prefix = preset_key.rsplit(".", 1)[0] + "."
-        managed_keys = {
-            prefix + key: value
-            for key, value in preset_values.get(opts.get(preset_key), {}).items()
-        }
-        if managed_keys:
-            opts.update(managed_keys)
+        values = preset_values.get(opts.get(preset_key), {})
+        if values:
+            opts.update({prefix + key: value for key, value in values.items()})
         elif preset_key not in opts:
-            all_managed = {
-                prefix + key
-                for values in preset_values.values()
-                for key in values
-            }
-            if any(key in opts for key in all_managed):
+            managed = {prefix + key for values in preset_values.values() for key in values}
+            if any(key in opts for key in managed):
                 opts[preset_key] = "custom"
+    if not found and "ocr.preset" in opts:
+        preset = opts.pop("ocr.preset")
+        if preset not in {*_LEGACY_PRESETS, "custom"}:
+            raise ValueError(tr('未知历史识别预设。'))
+        for key, value in _LEGACY_PRESETS.get(preset, {}).items():
+            if "ocr." + key in definitions:
+                opts["ocr." + key] = value
     return opts
 
 
-# 路由函数
 def init(UmiWeb):
+    @UmiWeb.route("/api/backends")
+    def _backends():
+        return {"code": 100, "data": {kind: available_backends(kind) for kind in ("ocr", "document")}}
+
     @UmiWeb.route("/api/ocr/get_options")
     def _get_options_json():
-        opts = get_ocr_options()
-        res = json.dumps(opts)
-        return res
-
-    """
-    执行OCR，方法：POST
-    参数：
-    "base64": "", # 必填
-    "options": {}, # 选填，内容与 _get_options 的对应。
-    """
+        try:
+            return json.dumps(get_ocr_options(backend_id=request.query.get("backendId", "current")), ensure_ascii=False)
+        except ValueError as exc:
+            return json.dumps({"code": 804, "data": str(exc)}, ensure_ascii=False)
 
     @UmiWeb.route("/api/ocr", method="POST")
     def _ocr():
         try:
             data = request.json
-        except Exception as e:
-            return json.dumps({"code": 800, "data": f"请求无法解析为json。 {e}"})
+        except Exception as exc:
+            return json.dumps({"code": 800, "data": tr('请求无法解析为 JSON：{error}', error=exc)})
         if not data:
-            return json.dumps({"code": 801, "data": "请求为空。"})
+            return json.dumps({"code": 801, "data": tr('请求为空。')})
         if not isinstance(data, dict):
-            return json.dumps({"code": 805, "data": "请求必须为JSON对象。"})
+            return json.dumps({"code": 805, "data": tr('请求必须为 JSON 对象。')})
         if "base64" not in data:
-            return json.dumps({"code": 802, "data": "请求中缺少 base64 字段。"})
+            return json.dumps({"code": 802, "data": tr('请求中缺少 base64 字段。')})
         if not is_valid_base64(data["base64"]):
-            return json.dumps({"code": 805, "data": "base64 字段必须是有效的Base64字符串。"})
-        if "options" not in data:
-            data["options"] = {}
-        elif not isinstance(data["options"], dict):
-            return json.dumps({"code": 803, "data": "请求中 options 字段必须为字典。"})
+            return json.dumps({"code": 805, "data": tr('base64 字段必须为有效的 Base64 字符串。')})
+        if not isinstance(data.get("options", {}), dict):
+            return json.dumps({"code": 803, "data": tr('options 必须为字典。')})
+        selected = None
         try:
-            # 补充缺失的默认参数
-            opt = data["options"]
-            default = get_ocr_options()
-            _apply_preset_options(opt, default)
-            for key in default:
-                if key not in opt:
-                    opt[key] = default[key]["default"]
-            # 检查OCR参数
-            check_ocr_options(opt)
-        except Exception as e:
-            return json.dumps({"code": 804, "data": f"options 解释失败。 {e}"})
-        # 同步执行
-        resList = MissionOCR.addMissionWait(opt, {"base64": data["base64"]})
-        res = resList[0]["result"]
-        if opt["data.format"] == "text":  # 转纯文本
-            if res["code"] == 100:
-                res["data"] = getDataText(res["data"])
-        res = json.dumps(res)
-        return res
-
-
-"""
-const url = "http://127.0.0.1:1224/api/ocr";
-const data = {
-    // 必填
-    "base64": "iVBORw0KGgoAAAANSUhEUgAAAC4AAAAXCAIAAAD7ruoFAAAACXBIWXMAABnWAAAZ1gEY0crtAAAAEXRFWHRTb2Z0d2FyZQBTbmlwYXN0ZV0Xzt0AAAHjSURBVEiJ7ZYrcsMwEEBXnR7FLuj0BPIJHJOi0DAZ2qSsMCxEgjYrDQqJdALrBJ2ASndRgeNI8ledutOCLrLl1e7T/mRkjIG/IXe/DWBldRTNEoQSpgNURe5puiiaJehrMuJSXSTgbaby0A1WzLrCCQCmyn0FwoN0V06QONWAt1nUxfnjHYA8p65GjhDKxcjedVH6JOejBPwYh21eE0Wzfe0tqIsEkGXcVcpoMH4CRZ+P0lsQp/pWJ4ripf1XFDFe8GHSHlYcSo9Es31t60RdFlN1RUmrma5oTzTVB8ZUaeeYEC9GmL6kNkDw9BANAQYo3xTNdqUkvHq+rYhDKW0Bj3RSEIpmyWyBaZaMTCrCK+tJ5Jsa07fs3E7esE66HzralRLgJKp0/BD6fJRSxvmDsb6joqkcFXGqMVVFFEHDL2gTxwCAaTabnkFUWhDCHTd9iYrGcAL1ZnqIp5Vpiqh7bCfua7FA4qN0INMcN1+cgCzj+UFxtbmvwdZvGIrI41JiqhZBWhhF8WxorkYPpQwJiWYJeA3rXE4hzcwJ+B96F9zCFHC0FcVegghvFul7oeEE8PvHeJqC0w0AUbbFIT8JnEwGbPKcS2OxU3HMTqD0r4wgEIuiKJ7i4MS16+og8/+bPZRPLa+6Ld2DSzcAAAAASUVORK5CYII=",
-    "options": {
-        "ocr.preset": "custom",
-        "ocr.longSide": 3200,
-        "ocr.scoreThreshold": 0.5,
-        "tbpu.parser": "multi_para",
-        "data.format": "text",
-    }
-};
-
-fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-    })
-    .catch(error => {
-        console.error(error);
-    });
-
-
-
-const url = "http://127.0.0.1:1224/api/ocr/get_options";
-fetch(url, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-    })
-    .catch(error => {
-        console.error(error);
-    });
-"""
+            backend_id = data.get("backendId", "current")
+            selected = select_backend("ocr", backend_id)
+            definitions = get_ocr_options(backend_id=selected.backend_id, local_options=selected.local_options)
+            options = dict(data.get("options", {}))
+            _apply_preset_options(options, definitions)
+            options = validate_options(options, definitions)
+            check_ocr_options(options)
+            validate_visual_budget(selected.backend_id, selected.config, options.get("ocr.maxOutputTokens", 4096))
+            if "taskTimeoutSeconds" in data:
+                timeout = data["taskTimeoutSeconds"]
+                if type(timeout) is not int or not 1 <= timeout <= 300:
+                    raise ValueError(tr('taskTimeoutSeconds 必须为 1 到 300 的整数。'))
+                options["ocr.taskTimeoutSeconds"] = timeout
+            results = selected.manager.addMissionWait(options, {"base64": data["base64"]})
+            result = results[0]["result"]
+            if options["data.format"] == "text" and result["code"] == 100:
+                result["data"] = getDataText(result["data"])
+            return json.dumps(result, ensure_ascii=False)
+        except (ValueError, TypeError) as exc:
+            return json.dumps({"code": 804, "data": tr('参数无效：{error}', error=exc), "errorType": "INVALID_OPTIONS"}, ensure_ascii=False)
+        except Exception as exc:
+            return json.dumps({"code": 806, "data": str(exc), "errorType": "BACKEND_UNAVAILABLE"}, ensure_ascii=False)
+        finally:
+            if selected:
+                selected.close()

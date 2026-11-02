@@ -20,7 +20,8 @@ def generate(plugin):
                    and path.name not in {"runtime.lock.json", "gpu-e2e-evidence.json"}
                    and "__pycache__" not in path.relative_to(plugin).parts)
     native = [{"path": path.relative_to(plugin).as_posix(), "sha256": digest(path)}
-              for path in files if path.suffix.lower() in {".dll", ".pyd"}]
+              for path in files if path.suffix.lower() in {".dll", ".pyd"}
+              or path.relative_to(plugin).as_posix() == "UmiOCR-CudaWorker.exe"]
     record = {
         "pluginId": manifest["id"], "version": manifest["version"],
         "lock": "build/requirements-gpu-plugin-windows-cu126.lock",

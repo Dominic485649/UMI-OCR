@@ -7,12 +7,13 @@ import "../../Configs"
 
 Configs {
     category_: "BatchOCR"
+    property var ocrSource: null
+    panelLayout: qmlapp.globalConfigs.ocrManager.modelPanelLayout(this)
+    valueSources: ocrSource ? ({"ocr": ocrSource}) : ({})
+    Component.onCompleted: { ocrSource = qmlapp.globalConfigs.ocrManager.taskSource(category_) }
     signal clickIgnoreArea() // 打开忽略区域
 
     configDict: {
-        // OCR参数
-        "ocr": qmlapp.globalConfigs.ocrManager.deploy(this, "ocr"), 
-
         // 后处理
         "tbpu": {
             "title": qsTr("OCR文本后处理"),

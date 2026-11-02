@@ -95,31 +95,87 @@ Item {
     property var configDict: { } // 定义字典，静态参数，key为嵌套
     onConfigDictChanged: { if(autoLoad && isChangedInit) Qt.callLater(reload) }
     property alias panelComponent: panelComponent // 自动生成的组件
+    // 只描述展示位置；引用不会进入本页 originDict/valueDict 或持久化类别。
+    property var panelLayout: null
+    onPanelLayoutChanged: { if(isChangedInit && panelBuilt) Qt.callLater(initPanelComponent) }
+    signal panelRebuilt()
+    signal configurationReloaded()
+    property int definitionRevision: 0
     property bool autoLoad: true // 自动加载设置项
+    // 只有显式声明的前缀从应用级来源取值，不在任务页保存第二份。
+    property var valueSources: ({})
+    // 仅应用级参数来源提前保存待写值，普通面板维持原来的缓存时序。
+    property bool preserveCacheOnReload: false
+    property string reloadSubscriptionGroup: ""
 
-    // 重置所有设置为默认值
-    function reset() {
-        for (let key in originDict) {
-            setValue(key, originDict[key].default, true) // 刷新值
+    function sourceForKey(key) {
+        for(const prefix in valueSources) {
+            if(key === prefix || key.startsWith(prefix + ".")) {
+                const source = valueSources[prefix]
+                if(!source || source === configs) throw new Error("Invalid configuration source: " + prefix)
+                if(originDict.hasOwnProperty(key)) throw new Error("Conflicting configuration source: " + key)
+                return source
+            }
+        }
+        return null
+    }
+    function eachValueSource(callback) {
+        const seen = []
+        for(const prefix in valueSources) {
+            const source = valueSources[prefix]
+            if(!source || source === configs) throw new Error("Invalid configuration source: " + prefix)
+            if(seen.indexOf(source) >= 0) continue
+            seen.push(source)
+            callback(source)
         }
     }
-    // 重新从 configDict 加载设置项和UI
+    // 重置所属规范值及声明的来源；普通展示引用仍不参与重置。
+    function reset() {
+        for (let key in originDict) {
+            const origin = originDict[key]
+            if(origin.type === "group" || !origin.hasOwnProperty("default")) continue
+            setValue(key, origin.default, true)
+        }
+        eachValueSource(source => source.reset())
+    }
+    function flushCache() {
+        cacheTimer.stop()
+        for(const key in cacheDict) settings.writeValue(key, cacheDict[key])
+        cacheDict = ({})
+    }
+    // 重新从 configDict 加载设置项和UI，不能丢弃尚未落盘的默认值。
     function reload() {
+        if(preserveCacheOnReload) flushCache()
         isChangedInit = false
-        initConfigDict() 
+        initConfigDict()
+        definitionRevision++
         if(!lazyPanel || panelBuilt) initPanelComponent()
         initChangedFuncs()
+        configurationReloaded()
         console.log(`% 加载配置 ${category_} ！`)
-        // console.log(`% 加载配置 ${category_} ！: ${JSON.stringify(valueDict, null, 2)}`)
     }
-    // 重新从 settings 文件中加载设置项和UI
+    // 所属来源也同步原类别，不从另一个页面复制值。
     function settingsReload() {
+        if(preserveCacheOnReload) flushCache()
+        eachValueSource(source => source.settingsReload())
         settings.sync()
         reload()
     }
-    // 获取配置值字典
+    // 聚合任务快照，但只引入声明前缀，不泄漏共享模型/生命周期参数。
     function getValueDict() {
-        return valueDict
+        if(Object.keys(valueSources).length === 0) return valueDict
+        const values = Object.assign({}, valueDict)
+        for(const prefix in valueSources) {
+            const source = valueSources[prefix]
+            if(!source || source === configs) throw new Error("Invalid configuration source: " + prefix)
+            const external = source.getValueDict()
+            for(const key in external) {
+                if(key !== prefix && !key.startsWith(prefix + ".")) continue
+                if(values.hasOwnProperty(key)) throw new Error("Conflicting configuration source: " + key)
+                values[key] = external[key]
+            }
+        }
+        return values
     }
     // 获取原始值字典
     function getOriginDict() {
@@ -131,7 +187,7 @@ Item {
     // 配置存储字典，key为展开形式，三个字典key对应
     property var originDict: { } // 键字典，键为展开形式，值指向configDict的项
     property var valueDict: { } // 值字典，动态变化
-    property var compDict: { } // 组件字典（不包括组）。可能不是所有配置项都有组件
+    property var compDict: ({}) // 控件映射；懒面板未展开时也必须是可查询的空对象
     property var compList: [] // 保存所有组件（包括组）的列表，便于删除
 
     property var cacheDict: {} // 缓存
@@ -145,19 +201,17 @@ Item {
 
     // ========================= 【数值逻辑（内部调用）】 =========================
 
-    // 初始化
-    Component.onCompleted: { 
-        if(autoLoad) reload() // 自动加载设置项
-        // 注册重载事件
+    // 同类别可有互不重叠的轻量来源和页面，订阅必须按实例注销。
+    Component.onCompleted: {
+        reloadSubscriptionGroup = "settingsReload:" + category_ + ":" + configs.toString()
+        if(autoLoad) reload()
         Qt.callLater(()=>{
-            qmlapp.pubSub.subscribeGroup("<<settingsReload>>", configs, "settingsReload",
-                "settingsReload"+category_ // 将配置名传入组名，作为注销事件时的唯一标识符
-            )
+            qmlapp.pubSub.subscribeGroup("<<settingsReload>>", configs, "settingsReload", reloadSubscriptionGroup)
         })
     }
-    // 销毁，注销重载事件
     Component.onDestruction: {
-        if(qmlapp.pubSub) qmlapp.pubSub.unsubscribeGroup("settingsReload"+category_)
+        if(preserveCacheOnReload) flushCache()
+        if(qmlapp.pubSub && reloadSubscriptionGroup) qmlapp.pubSub.unsubscribeGroup(reloadSubscriptionGroup)
     }
     // 初始化数值
     function initConfigDict() {
@@ -298,13 +352,16 @@ Item {
         if(!config.hasOwnProperty("save")) // 保存
             config.save = true
     }
-    // 获取值
+    // 外部来源按原键读写，任务页不保存第二份值。
     function getValue(key) {
-        return valueDict[key]
+        const source = sourceForKey(key)
+        return source ? source.getValue(key) : valueDict[key]
     }
     // 设置值  键, 值, 是否刷新UI, 是否立刻写入本地（还是缓存写入）
     function setValue(key, val, isupdateUI=false, saveNow=false) {
-        if(!originDict.hasOwnProperty(key)) return // A destroyed control can commit during panel replacement.
+        const source = sourceForKey(key)
+        if(source) { source.setValue(key, val, isupdateUI, saveNow); return }
+        if(!originDict.hasOwnProperty(key)) return // 已销毁控件不应提交到新配置。
         if(typeof val !== "object" && valueDict[key] === val) // 如果val不是数组或字典，排除相同值
             return
         let res = onChangedFunc(key, val, valueDict[key]) // 触发函数，传入新值和旧值
@@ -398,6 +455,20 @@ Item {
 
     function ensurePanel() { if(!panelBuilt) initPanelComponent() }
 
+    // 默认布局仍按原配置树生成；显式布局可移动或引用规范项而不改变键。
+    function defaultPanelLayout(group=configDict) {
+        const revision = definitionRevision
+        const entries = []
+        for(const key in group) {
+            const origin = group[key]
+            if(!origin || typeof origin !== "object" || typeof origin.title !== "string") continue
+            const entry = {key: origin.fullKey, origin: origin}
+            if(origin.type === "group") entry.items = defaultPanelLayout(origin)
+            entries.push(entry)
+        }
+        return entries
+    }
+
     // 初始化 自动生成组件
     function initPanelComponent() {
         panelBuilt = true
@@ -406,42 +477,41 @@ Item {
         const compListLength = compList.length
         if(compListLength !== 0) { // 外层组件列表非空，先删除旧的组件
             for(let i = compListLength-1; i>=0; i--) { // 倒序遍历，从内层往外层删
+                // 延迟销毁前立即隐藏，避免旧、新控件在同一帧重复展示或误触。
+                compList[i].visible = false
                 compList[i].destroy()
             }
             compList = []
         }
         compDict = {}
 
-        function handleConfigGroup(group, parent=panelContainer) { // 处理一个配置组
-            for(let key in group) {
-                const config = group[key]
-                if(typeof config !== "object")
-                    continue
-                if(! (typeof config.title === "string")) // 无标题，则表示不生成组件
-                    continue
-                if(config.advanced) // 任意一个选项是高级选项，则总体开启高级模式
-                    enabledAdvanced = true
-                // 若是配置项组，递归遍历
-                if(config.type === "group") { 
-                    // 若是外层，则生成外层group组件；若是内层则生成内层组件。
-                    const comp = parent===panelContainer ? compGroup : compGroupInner
-                    const fold = config.fold?true:false // 是否折叠，转布尔值
-                    const obj = comp.createObject(parent, {"key":config.fullKey, "configs":configs})
-                    compList.push(obj) // 保存组件引用
-                    handleConfigGroup(config, obj.container) // 递归下一层，父级变成本层
+        function build(entries, parent=panelContainer) {
+            for(const entry of entries) {
+                const source = entry.sourceConfigs || configs
+                const sourceKey = entry.sourceKey || entry.key || ""
+                const config = entry.origin || source.originDict[sourceKey]
+                if(!config || typeof config.title !== "string") continue
+                if(config.advanced) enabledAdvanced = true
+                if(entry.items !== undefined || config.type === "group") {
+                    const comp = parent === panelContainer ? compGroup : compGroupInner
+                    const obj = comp.createObject(parent, {
+                        "key": entry.key || sourceKey, "configs": configs, "origin": config})
+                    compList.push(obj)
+                    build(entry.items || source.defaultPanelLayout(config), obj.container)
                 }
-                // 若是配置项
-                else {
-                    if(componentDict.hasOwnProperty(config.type)) {
-                        const comp = componentDict[config.type]
-                        const obj = comp.createObject(parent, {"key":config.fullKey, "configs":configs})
-                        compList.push(obj) // 保存组件引用
-                        compDict[config.fullKey] = obj
-                    }
+                else if(config.deviceProvider === "nvidia-cuda" || componentDict.hasOwnProperty(config.type)) {
+                    const component = config.deviceProvider === "nvidia-cuda" ? compNvidiaDevice : componentDict[config.type]
+                    const obj = component.createObject(parent, {
+                        "key": entry.key || sourceKey, "configs": configs,
+                        "sourceConfigs": source, "sourceKey": sourceKey})
+                    compList.push(obj)
+                    // 只有本页规范项参与 setValue 的直接刷新；外部引用由提交信号同步。
+                    if(source === configs) compDict[sourceKey] = obj
                 }
             }
         }
-        handleConfigGroup(configDict)
+        build(panelLayout === null ? defaultPanelLayout(configDict) : panelLayout)
+        panelRebuilt()
     }
 
     // 总体 滚动视图
@@ -452,23 +522,17 @@ Item {
         clip: true // 溢出隐藏
         property alias ctrlBar: ctrlBar // 控制栏的引用
         property alias advanced: configs.advanced // 高级标志的引用
-        // 获取所有外层配置组的信息
+        // destroy() 的旧组可暂留在 children；只枚举本轮登记的外层活动组件。
+        function activeGroupItems() {
+            return configs.compList.filter(item => item.parent === panelContainer && item.title !== undefined)
+        }
+        // 标题快照和滚动索引必须使用同一活动分组顺序。
         function getGroupList() {
-            const c = panelContainer.children
-            let itemList = []
-            for(let i in c) {
-                if(c[i].title===undefined)
-                    return
-                itemList.push({
-                    title: c[i].title,
-                    advanced: c[i].advanced
-                })
-            }
-            return itemList
+            return activeGroupItems().map(item => ({title: item.title, advanced: item.advanced}))
         }
         // 滚到一个外层配置组的位置
         function scrollToGroup(index) {
-            const children = panelContainer.children
+            const children = activeGroupItems()
             if(index < 0 || index >= children.length) {
                 console.error(`无法滚动到${index}，超出范围！`)
                 return
@@ -549,7 +613,7 @@ Item {
             }
 
             Component.onCompleted: {
-                origin = configs.originDict[key]
+                if(!origin) origin = configs.originDict[key]
                 title = origin.title
                 if(origin.advanced) {
                     advanced = origin.advanced
@@ -575,7 +639,7 @@ Item {
                 anchors.topMargin: size_.smallSpacing
                 color: theme.bgColor
                 radius: size_.panelRadius
-                height: childrenRect.height + size_.smallSpacing
+                height: panelContainer.height + size_.smallSpacing * 2
 
                 Column {
                     id: panelContainer
@@ -642,7 +706,7 @@ Item {
             height: groupText.height + (fold ? 0:panelContainer.height)
 
             Component.onCompleted: {
-                origin = configs.originDict[key]
+                if(!origin) origin = configs.originDict[key]
                 title = origin.title
                 // 折叠属性。origin值转布尔，undefined当成false
                 enabledFold = origin.enabledFold?true:false
@@ -908,6 +972,11 @@ Item {
                 }
             }
         }
+    }
+    // 异步设备列表只改变展示，规范值继续使用旧字符串类型。
+    Component {
+        id: compNvidiaDevice
+        NvidiaDeviceConfig {}
     }
     // 配置项：枚举
     Component {

@@ -44,8 +44,6 @@ UmiAbout.fullname
 
 import os
 import sys
-import psutil
-import platform
 from json import load
 
 from umi_log import logger
@@ -53,19 +51,48 @@ from umi_log import logger
 UmiAbout = None
 
 
-# 初始化时调用一次
-def init(app_path=""):
+def collectSystemInfo(startupTrace=None):
+    """原有诊断采集，无 Qt；默认同步 API 或独立后台工作都调用同一实现。"""
+    if startupTrace is not None:
+        startupTrace.detail("about-diagnostics-import", "begin")
+    import psutil
+    import platform
+    if startupTrace is not None:
+        startupTrace.detail("about-diagnostics-import", "end", outcome="ok")
+        startupTrace.detail("about-platform", "begin")
+    platform_info = platform.platform()
+    python_version = platform.python_version()
+    if startupTrace is not None:
+        startupTrace.detail("about-platform", "end", outcome="ok")
+        startupTrace.detail("about-hardware", "begin")
+    cpu = f"{platform.processor()} | {psutil.cpu_count(logical=False)}C{psutil.cpu_count(logical=True)}T"
+    ram = f"{(psutil.virtual_memory().total / 1073741824):.1f} GB"
+    if startupTrace is not None:
+        startupTrace.detail("about-hardware", "end", outcome="ok")
+    return {"platform": platform_info, "python": python_version, "cpu": cpu, "ram": ram}
+
+
+# 初始化时调用一次；旧调用默认仍同步返回完整信息。
+def init(app_path="", startupTrace=None, *, deferSystemInfo=False):
     """
     `app_path`: 程序入口文件 路径\n
+    `startupTrace`: 可选的已有启动观测器；默认不创建观测或额外采集。\n
+    `deferSystemInfo`: 仅正常入口显式启用，诊断字段先留空，基础字段立即可用。\n
     """
     global UmiAbout
     # 读取配置
+    if startupTrace is not None:
+        startupTrace.detail("about-json", "begin")
     try:
         with open("about.json", "r", encoding="utf-8") as file:
             u = load(file)
     except Exception as e:
+        if startupTrace is not None:
+            startupTrace.detail("about-json", "end", outcome="error")
         os.MessageBox(f"[Error] 无法读取配置 about.json 。\n{e}")
         return False
+    if startupTrace is not None:
+        startupTrace.detail("about-json", "end", outcome="ok")
     # 完整版本号
     v = f'{u["version"]["major"]}.{u["version"]["minor"]}.{u["version"]["patch"]}'
     if u["version"]["prerelease"]:
@@ -102,12 +129,13 @@ def init(app_path=""):
         "dir": app_dir,
         # 运行平台
         "system": _system,  # 简略系统版本，如 'win32'
-        "platform": platform.platform(),  # 详细系统版本，如 'Windows-10-10.0.22631-SP0'
-        "python": platform.python_version(),
-        # 硬件信息，用于debug
-        "cpu": f"{platform.processor()} | {psutil.cpu_count(logical=False)}C{psutil.cpu_count(logical=True)}T",
-        "ram": f"{(psutil.virtual_memory().total / 1073741824):.1f} GB",
+        "platform": "",  # 仅用于关于页 debug，不影响平台功能选择。
+        "python": "",
+        "cpu": "",
+        "ram": "",
     }
+    if not deferSystemInfo:
+        u["app"].update(collectSystemInfo(startupTrace))
 
     UmiAbout = u
     return True

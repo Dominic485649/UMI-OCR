@@ -1,6 +1,7 @@
 """Offline checks for release identity, attribution and About-page targets."""
 
 import argparse
+import importlib.util
 import json
 import re
 from pathlib import Path
@@ -13,7 +14,7 @@ UPSTREAM = "https://github.com/hiroi-sora/Umi-OCR"
 CONTACT = "https://qm.qq.com/q/5XHoXCOU26"
 
 
-def verify(root: Path, expected_version: str):
+def verify(root: Path, expected_version: str, expected_cuda_version: str):
     data = root / "UmiOCR-data"
     about = json.loads((data / "about.json").read_text(encoding="utf-8"))
     version = about["version"]
@@ -49,22 +50,29 @@ def verify(root: Path, expected_version: str):
     cuda = json.loads(
         (data / "plugins/win32_PaddleOCRv6_CUDA/umi-plugin.json").read_text(encoding="utf-8")
     )
-    assert cuda["version"] == actual, "Host and CUDA product versions must match"
+    assert cuda["version"] == expected_cuda_version, (cuda["version"], expected_cuda_version)
+    assert re.fullmatch(r"\d+\.\d+\.\d+", cuda["version"]), "CUDA product version must be explicit"
     assert cuda["homepage"] in {HOST, PLUGINS}, "CUDA homepage must belong to this fork"
     assert cuda["runtime"]["process_boundary"]["type"] == "separate-worker-stdio-ipc"
     assert cuda["runtime"]["vendor_dirs"] == [], "The host must not mount Paddle vendor dependencies"
     assert cuda["runtime"]["dll_dirs"] == [], "The host must not mount NVIDIA DLL directories"
-    assert "3.0" not in re.findall(
+    api_versions = re.findall(
         r'HOST_API_VERSION\s*=\s*[\"\']([^\"\']+)',
         (data / "py_src/plugins_controller/host_api.py").read_text(encoding="utf-8"),
-    ), "Changing the product major must not accidentally change the host contract major"
+    )
+    assert len(api_versions) == 1 and api_versions[0] != "3.0", "Product versions must not change the host contract major"
+    spec = importlib.util.spec_from_file_location("release_metadata_host_api", ROOT / "UmiOCR-data/py_src/plugins_controller/host_api.py")
+    host_api = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(host_api)
+    assert host_api.matchVersionRange(api_versions[0], cuda.get("host_api")), "CUDA host_api excludes the actual host API"
 
-    print(f"Release metadata checks passed: {actual}; both authors; own project/plugin/contact targets.")
+    print(f"Release metadata checks passed: host={actual}; CUDA={cuda['version']}; host API={api_versions[0]}; both authors and own targets.")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", type=Path, default=ROOT)
     parser.add_argument("--version", default="3.0.3")
+    parser.add_argument("--cuda-version", default="3.0.4")
     args = parser.parse_args()
-    verify(args.repo_root.resolve(), args.version)
+    verify(args.repo_root.resolve(), args.version, args.cuda_version)

@@ -1,16 +1,36 @@
+from ..utils.runtime_i18n import tr
 # =============================================
 # =============== 插件管理连接器 ===============
 # =============================================
 
 from PySide6.QtCore import QObject, Slot, Signal
 
-from .plugins_controller import PluginsController
-
-
 # 插件连接器
 class PluginsConnector(QObject):
     operationFinished = Signal(str, "QVariant")
+    cudaDevicesDiscovered = Signal(str, "QVariant")
     _pending = 0
+
+    @Slot(str, bool)
+    def discoverCudaDevices(self, requestId, force):
+        def failure():
+            return {"ok": False, "state": "failed", "devices": [],
+                    "message": tr('NVIDIA 设备发现失败，请重试。')}
+
+        def run():
+            try:
+                from ..utils.cuda_device_probe import discover_cuda_devices
+                result = discover_cuda_devices(force=force)
+            except Exception:
+                result = failure()
+            self.cudaDevicesDiscovered.emit(requestId, result)
+
+        # 与插件操作及模型服务完全分离，不占用 _pending，也不在 UI 线程探测。
+        try:
+            from ..utils.thread_pool import threadRun
+            threadRun(run)
+        except Exception:
+            self.cudaDevicesDiscovered.emit(requestId, failure())
 
     @Slot(result=bool)
     def isBusy(self):
@@ -24,12 +44,18 @@ class PluginsConnector(QObject):
         self._pending += 1
         def run():
             try:
-                if operation == "shutdownServices":
-                    PluginServices.shutdownAll()
-                    result = {"ok": True, "message": "模型服务已释放", "details": {}}
+                if operation in {"shutdownServices", "pluginHealth"}:
+                    from ..mission.backend_runtime import BackendRuntime
+                    with BackendRuntime.operation(pluginId or "shutdown", idle_only=True,
+                                                  activate=operation == "pluginHealth"):
+                        if operation == "shutdownServices":
+                            PluginServices.shutdownAll()
+                            result = {"ok": True, "message": tr('模型服务已释放'), "details": {}}
+                        else:
+                            from .plugins_controller import PluginsController
+                            result = PluginsController.runHealthCheck(pluginId)
                 else:
-                    result = (PluginsController.runHealthCheck(pluginId) if operation == "pluginHealth"
-                          else PluginServices.call(pluginId, serviceId, operation, values))
+                    result = PluginServices.call(pluginId, serviceId, operation, values)
             except Exception as exc:
                 result = {"ok": False, "message": str(exc), "details": {}}
             finally:
@@ -63,26 +89,31 @@ class PluginsConnector(QObject):
     # }
     @Slot(result="QVariant")
     def init(self):
+        from .plugins_controller import PluginsController
         return PluginsController.init()
 
     # 全部插件的状态列表，供插件管理界面刷新
     @Slot(result="QVariant")
     def getPlugins(self):
+        from .plugins_controller import PluginsController
         return PluginsController.getPlugins()
 
     # 启用/禁用一个插件。返回 [Success] 或 [Error] 开头的提示文本
     @Slot(str, bool, result=str)
     def setEnabled(self, pluginId, enabled):
+        from .plugins_controller import PluginsController
         return PluginsController.setEnabled(pluginId, enabled)
 
     # 按需执行插件自带的健康检查，返回 {"ok", "message", "details"}
     @Slot(str, result="QVariant")
     def runHealthCheck(self, pluginId):
+        from .plugins_controller import PluginsController
         return PluginsController.runHealthCheck(pluginId)
 
     # 宿主环境摘要（宿主 API 版本、平台、架构、Python 版本）
     @Slot(result="QVariant")
     def hostInfo(self):
+        from .plugins_controller import PluginsController
         return PluginsController.hostInfo()
 
     @Slot(str, str, "QVariant", result="QVariant")

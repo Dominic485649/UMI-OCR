@@ -204,10 +204,11 @@ TabPage {
             simpleType = qmlapp.globalConfigs.getValue("window.simpleNotificationType")
         }
         const code = res.code
+        const notice = resultsTableView.resultNotice(res)
         const time = res.time.toFixed(2)
         let title = ""
         resText = resText.replace(/\n/g, " ") // 换行符替换空格
-        if(code === 100 || code === 101) { // 成功时，不发送内部弹窗
+        if((code === 100 || code === 101) && !notice.label) { // 仅普通成功结果省略内部通知
             if(simpleType==="inside" || simpleType==="onlyInside")
                 if(qmlapp.mainWin.getVisibility())
                     return
@@ -223,6 +224,9 @@ TabPage {
         else {
             title = qsTr("识别失败")
         }
+        if(notice.label) title = notice.label + " · " + title
+        // 这里只扩展通知副本；onOcrGet 复制和叠加层仍使用原始有效文字。
+        if(notice.warningText) resText = notice.warningText + (resText ? "\n\n" + resText : "")
         title += `  -  ${time}s`
         qmlapp.popup.simple(title, resText, simpleType)
     }
@@ -338,7 +342,7 @@ TabPage {
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         text_: qsTr("文字")
-                        toolTip: qsTr("在图片上叠加显示识别文字\n可在全局设置中设为默认关闭")
+                        toolTip: qsTr("在图片上叠加显示识别文字")
                         checked: imageText.showOverlay
                         enabledAnime: true
                         onCheckedChanged: imageText.showOverlay = checked

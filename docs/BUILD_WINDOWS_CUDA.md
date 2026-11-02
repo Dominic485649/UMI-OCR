@@ -1,12 +1,14 @@
 # Windows CUDA 构建文档
 
-本文档说明 Umi-OCR 独立 Windows x64 基础包和 CUDA 12.6 插件的构建契约，产品版本从 `UmiOCR-data/about.json` 读取。展示名、窗口标题、`Umi-OCR.exe` 和便携设置目录 `.settings` 保持为 `Umi-OCR`；Host API 兼容范围不随产品版本变化。
+本文档说明 Umi-OCR 独立 Windows x64 基础包和 CUDA 12.6 插件的构建契约。本体版本从 `UmiOCR-data/about.json` 读取，CUDA 插件版本从其 `umi-plugin.json` 读取，两者不要求同版；兼容性按 Host API 范围判断。展示名、窗口标题、`Umi-OCR.exe` 和便携设置目录 `.settings` 保持为 `Umi-OCR`。
+
+**当前准备范围（2026-10-24）**：CUDA 插件 `3.0.4` 配套已发布的本体 `3.0.3`，不重编或改写本体。插件源码构建的 `UmiOCR-CudaWorker.exe` 内嵌 `activeCodePage=UTF-8`，在实际加载 Python/Paddle 的进程启用原生 UTF-8，不修改原版 Python EXE、Windows 全局编码或模型路径。本轮真实回归仅限启动、CUDA/模型初始化与正常退出；未重新执行图片/PDF OCR，不将历史 E2E PASS 写成本轮结果。当前准备不代表验收或发行通过，正式门禁继续保留原规则与 BLOCK，详见 [3.0.4 CUDA 文案](RELEASE_CUDA_3.0.4_DRAFT.md)和[本轮审查范围](RELEASE_CUDA_3.0.4_REVIEW.md)。
 
 **日期冻结状态（2026-10-22，本轮 fresh 重建开始前）**：3.0.3 的历史 R2 已完成基础/组合、热 GUI、托盘/HTTP/退出、GPU、归档重装和源码/模型核验；两个公开 `v3.0.3` 源码标签已存在，但 binary Release 尚未创建、上传或公开。本轮计划修正正式门禁接线并 fresh noncandidate `-SkipArchive` prepare，此截点尚未构建，不继承 R2 PASS、哈希或审查同意。实际程序及两份文案须再次交审，同意后才更新 main/tag；正式 source gate 等标签匹配后运行，再受限 finalize。详见 [3.0.3 验收契约](RELEASE_3.0.3_ACCEPTANCE.md)、[审查要求](RELEASE_3.0.3_REVIEW.md)和[源码交付契约](../SOURCE-CODE.md)。
 
 ## 构建环境
 
-- Windows 10/11 x64。
+- Windows 10/11 x64；CUDA 3.0.4 的原生 UTF-8 worker 入口要求 Windows 10 1903+ 或 Windows 11。
 - NVIDIA GPU，Windows 驱动 `560.76` 或更高版本。无需预装 CUDA Toolkit；锁定的 CUDA 12.6/cuDNN DLL 随便携包提供。Scoop 等位置中的系统 CUDA 不参与构建产物运行时解析，也不能替代包内 DLL。
 - Visual Studio 2026、MSVC 14.51、Windows SDK 10.0.28000.0，安装“使用 C++ 的桌面开发”。脚本使用 `vswhere` 查找，不依赖机器绝对路径。
 - CMake、Git、PowerShell 7、`7z.exe` 和 Windows 自带 `tar.exe`、`curl.exe` 可从 `PATH` 调用。
@@ -33,7 +35,9 @@
 pwsh -File .\build\windows\Resolve-Lock.ps1
 ```
 
-## 离线构建示例与本轮正式准备
+## 离线构建示例与分版本准备
+
+仅更新 CUDA 3.0.4 时，`-BaseStagingRoot` 指向已校验的本体3.0.3展开目录，`-ReuseVendorFromStagingRoot` 指向完整、已校验的CUDA3.0.3展开目录；使用新的 `-StagingRoot`，配合 `-ReuseDependencies -ReuseModels -SkipModels -Offline -SkipArchive`。此时只执行 `Build-GpuPlugin.ps1`，无需调用 `Build-Release.ps1`，插件版本取3.0.4，宿主字节保持3.0.3原样；不得使用曾被清理成不完整状态的旧 staging 作为种子。
 
 从仓库根目录执行；构建编译本地原生组件、复制和静态审计，不启动产品或 GPU，不下载包或模型。所有输出路径必须全新，seed 只读。构建入口不扫描、删除或重建旧 staging。
 
@@ -79,6 +83,10 @@ pwsh -File ./build/windows/Assemble-Candidate.ps1 -Destination $complete `
 Base 解压到选择的应用根目录，根下直接出现 `Umi-OCR.exe` 和 `UmiOCR-data/`。CUDA tar.xz 解压到同一应用根目录，直接覆盖到 `UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/`，没有额外产品目录前缀。CUDA 的许可证与对应源码材料放在 `LICENSES/plugins/win32_PaddleOCRv6_CUDA/`，保留主程序根目录的许可证、版本与源码记录。图形归档工具需解开 xz 和 tar 两层；Windows `tar.exe -xf archive.tar.xz -C <应用根目录>` 可一次完成。
 
 ## 验证
+
+CUDA 3.0.4 本轮只执行启动、CUDA/模型初始化与正常退出，使用 `record_gpu_startup.py` 记录；其结果不授权发布，不替代以下既有全量门禁。不要为本轮调用包含图片/PDF OCR 的完整联合回归；未复测项目与正式 BLOCK 必须如实保留。
+
+### 既有全量验证路径（不属于本轮启动限定范围）
 
 prepare 与 `-SkipArchive` 不代表 public-release 或当前源码 E2E 已通过，旧 R2 的 hash/PASS 也不是本轮证据。按已批准的本轮范围对实际组装目录执行 `Test-Release.ps1 -StagingRoot $complete -Kind combined -Device gpu:0`，另行记录热 GUI、真实 Windows 托盘/退出前 HTTP 就绪、正常退出、GPU 原始回执、源码/模型及人工限制。GPU 正式门禁须绑定实际 CUDA overlay，不以独立 GPU staging 代替。
 

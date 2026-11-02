@@ -7,11 +7,12 @@ import "../../Configs"
 
 Configs {
     category_: "ScreenshotOCR"
+    property var ocrSource: null
+    panelLayout: qmlapp.globalConfigs.ocrManager.modelPanelLayout(this)
+    valueSources: ocrSource ? ({"ocr": ocrSource}) : ({})
+    Component.onCompleted: { ocrSource = qmlapp.globalConfigs.ocrManager.taskSource(category_) }
 
     configDict: {
-        // OCR参数
-        "ocr": qmlapp.globalConfigs.ocrManager.deploy(this, "ocr"), 
-
         // 后处理
         "tbpu": {
             "title": qsTr("OCR文本后处理"),

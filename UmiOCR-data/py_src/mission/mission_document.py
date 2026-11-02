@@ -14,12 +14,15 @@ document 能力的全局任务管理器，与 MissionOCR 平级。
 调度模式取 "1234"（顺序）：文档解析往往独占后端显存或独占一个外部
 服务连接，轮询调度会让多份文档互相拖慢并放大显存峰值。
 """
+from ..utils.runtime_i18n import tr
 
 import os
 
 from umi_log import logger
 
 from .mission import Mission
+from .managed_mission import ManagedMission
+from .backend_runtime import BackendRuntime
 from ..document.api import getApiDocument, getLocalOptions
 from ..utils.utils import argdIntConvert
 
@@ -40,9 +43,11 @@ DocumentSuf = [
 _UNAVAILABLE = {"state": "unavailable", "idleSeconds": 0, "error": ""}
 
 
-class __MissionDocumentClass(Mission):
-    def __init__(self):
-        super().__init__()
+class __MissionDocumentClass(ManagedMission):
+    _capability = "document"
+
+    def __init__(self, global_manager=False):
+        super().__init__(global_manager)
         self._apiKey = ""
         self._api = None
         self._schedulingMode = "1234"  # 顺序调度，见模块说明
@@ -52,21 +57,20 @@ class __MissionDocumentClass(Mission):
     def addMissionList(self, msnInfo, msnList):
         if not self._api:
             return (
-                "[Error] MissionDocument: 尚未选择结构化文档后端。"
-                "请先在【全局设置 - 结构化文档】中安装并启用一个 document 插件。"
+                tr('[Error] MissionDocument: 尚未选择结构化文档后端。请先在【全局设置 - 插件管理】中安装并启用一个 document 插件。')
             )
         for i in range(len(msnList) - 1, -1, -1):
             path = msnList[i].get("path", "")
             if not path:
-                logger.warning(f"添加文档任务时，第{i}项不含 path")
+                logger.warning(tr('添加文档任务时，第{i}项不含 path', i=i))
                 del msnList[i]
                 continue
             if os.path.splitext(path)[-1].lower() not in DocumentSuf:
-                logger.warning(f"添加文档任务时，第{i}项不是受支持的文档：{path}")
+                logger.warning(tr('添加文档任务时，第{i}项不是受支持的文档：{path}', i=i, path=path))
                 del msnList[i]
                 continue
             if not os.path.isfile(path):
-                logger.warning(f"添加文档任务时，第{i}项文件不存在：{path}")
+                logger.warning(tr('添加文档任务时，第{i}项文件不存在：{path}', i=i, path=path))
                 del msnList[i]
         return super().addMissionList(msnInfo, msnList)
 
@@ -77,27 +81,41 @@ class __MissionDocumentClass(Mission):
         argdIntConvert(startInfo)
         progress = msnInfo.get("onProgress", lambda *args: None)
         self._api.on_progress = lambda stage: progress(stage)
-        progress("准备输入")
+        partial = msnInfo.get("onPartial", lambda value: None)
+        msnInfo.pop("_documentPartialPath", None)
+
+        def deliver_partial(event):
+            # start() 会将回调交给共享后端；实际文档路径在每个串行任务内绑定。
+            path = msnInfo.get("_documentPartialPath")
+            if path and isinstance(event, dict):
+                partial({**event, "path": path})
+
+        self._api.on_partial = deliver_partial
+        progress(tr('准备输入'))
         try:
             msg = self._api.start(startInfo)
         except Exception as e:
-            logger.error("结构化文档后端启动失败。", exc_info=True, stack_info=True)
-            return f"[Error] 结构化文档后端启动失败：{e}"
+            logger.error(tr('结构化文档后端启动失败。'), exc_info=True, stack_info=True)
+            return tr('[Error] 结构化文档后端启动失败：{e}', e=e)
         if isinstance(msg, str) and msg.startswith("[Error]"):
-            logger.error(f"结构化文档后端启动失败： {msg}")
+            logger.error(tr('结构化文档后端启动失败： {msg}', msg=msg))
             return msg
         return ""
 
     def msnTask(self, msnInfo, msn):
+        # 原始输入路径由宿主绑定，不能采用 worker 临时渲染图片的路径。
+        msnInfo["_documentPartialPath"] = str(msn.get("path", ""))
         try:
             res = self._api.parseDoc(msn)
         except Exception as e:
-            logger.error("结构化文档解析失败。", exc_info=True, stack_info=True)
-            return {"code": 902, "data": f"[Error] 解析文档失败：{e}"}
+            logger.error(tr('结构化文档解析失败。'), exc_info=True, stack_info=True)
+            return {"code": 902, "data": tr('[Error] 解析文档失败：{e}', e=e)}
+        finally:
+            msnInfo.pop("_documentPartialPath", None)
         if not isinstance(res, dict) or "code" not in res:
             return {
                 "code": 903,
-                "data": "[Error] document 后端返回了不符合契约的结果，缺少 code 字段。",
+                "data": tr('[Error] document 后端返回了不符合契约的结果，缺少 code 字段。'),
             }
         res["path"] = msn.get("path", "")
         return res
@@ -108,13 +126,14 @@ class __MissionDocumentClass(Mission):
         return {
             "apiKey": self._apiKey,
             "missionListsLength": self.getMissionListsLength(),
+            "runtime": BackendRuntime.status(),
             "apiState": self._api.get_status() if self._api else dict(_UNAVAILABLE),
         }
 
     def setApi(self, apiKey, info):
         """设置后端。成功返回 [Success] ，失败返回 [Error] 开头的字符串。"""
-        if self.getMissionListsLength():
-            return "[Error] 当前任务尚未完成，请稍后切换。"
+        if self.getMissionListsLength() or (self._global_manager and BackendRuntime.busy()):
+            return tr('[Error] 当前任务尚未完成，请稍后切换。')
         if not apiKey:
             self.shutdown()
             self._api = None
@@ -126,8 +145,14 @@ class __MissionDocumentClass(Mission):
             try:
                 self._api.stop()
             except Exception:
-                logger.error("停止旧的结构化文档后端失败。", exc_info=True)
-        res = getApiDocument(apiKey, info)
+                logger.error(tr('停止旧的结构化文档后端失败。'), exc_info=True)
+        from ..document.api import getApiKeys
+        if apiKey not in getApiKeys():
+            self._apiKey, self._api = "", None
+            return f'[Error] "{apiKey}" is not a registered document capability.'
+        if self._global_manager:
+            BackendRuntime.configure("document", apiKey, info)
+        res = BackendRuntime.handle("document", apiKey, info, getApiDocument)
         if isinstance(res, str):
             self._apiKey = ""
             self._api = None
@@ -143,7 +168,7 @@ class __MissionDocumentClass(Mission):
         if not self._api:
             return {
                 "ok": False,
-                "message": "尚未选择结构化文档后端。",
+                "message": tr('尚未选择结构化文档后端。'),
                 "details": {},
             }
         shortInfo = self._dictShortKey(info)
@@ -151,10 +176,10 @@ class __MissionDocumentClass(Mission):
         try:
             res = self._api.health(shortInfo)
         except Exception as e:
-            logger.error("结构化文档健康检查失败。", exc_info=True, stack_info=True)
-            return {"ok": False, "message": f"健康检查异常：{e}", "details": {}}
+            logger.error(tr('结构化文档健康检查失败。'), exc_info=True, stack_info=True)
+            return {"ok": False, "message": tr('健康检查异常：{e}', e=e), "details": {}}
         if not isinstance(res, dict):
-            return {"ok": False, "message": "后端返回了不符合契约的健康检查结果。", "details": {}}
+            return {"ok": False, "message": tr('后端返回了不符合契约的健康检查结果。'), "details": {}}
         return {
             "ok": bool(res.get("ok")),
             "message": str(res.get("message") or ""),
@@ -165,33 +190,19 @@ class __MissionDocumentClass(Mission):
         if not self._api:
             return "[Error] MissionDocument: API object is None."
         if self.getMissionListsLength():
-            return "[Error] 文档任务正在运行，不能清理后台。"
+            return tr('[Error] 文档任务正在运行，不能清理后台。')
         try:
             return self._api.release()
         except Exception as e:
-            logger.error("清理结构化文档后台失败。", exc_info=True, stack_info=True)
-            return f"[Error] 清理失败：{e}"
-
-    def stopMissionList(self, msnIDs):
-        ids = msnIDs if isinstance(msnIDs, list) else [msnIDs]
-        active = getattr(self, "_activeMsnID", None) in ids
-        if self._api and active:
-            cancel = getattr(self._api, "cancel", None)
-            if callable(cancel): cancel()
-        return super().stopMissionList(msnIDs)
-
-    def stopAllMissions(self):
-        if self._api:
-            cancel = getattr(self._api, "cancel", None)
-            if callable(cancel): cancel()
-        return super().stopAllMissions()
+            logger.error(tr('清理结构化文档后台失败。'), exc_info=True, stack_info=True)
+            return tr('[Error] 清理失败：{e}', e=e)
 
     def shutdown(self):
         if self._api:
             try:
                 self._api.stop()
             except Exception:
-                logger.error("关闭结构化文档后端失败。", exc_info=True)
+                logger.error(tr('关闭结构化文档后端失败。'), exc_info=True)
 
     def getLocalOptions(self):
         if self._apiKey:
@@ -225,5 +236,14 @@ class __MissionDocumentClass(Mission):
         return newD
 
 
+def createMissionDocument(backend_id, config):
+    """为 HTTP 等调用方创建隔离任务管理器，而非重复模型实例。"""
+    manager = __MissionDocumentClass()
+    result = manager.setApi(backend_id, config)
+    if result.startswith("[Error]"):
+        raise ValueError(result)
+    return manager
+
+
 # 全局 结构化文档任务管理器
-MissionDocument = __MissionDocumentClass()
+MissionDocument = __MissionDocumentClass(global_manager=True)

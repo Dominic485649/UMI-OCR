@@ -10,6 +10,7 @@
 新增一种能力类型 = 新建一个 CapabilityRegistry 并登记到 CAPABILITY_TYPES ，
 插件控制器本身不需要再改。
 """
+from ..utils.runtime_i18n import tr
 
 from umi_log import logger
 
@@ -33,7 +34,7 @@ class CapabilityRegistry:
     def register(self, pluginId, resolve, config=None, meta=None):
         """resolve: 无参可调用，返回该能力的实现对象（类或工厂）。"""
         if not callable(resolve):
-            raise TypeError(f"能力 {self.typeName}/{pluginId} 的 resolve 必须可调用。")
+            raise TypeError(tr('能力 {typename}/{pluginid} 的 resolve 必须可调用。', typename=self.typeName, pluginid=pluginId))
         config = config or {}
         self._entries[pluginId] = {
             "resolve": resolve,
@@ -58,16 +59,16 @@ class CapabilityRegistry:
         """解析出能力实现对象。失败返回 (None, 错误信息)。"""
         entry = self._entries.get(pluginId)
         if not entry:
-            return None, f'"{pluginId}" 未注册 {self.typeName} 能力。'
+            return None, tr('"{pluginid}" 未注册 {typename} 能力。', pluginid=pluginId, typename=self.typeName)
         try:
             return entry["resolve"](), ""
         except Exception as e:
             logger.error(
-                f"解析 {self.typeName} 能力 {pluginId} 失败。",
+                tr('解析 {typename} 能力 {pluginid} 失败。', typename=self.typeName, pluginid=pluginId),
                 exc_info=True,
                 stack_info=True,
             )
-            return None, f"加载 {pluginId} 的 {self.typeName} 实现失败：{e}"
+            return None, tr('加载 {pluginid} 的 {typename} 实现失败：{e}', pluginid=pluginId, typename=self.typeName, e=e)
 
     def localOptions(self, pluginId):
         entry = self._entries.get(pluginId)

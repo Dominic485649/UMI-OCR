@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "kind": "plugin",
+  "archives": [
+    {"path": "vendor.zip", "source_prefix": "vendor", "packages": ["anyio", "future", "httpcore", "httpx", "idna", "packaging"], "modules": ["six.py", "typing_extensions.py"], "required": true}
+  ]
+}

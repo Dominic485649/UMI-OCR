@@ -193,7 +193,10 @@ class HttpApiWsgiTests(unittest.TestCase):
             "data.format": {"default": "dict"},
         }
         result = {"code": 100, "data": [{"text": "mock"}]}
-        with patch.object(ocr_server, "get_ocr_options", return_value=options):
+        from py_src.server.backend_router import BackendSelection
+        selected = BackendSelection(ocr_server.MissionOCR, "", {}, local_options={})
+        with patch.object(ocr_server, "get_ocr_options", return_value=options), \
+             patch.object(ocr_server, "select_backend", return_value=selected):
             with patch.object(ocr_server.MissionOCR, "addMissionWait", return_value=[{"result": result}]) as mission:
                 invalid_json = self.request(
                     "POST", "/api/ocr", body=b"{", headers={"Content-Type": "application/json"}

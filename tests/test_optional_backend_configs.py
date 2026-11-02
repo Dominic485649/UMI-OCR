@@ -74,6 +74,8 @@ function stopAllMissions() {}
 function runHealthCheck() {}
 function scheduleWarmup() {}
 function resetCleanupSchedule() {}
+function refreshDeployedPages() {}
+var warmupTimer = {stop: function() {}};
 function applyConfigs() { applied = true; }
 '''
 
@@ -88,7 +90,9 @@ def check_capability(source_root, kind, engine):
     qml = source_root / "qt_res/qml"
     manager = qml / "ApiManager" / ("DocumentManager.qml" if kind == "document" else "OcrManager.qml")
     configs = qml / "Configs/Configs.qml"
-    functions = [qml_function(manager, name) for name in ("makeGlobalOptions", "init1", "init2")]
+    names = ["makeGlobalOptions", "init1", "init2"]
+    if kind == "ocr": names.extend(("modelDisplayName", "orderedModelKeys"))
+    functions = [qml_function(manager, name) for name in names]
     functions += [qml_function(configs, name) for name in ("initConfigDict", "str2var", "supplyDefaultParams")]
     evaluate(engine, SETUP + "\n" + "\n".join(functions))
 

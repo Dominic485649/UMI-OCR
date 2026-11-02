@@ -42,7 +42,7 @@ DERIVED_REPORTS = frozenset({
     "runtime-vendor-lock.json", "model-rights.json", "cuda-redistributable.json",
     "cudnn-redistributable.json", "opencv-artifact.json", "ffmpeg-build.json",
     "mpl-components.json", "agpl-integration.json", "cpu-document-gates.json",
-    "gpu-e2e-evidence.json", "source-delivery.json", "current-source-e2e.json",
+    "gpu-e2e-evidence.json", "gpu-startup-evidence.json", "source-delivery.json", "current-source-e2e.json",
     "RELEASE_EVIDENCE.json", "RELEASE_EVIDENCE.md",
 })
 SOURCE_RECORDS = ("source-snapshot.zip", "source-snapshot.json", "source-provenance.json")
@@ -170,8 +170,9 @@ def inspect_product(repo, root, kind, *, validate_source=False):
             raise FinalizationError("The base product must not contain plugin metadata")
         document = gates.read_json(root / "UmiOCR-data/about.json")
     version = identity_version(document)
-    if version != identity_version(gates.read_json(repo / "UmiOCR-data/about.json")):
-        raise FinalizationError("Product version does not match the current repository")
+    repository_identity = (repo / "UmiOCR-data/plugins" / gates.PLUGIN_ID / "umi-plugin.json") if kind == "gpu" else (repo / "UmiOCR-data/about.json")
+    if version != identity_version(gates.read_json(repository_identity)):
+        raise FinalizationError("Product version does not match the current repository's product kind")
     required = {"COPYING", "LICENSE", "SOURCE-CODE.md", "VERSION", "source", "LICENSES", *SOURCE_RECORDS}
     allowed = required | {"NOTICE.md", "source-export.json"}
     if kind == "base":
@@ -229,62 +230,39 @@ def execution_sources(directory, excluded):
     return records
 
 
-def app_archive_sources(metadata, archive_path, expected):
-    """Inspect ZIP data; never import/unmarshal/execute artifact code.
-
-    merge_runtime.py retains original .py bytes plus checked-hash .pyc, with
-    co_filename relative to py_src before adding that namespace to ZIP names.
-    Recompile canonical text (without executing it) using the existing normal
-    optimization level and tool interpreter; do not trust the .pyc header alone.
-    """
-    import marshal
-
-    sources = {}
-    with zipfile.ZipFile(archive_path) as archive:
-        members = archive.infolist()
-        names, folded = set(), set()
-        for member in members:
-            name = member.filename.rstrip("/") if member.is_dir() else member.filename
-            overlay.snapshot_relative("host/" + name)
-            if name in names or name.casefold() in folded or stat.S_ISLNK(member.external_attr >> 16):
-                raise FinalizationError("app.zip contains duplicate/colliding/link members")
-            names.add(name)
-            folded.add(name.casefold())
-            if name != "py_src" and not name.startswith("py_src/"):
-                raise FinalizationError("app.zip members must stay in the canonical py_src namespace")
-            if not member.is_dir() and not name.endswith((".py", ".pyc")):
-                raise FinalizationError("Unsupported executable/resource member in app.zip")
-        files = {member.filename: member for member in members if not member.is_dir()}
-        for name, member in files.items():
-            if name.endswith(".py"):
-                with archive.open(member) as stream:
-                    checksum = overlay.digest(stream)
-                if expected.get(name) != checksum:
-                    raise FinalizationError("app.zip source member differs from canonical source")
-                sources[name] = checksum
-            else:
-                original = name[:-1]
-                if original not in files or original not in expected:
-                    raise FinalizationError("app.zip bytecode lacks its canonical original .py member")
-                canonical = metadata / "source/UmiOCR-data" / original
-                data = canonical.read_bytes()
-                filename = original.removeprefix("py_src/")
-                try:
-                    code = compile(data, filename, "exec", dont_inherit=True, optimize=0)
-                except (SyntaxError, ValueError) as exc:
-                    raise FinalizationError("Canonical app.zip source cannot be compiled for comparison") from exc
-                expected_pyc = (importlib.util.MAGIC_NUMBER + b"\x03\x00\x00\x00" +
-                                importlib.util.source_hash(data) + marshal.dumps(code))
-                if archive.read(member) != expected_pyc:
-                    raise FinalizationError("app.zip bytecode differs from its canonical source/toolchain")
-    return sources
+def archived_execution_sources(directory, expected):
+    """核验声明、原字节、全部来源和容器闭包，不执行或重新编译产物代码。"""
+    try:
+        names = {path.name.casefold() for path in directory.iterdir()}
+        markers = {"runtime-archives.json", "runtime-archive-inputs.json",
+                   ".runtime-archive-candidate.json", "archive-layout.json"}
+        if not (names & markers or any(name.endswith(".zip") for name in names)):
+            return {}
+        if "archive-layout.json" in names:
+            raise FinalizationError("Unsupported legacy runtime archive declaration")
+        report = adjacent("audit_runtime_archives").audit(directory)
+        if (not isinstance(report, dict) or report.get("status") != "PASS" or
+                any(not isinstance(report.get(key), list) for key in ("archives", "members", "archived_paths"))):
+            raise FinalizationError("Runtime archives cannot fall back to an unverified loose layout")
+        sources = {}
+        for member in report["members"]:
+            name = member["path"]
+            if name.startswith("py_src/") and name.endswith((".py", ".qml", ".js")):
+                if expected.get(name) != member["sha256"]:
+                    raise FinalizationError("Archived execution source differs from canonical source")
+                sources[name] = member["sha256"]
+        return sources
+    except FinalizationError:
+        raise
+    except Exception as exc:
+        # Loader/interface errors are blockers too, never an excuse to accept
+        # only the remaining loose files or to execute candidate helper code.
+        raise FinalizationError(f"Runtime archive source/layout verification failed ({type(exc).__name__}): {exc}") from exc
 
 
 def validate_execution_source(metadata, root, kind, source):
-    # Independent source/payload digests do not themselves prove that the
-    # execution code is the source that was published. Bridge only original
-    # materialized code and the known app.zip representation; this is NOT a
-    # reproducible-build claim about native binaries, RCC/QM or dependencies.
+    # 独立的源码/产物哈希不等于两者相符。连接磁盘原文和已严格核验的
+    # Stored ZIP 原文；第三方成员另核原RECORD。此处不声明原生可重现构建。
     prefix = "UmiOCR-data/" if kind == "base" else f"UmiOCR-data/plugins/{gates.PLUGIN_ID}/"
     excluded = {"runtime", "site-packages", "plugins"} if kind == "base" else {"vendor", "models"}
     expected = {}
@@ -295,16 +273,13 @@ def validate_execution_source(metadata, root, kind, source):
         if relative.parts[0] not in excluded and relative.suffix in {".py", ".qml", ".js"}:
             expected[relative.as_posix()] = checksum
     actual = execution_sources(root / prefix, excluded)
-    if kind == "base":
-        if "main.py" not in expected:
-            raise FinalizationError("Canonical host main.py is missing")
-        archive = root / "UmiOCR-data/app.zip"
-        if archive.exists():
-            packed = app_archive_sources(metadata, archive, expected)
-            for name, checksum in packed.items():
-                if name in actual and actual[name] != checksum:
-                    raise FinalizationError("Loose and archived execution source disagree")
-                actual[name] = checksum
+    packed = archived_execution_sources(root / prefix, expected)
+    if kind == "base" and "main.py" not in expected:
+        raise FinalizationError("Canonical host main.py is missing")
+    for name, checksum in packed.items():
+        if name in actual:
+            raise FinalizationError("Loose and archived execution source overlap")
+        actual[name] = checksum
     if not expected or any(expected.get(name) != checksum for name, checksum in actual.items()):
         raise FinalizationError("Execution source differs from canonical source")
     if {name for name in expected if name.endswith(".py")} != {name for name in actual if name.endswith(".py")}:
@@ -378,12 +353,25 @@ def check_report(metadata, kind, binding, release_gates, receipt_hash):
     statuses = report.get("gates")
     required = {"runtime_vendor", "paddle_models", "cuda", "cudnn", "opencv", "ffmpeg", "mpl",
                 "agpl_nvidia", "cpu_ocr", "document_models", *gates.RELEASE_GATES}
+    startup_scope = current.get("validation_scope") == gates.STARTUP_SCOPE
     if kind == "gpu":
         required.add("gpu_ocr_e2e")
+    if startup_scope:
+        required.add("gpu_worker_startup")
+        if (kind != "gpu" or not gates.verified_startup_exception(current, report.get("gpu_worker_startup")) or
+                not isinstance(statuses, dict) or statuses.get("gpu_worker_startup") != "PASS" or
+                statuses.get("gpu_ocr_e2e") != "NOT_RUN"):
+            raise FinalizationError("The startup-only archival exception is missing current approval or exact scope evidence")
+    elif current.get("validation_scope") == gates.BASE_CAPTURE_SCOPE:
+        if kind != "base" or not gates.verified_base_capture_waiver(current):
+            raise FinalizationError("The reviewed base-only capture waiver is invalid or belongs to another component")
+    elif current.get("validation_scope", "full") != "full":
+        raise FinalizationError("Unknown finalization validation scope")
     if (not isinstance(statuses, dict) or set(statuses) != required or
             statuses.get("source_delivery") != source["status"] or
             statuses.get("current_source_e2e") != current["status"] or
-            any(status not in {"PASS", "NOT_INCLUDED"} for name, status in statuses.items() if name not in gates.RELEASE_GATES)):
+            any(status not in {"PASS", "NOT_INCLUDED"} for name, status in statuses.items()
+                if name not in gates.RELEASE_GATES and not (startup_scope and name == "gpu_ocr_e2e" and status == "NOT_RUN"))):
         raise FinalizationError("A recorded component/publication gate is blocked")
 
 

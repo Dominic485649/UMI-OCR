@@ -18,6 +18,7 @@
 #>
 param(
     [string]$StagingRoot = "",
+    [string]$SourceRoot = "",
     [string]$Device = "gpu:0",
     [ValidateSet("base", "combined", "auto")][string]$Kind = "auto",
     [switch]$SkipScreenshotCapture
@@ -30,6 +31,20 @@ if (-not $StagingRoot) {
 }
 $StagingRoot = (Resolve-Path -LiteralPath $StagingRoot).Path
 $DataRoot = Join-Path $StagingRoot "UmiOCR-data"
+# UTF-8 的源码专用检查使用匹配的对应源码；启动器仍检查实际打包根。
+if (-not $SourceRoot) {
+    $SourceRoot = if (Test-Path -LiteralPath (Join-Path $DataRoot "py_src/utils/pre_configs.py") -PathType Leaf) {
+        $DataRoot
+    } else {
+        Join-Path $StagingRoot "source/UmiOCR-data"
+    }
+}
+$SourceRoot = (Resolve-Path -LiteralPath $SourceRoot).Path
+foreach ($requiredSource in @("main.py", "py_src/utils/pre_configs.py")) {
+    if (-not (Test-Path -LiteralPath (Join-Path $SourceRoot $requiredSource) -PathType Leaf)) {
+        throw "UTF-8 源码专用检查缺少对应源码：$requiredSource；Stored 包须提供已核验的 -SourceRoot。"
+    }
+}
 $Python = Join-Path $DataRoot "runtime\python.exe"
 if (-not (Test-Path -LiteralPath $Python)) { throw "Portable Python is missing: $Python" }
 if (-not (Test-Path -LiteralPath (Join-Path $StagingRoot "Umi-OCR.exe"))) {
@@ -54,7 +69,7 @@ Invoke-PortablePython "tests\test_plugin_contract.py"
 Invoke-PortablePython "tests\test_mission_runtime.py" @($DataRoot)
 Invoke-PortablePython "tests\test_plugin_services.py" @($DataRoot)
 Invoke-PortablePython "tests\test_optional_backend_configs.py" @($DataRoot)
-Invoke-PortablePython "tests\test_utf8_runtime.py" @($DataRoot, (Join-Path $StagingRoot "Umi-OCR.exe"))
+Invoke-PortablePython "tests\test_utf8_runtime.py" @($DataRoot, (Join-Path $StagingRoot "Umi-OCR.exe"), "--source-root", $SourceRoot)
 Invoke-PortablePython "tests\test_http_api.py" @("--data-root", $DataRoot, "--packaged")
 Invoke-PortablePython "build\tools\qt_startup_smoke.py" @($DataRoot, (Join-Path $StagingRoot "Umi-OCR.exe"))
 Invoke-PortablePython "tests\test_qt_runtime.py" @($DataRoot)

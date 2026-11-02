@@ -143,7 +143,19 @@ def initRuntimeEnvironment():
     script = os.path.abspath(__file__)  # 启动脚本.py的路径
     cwd = os.path.dirname(script)  # 工作目录
     os.chdir(cwd)  # 重新设定工作目录（不在最顶层，而在 UmiOCR-data 文件夹下）
-    for n in [".", "site-packages", "app.zip", "dependencies.zip", "app.zip/py_src/imports"]:  # 将模块目录添加到 Python 搜索路径中
+    site.addsitedir(cwd)
+    if cwd in sys.path:
+        sys.path.remove(cwd)
+    sys.path.insert(0, cwd)
+    # This bootstrap stays on disk and verifies only declared containers before
+    # any application module can be imported from them. It never extracts ZIPs.
+    from runtime_archive_bootstrap import prepare_archives
+    archivePaths = prepare_archives(cwd, kind="host")
+    for index, path in enumerate(archivePaths):
+        if path in sys.path:
+            sys.path.remove(path)
+        sys.path.insert(index, path)
+    for n in ["site-packages", "app.zip/py_src/imports"]:  # 将模块目录添加到 Python 搜索路径中
         path = os.path.abspath(os.path.join(cwd, n))
         if os.path.exists(path) or ".zip/" in n:
             site.addsitedir(path)
@@ -171,8 +183,20 @@ def initRuntimeEnvironment():
 
 
 if __name__ == "__main__":
+    # Disabled by default: do not import or initialize the observer on normal runs.
+    startupTrace = None
+    traceRequested = bool(os.environ.get("UMI_STARTUP_TRACE"))
+    if traceRequested:
+        import time
+        startupEntryNs = time.perf_counter_ns()
     try:
         initRuntimeEnvironment()  # 初始化运行环境
+        if traceRequested:
+            bootstrapDoneNs = time.perf_counter_ns()
+            from py_src.utils.startup_trace import from_environment
+            startupTrace = from_environment()
+            startupTrace.mark("python-entry", at_ns=startupEntryNs)
+            startupTrace.mark("S1", at_ns=bootstrapDoneNs, origin="runtime-environment-ready")
     except Exception:
         err = traceback.format_exc()
         from py_src.imports.umi_log import logger, Logs_Dir
@@ -191,7 +215,7 @@ if __name__ == "__main__":
         # 启动正式入口
         from py_src.run import main
 
-        main(app_path=app_path, engineAddImportPath="./site-packages/PySide6/qml")
+        main(app_path=app_path, engineAddImportPath="./site-packages/PySide6/qml", startupTrace=startupTrace)
     except Exception:
         err = traceback.format_exc()
         from py_src.imports.umi_log import logger, Logs_Dir

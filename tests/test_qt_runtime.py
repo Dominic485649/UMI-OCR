@@ -126,7 +126,7 @@ Item {
     if merged: assert QFile.exists(":/qt_res/images/icons/umiocr.ico")
     else: assert icon.is_file(), icon
 
-    if merged:
+    if (data_root / "app.zip").is_file():
         import zipfile
         with zipfile.ZipFile(data_root / "app.zip") as archive:
             run_source = archive.read("py_src/run.py").decode("utf-8")

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verification_date": "2026-10-22",
+  "verification_date": "2026-11-01",
   "artifact_kind": "base",
   "gates": {
     "runtime_vendor": "PASS",

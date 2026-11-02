@@ -45,14 +45,14 @@ import site
 
 
 # 启动主qml。工作路径必须为 UmiOCR-data
-def runQml(engineAddImportPath, quitAfterMs=0):
+def runQml(engineAddImportPath, quitAfterMs=0, startupTrace=None):
     # ==================== 0. 导入包 ====================
     from PySide6.QtCore import Qt, QTimer, qInstallMessageHandler
     from PySide6.QtQml import QQmlApplicationEngine, qmlRegisterType
     from PySide6.QtQuickControls2 import QQuickStyle
     from PySide6.QtWidgets import QApplication
 
-    from umi_about import UmiAbout  # 项目信息
+    from umi_about import UmiAbout, collectSystemInfo  # 项目信息
     from umi_log import get_qt_message_handler, logger  # 日志
     from .utils import app_opengl  # 渲染器
     from .utils.portable_settings import PortableSettings
@@ -70,7 +70,11 @@ def runQml(engineAddImportPath, quitAfterMs=0):
     app_opengl.initOpengl()
 
     # ==================== 2. 启动qt ====================
+    if startupTrace is not None:
+        startupTrace.detail("qt-application", "begin")
     qtApp = QApplication(sys.argv)
+    if startupTrace is not None:
+        startupTrace.detail("qt-application", "end", outcome="ok")
     qtApp.setQuitOnLastWindowClosed(False)
     qtApp.setApplicationName(UmiAbout["name"])
     qtApp.setOrganizationName(UmiAbout["authors"][0]["name"])
@@ -82,6 +86,8 @@ def runQml(engineAddImportPath, quitAfterMs=0):
     app_opengl.checkOpengl()
 
     # ==================== 4. 注册连接器Python类 ====================
+    if startupTrace is not None:
+        startupTrace.detail("connectors-import", "begin")
     from .tag_pages.tag_pages_connector import TagPageConnector  # 页面连接器
     from .mission.mission_connector import MissionConnector  # 任务连接器
     from .mission.doc_preview_connector import DocPreviewConnector  # 文档预览连接器
@@ -96,6 +102,9 @@ def runQml(engineAddImportPath, quitAfterMs=0):
     from .image_controller.image_connector import ImageConnector  # 图片处理连接器
     from .image_controller.image_provider import PixmapProvider  # 图片提供器
     from .utils.i18n_configs import I18n  # 语言
+    if startupTrace is not None:
+        startupTrace.detail("connectors-import", "end", outcome="ok")
+        startupTrace.detail("connectors-register", "begin")
 
     qmlRegisterType(TagPageConnector, "TagPageConnector", 1, 0, "TagPageConnector")
     qmlRegisterType(MissionConnector, "MissionConnector", 1, 0, "MissionConnector")
@@ -111,9 +120,16 @@ def runQml(engineAddImportPath, quitAfterMs=0):
     qmlRegisterType(
         DocPreviewConnector, "DocPreviewConnector", 1, 0, "DocPreviewConnector"
     )
+    if startupTrace is not None:
+        startupTrace.detail("connectors-register", "end", outcome="ok")
 
     # ==================== 5. 启动翻译 ====================
+    if startupTrace is not None:
+        startupTrace.detail("translation", "begin")
     I18n.init(qtApp)
+    if startupTrace is not None:
+        startupTrace.detail("translation", "end", outcome="ok")
+        startupTrace.mark("S2", origin="Qt-connectors-and-translation-ready")
 
     # ==================== 6. 启动qml引擎 ====================
     engine = QQmlApplicationEngine()
@@ -123,16 +139,29 @@ def runQml(engineAddImportPath, quitAfterMs=0):
         engine.addImportPath(engineAddImportPath)  # 相对路径重新导入包
     engine.addImageProvider("pixmapprovider", PixmapProvider)  # 注册图片提供器
     rootContext = engine.rootContext()  # 注册常量
-    rootContext.setContextProperty("UmiAbout", UmiAbout)
+    # 基本信息只提交一次。后台诊断只更新 Python 原字典及专用通知对象，
+    # 不重设全局上下文，避免触发配置默认值/任务页面的全局绑定重算。
+    qmlAbout = {**UmiAbout, "app": dict(UmiAbout["app"])}
+    rootContext.setContextProperty("UmiAbout", qmlAbout)
+    from .utils.system_info import SystemInfo
+    systemInfo = SystemInfo(qtApp, UmiAbout["app"], collectSystemInfo, startupTrace)
+    rootContext.setContextProperty("UmiSystemInfo", systemInfo)
     portableSettings = PortableSettings("./.settings", qtApp)
     rootContext.setContextProperty("UmiSettings", portableSettings)
+    startupObserver = startupTrace.attach_qt(qtApp, engine) if startupTrace is not None else None
     from PySide6.QtCore import QResource
     merged_ui = os.path.isfile("ui.rcc")
     if merged_ui and not QResource.registerResource(os.path.abspath("ui.rcc")):
         raise RuntimeError("Unable to mount ui.rcc")
+    if startupTrace is not None:
+        startupTrace.mark("qml-load-begin", mergedUi=merged_ui)
     engine.load("qrc:/qt_res/qml/Main.qml" if merged_ui else "qt_res/qml/Main.qml")  # 通过本地文件启动
     if not engine.rootObjects():
         raise RuntimeError("QML root object could not be created; see Qt diagnostics above.")
+    if startupObserver is not None:
+        startupTrace.mark("qml-load-returned")
+        startupObserver.loaded(engine.rootObjects()[0])
+    systemInfo.start()  # 无论 trace/关于页是否启用，都只启动一次非阻塞诊断。
 
     def shutdownBackends():
         # 先完成批量页面的输出收尾，再关闭它仍可能依赖的识别后端。
@@ -166,24 +195,37 @@ def runQml(engineAddImportPath, quitAfterMs=0):
     qtApp.aboutToQuit.connect(shutdownBackends)
     if quitAfterMs > 0:
         QTimer.singleShot(quitAfterMs, lambda: qtApp.exit(0))
-    res = qtApp.exec()
+    try:
+        res = qtApp.exec()
+    finally:
+        systemInfo.stop()  # 只取消提交/轮询；绝不等待后台采集线程。
+    if startupTrace is not None:
+        startupTrace.mark("qt-exec-returned", exitCode=res)
+        startupTrace.close()
     if res != 0:
         msg = f"Umi-OCR 异常退出。代码：{str(res)}\nUmi-OCR exited abnormally. Code: {str(res)}"
         os.MessageBox(msg)
     logger.info("QML引擎关闭")
 
 
-def main(app_path, engineAddImportPath="", quitAfterMs=0):
+def main(app_path, engineAddImportPath="", quitAfterMs=0, startupTrace=None):
     """
     `app_path`: 程序入口文件 路径\n
     `engineAddImportPath`: 可选，qml包路径\n
     """
     # 初始化运行信息
     site.addsitedir("./py_src/imports")  # 自定义库添加到搜索路径
+    if startupTrace is not None:
+        startupTrace.detail("about-import", "begin")
     import umi_about
+    if startupTrace is not None:
+        startupTrace.detail("about-import", "end", outcome="ok")
 
-    if not umi_about.init(app_path):  # 初始化版本信息，失败则结束运行
+    aboutReady = umi_about.init(app_path, startupTrace=startupTrace, deferSystemInfo=True)
+    if not aboutReady:  # 初始化版本信息，失败则结束运行
         sys.exit(0)
+    if startupTrace is not None:
+        startupTrace.mark("about-ready", scope="basic-version-path-system", diagnostics="deferred")
 
     from .utils import pre_configs
     from .server.cmd_client import initCmd
@@ -195,5 +237,7 @@ def main(app_path, engineAddImportPath="", quitAfterMs=0):
     pre_configs.readConfigs()  # 初始化预配置项
     if not initCmd():  # 初始化命令行，如果已有Umi-OCR在运行则结束运行
         sys.exit(0)
-    runQml(engineAddImportPath, quitAfterMs)  # 启动qml
+    if startupTrace is not None:
+        startupTrace.mark("preconfigs-and-single-instance-ready")
+    runQml(engineAddImportPath, quitAfterMs, startupTrace)  # 启动qml
     sys.exit(0)

@@ -8,6 +8,7 @@
 它们。模型服务则可能需要被多个能力安全复用，因此把它从 capability 里提到
 插件级。本模块只保存惰性入口，不在插件发现阶段导入任何重量级实现。
 """
+from ..utils.runtime_i18n import tr
 
 from threading import RLock
 
@@ -36,7 +37,7 @@ def _service_args(value):
     if value is None:
         return {}
     if not isinstance(value, dict):
-        raise TypeError(f"共享服务参数必须是对象/字典，实际为 {type(value).__name__}。")
+        raise TypeError(tr('共享服务参数必须是对象/字典，实际为 {value}。', value=type(value).__name__))
     return value
 
 class PluginServiceRegistry:
@@ -51,11 +52,11 @@ class PluginServiceRegistry:
 
     def register(self, pluginId, serviceId, resolve, config=None, meta=None):
         if not callable(resolve):
-            raise TypeError(f"服务 {pluginId}/{serviceId} 的 resolve 必须可调用。")
+            raise TypeError(tr('服务 {pluginid}/{serviceid} 的 resolve 必须可调用。', pluginid=pluginId, serviceid=serviceId))
         key = (pluginId, serviceId)
         with self._lock:
             if key in self._entries:
-                raise ValueError(f"服务重复声明：{pluginId}/{serviceId}。")
+                raise ValueError(tr('服务重复声明：{pluginid}/{serviceid}。', pluginid=pluginId, serviceid=serviceId))
             self._entries[key] = {
                 "resolve": resolve,
                 "config": config or {},
@@ -80,7 +81,7 @@ class PluginServiceRegistry:
         with self._lock:
             entry = self._entries.get((pluginId, serviceId))
             if not entry:
-                raise KeyError(f'插件 "{pluginId}" 未声明共享服务 "{serviceId}"。')
+                raise KeyError(tr('插件 "{pluginid}" 未声明共享服务 "{serviceid}"。', pluginid=pluginId, serviceid=serviceId))
             if entry["instance"] is None:
                 entry["instance"] = entry["resolve"]()
             return entry["instance"]
@@ -90,39 +91,33 @@ class PluginServiceRegistry:
         method = getattr(service, "configure", None)
         if callable(method):
             return method(_service_args(argd))
-        return {"ok": True, "message": "服务不需要额外配置。", "details": {}}
+        return {"ok": True, "message": tr('服务不需要额外配置。'), "details": {}}
 
     def call(self, pluginId, serviceId, methodName, argd=None):
+        from ..mission.backend_runtime import BackendRuntime
         try:
             if argd is not None:
                 argd = _service_args(argd)
-            service = self.get(pluginId, serviceId)
-            method = getattr(service, methodName, None)
-            if not callable(method):
-                return {
-                    "ok": False,
-                    "message": f"共享服务不支持 {methodName}。",
-                    "details": {},
-                }
-            if argd is None:
-                result = method()
-            else:
-                configured = self.configure(pluginId, serviceId, argd)
-                # configure() is allowed to reject a restart-causing change
-                # while an OCR/document request owns a lease.  Do not ignore
-                # that failure and then invoke the service with stale state.
-                if isinstance(configured, dict) and not configured.get("ok", True):
-                    return configured
-                result = method(_service_args(argd))
+            idle_only = methodName in {"maintain", "stop_owned", "release", "shutdown_owned"}
+            with BackendRuntime.operation(pluginId, idle_only=idle_only,
+                                          warmup=methodName == "prestart", activate=not idle_only):
+                service = self.get(pluginId, serviceId)
+                method = getattr(service, methodName, None)
+                if not callable(method):
+                    return {"ok": False, "message": tr('共享服务不支持 {methodname}。', methodname=methodName), "details": {}}
+                if argd is None:
+                    result = method()
+                else:
+                    configured = self.configure(pluginId, serviceId, argd)
+                    if isinstance(configured, dict) and not configured.get("ok", True):
+                        return configured
+                    result = method(argd)
             if isinstance(result, dict):
                 return result
             return {"ok": True, "message": str(result or ""), "details": {}}
         except Exception as exc:
-            logger.error(
-                f"调用插件共享服务 {pluginId}/{serviceId}/{methodName} 失败。",
-                exc_info=True,
-            )
-            return {"ok": False, "message": f"服务调用失败：{exc}", "details": {}}
+            logger.error(tr('调用插件共享服务 {pluginid}/{serviceid}/{methodname} 失败。', pluginid=pluginId, serviceid=serviceId, methodname=methodName), exc_info=True)
+            return {"ok": False, "message": tr('服务调用失败：{error}', error=exc), "details": {}}
 
     def status(self, pluginId, serviceId):
         try:
@@ -157,7 +152,7 @@ class PluginServiceRegistry:
             try:
                 method()
             except Exception:
-                logger.error("关闭插件共享服务失败。", exc_info=True)
+                logger.error(tr('关闭插件共享服务失败。'), exc_info=True)
 
 
 PluginServices = PluginServiceRegistry()

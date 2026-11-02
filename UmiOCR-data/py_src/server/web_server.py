@@ -1,3 +1,4 @@
+from ..utils.runtime_i18n import tr
 # =========================================================
 # =======                 Web服务器                 ========
 # ======= http接口可复用于跨进程命令行、防止多开等方面 ========
@@ -5,6 +6,8 @@
 
 import json
 import ipaddress
+import threading
+from socketserver import ThreadingMixIn
 from urllib.parse import urlsplit
 
 from PySide6.QtCore import QThreadPool, QRunnable
@@ -19,8 +22,9 @@ from .cmd_server import CmdServer
 from . import ocr_server
 from . import qrcode_server
 from . import doc_server
+from . import structured_document_server
 
-BaseRequest.MEMFILE_MAX = 104857600  # 超过100 MB后将上传内容转存临时文件
+BaseRequest.MEMFILE_MAX = 4 * 1024 * 1024  # 大请求尽早转存，避免并发上传放大内存占用。
 MAX_REQUEST_SIZE = 104857600
 
 UmiWeb = Bottle()
@@ -71,7 +75,7 @@ def _argv():
     except (TypeError, ValueError):
         is_loopback = False
     if not is_loopback:
-        msg = "Unauthorized access. Only local requests are allowed.\n此接口只允许本机访问。"
+        msg = tr('Unauthorized access. Only local requests are allowed.\n此接口只允许本机访问。')
         return HTTPResponse(msg, status=401)
     # A remote website's fetch also connects from loopback.  The network
     # address alone does not authenticate it as a local CLI invocation.
@@ -111,6 +115,7 @@ def _argv():
 ocr_server.init(UmiWeb)
 qrcode_server.init(UmiWeb)
 doc_server.init(UmiWeb)
+structured_document_server.init(UmiWeb)
 
 # =============== 自定义服务器适配器，方便控制服务终止 ==============================
 QmlCallback = None  # qml回调函数
@@ -119,35 +124,53 @@ QmlCallback = None  # qml回调函数
 class _WSGIRefServer(ServerAdapter):
     # https://stackoverflow.com/questions/11282218/bottle-web-framework-how-to-stop
 
-    class CustomWSGIServer(WSGIServer):  # 定制服务器
+    class CustomWSGIServer(ThreadingMixIn, WSGIServer):
+        # 同步 OCR 等待不能阻塞其他任务的状态查询/取消；连接数仍有硬上限。
+        daemon_threads = True
+        block_on_close = False
+
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.activeConnections = set()  # 当前活跃连接
+            self.activeConnections = set()
+            self._connections_lock = threading.Lock()
+            self._permits = threading.BoundedSemaphore(16)
 
         def process_request(self, request, client_address):
-            # 记录活跃的连接
-            self.activeConnections.add(request)
+            if not self._permits.acquire(blocking=False):
+                try:
+                    request.sendall(b"HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
+                finally:
+                    self.shutdown_request(request)
+                return
+            request.settimeout(30)
+            with self._connections_lock:
+                self.activeConnections.add(request)
             try:
                 super().process_request(request, client_address)
+            except BaseException:
+                with self._connections_lock:
+                    self.activeConnections.discard(request)
+                self._permits.release()
+                raise
+
+        def process_request_thread(self, request, client_address):
+            try:
+                super().process_request_thread(request, client_address)
             finally:
-                self.activeConnections.discard(request)
+                with self._connections_lock:
+                    self.activeConnections.discard(request)
+                self._permits.release()
 
-        def close_all_request(self):  # 关闭所有活跃的连接
+        def close_all_request(self):
             import socket
-
-            for request in tuple(self.activeConnections):
+            with self._connections_lock:
+                active = tuple(self.activeConnections)
+            for connection in active:
                 try:
-                    request.shutdown(socket.SHUT_RDWR)
-                    request.close()
-                    logger.info(f"强制关闭连接。 request: {request}")
+                    connection.shutdown(socket.SHUT_RDWR)
+                    connection.close()
                 except OSError:
                     pass
-                except Exception:
-                    logger.error(
-                        f"强制连接异常。 request: {request}",
-                        exc_info=True,
-                        stack_info=True,
-                    )
 
     def run(self, handler):
         import atexit  # 退出处理
@@ -167,7 +190,7 @@ class _WSGIRefServer(ServerAdapter):
                 )
                 break
             except OSError:  # 当前端口号已占用，测试下一位端口号
-                logger.warning(f"服务器端口号 {self.port} 已被占用")
+                logger.warning(tr('服务器端口号 {port} 已被占用', port=self.port))
                 self.port += 1
                 if self.port > 65535:
                     self.port = 1024
@@ -180,12 +203,12 @@ class _WSGIRefServer(ServerAdapter):
 
     def stop(self):  # 服务终止
         # self.server.server_close() # 备选方案，但会导致 bad fd 异常
-        logger.debug("WEB服务器准备关闭！")
+        logger.debug(tr('WEB服务器准备关闭！'))
         self.server.close_all_request()  # 强制关闭客户端连接
         self.server.shutdown()  # 关闭服务器
         import atexit
         atexit.unregister(self.stop)
-        logger.info("WEB服务器已关闭！")
+        logger.info(tr('WEB服务器已关闭！'))
 
 
 # ============================== 线程类 ==============================
@@ -222,7 +245,7 @@ def configureHttp(qmlObj, callback, enabled, host, port):
                     server = getattr(getattr(_Worker, "_server", None), "server", None)
                     if server is not None: break
                     time.sleep(0.05)
-                else: raise RuntimeError("HTTP 服务启动超时")
+                else: raise RuntimeError(tr('HTTP 服务启动超时'))
                 _Worker._server.stop()
                 _Worker._server.server.server_close()
                 _Worker = None

@@ -101,7 +101,9 @@ Item {
         const info = infoList[infoIndex]
         if(info.comp) return info.comp
         const url = info.url
+        if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.detail("page-create-component", "begin", info.key, "")
         const comp = Qt.createComponent(url)
+        if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.detail("page-create-component", "end", info.key, comp.status === Component.Ready ? "ready" : "not-ready")
         if (comp.status === Component.Ready) { // 加载成功
             infoList[infoIndex].comp = comp
             return comp
@@ -125,8 +127,10 @@ Item {
         const info = infoList[infoIndex]
         // 实例化逻辑控制器
         let ctrlKey = ""
+        if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.detail("page-controller", "begin", info.key, info.needController ? "controller" : "simple")
         if(info.needController){
             ctrlKey = connector.addPage(info.key)
+            if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.detail("page-controller", "end", info.key, ctrlKey ? "created" : "empty")
             if(!ctrlKey){
                 console.error("【Error】添加页面失败：组件["+info.key+"]创建控制器失败！")
                 return undefined
@@ -134,6 +138,7 @@ Item {
         }
         else { // 新增一个不带控制器的简单页
             ctrlKey = connector.addSimplePage(info.key)
+            if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.detail("page-controller", "end", info.key, ctrlKey ? "created" : "empty")
         }
         // 检查组件
         let comp = getComp(infoIndex)
@@ -149,7 +154,9 @@ Item {
         }
         if(info.pluginKey)
             properties.pluginKey = info.pluginKey
+        if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.detail("page-create-object", "begin", info.key, "")
         const obj = comp.createObject(pagesNest, properties)
+        if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.detail("page-create-object", "end", info.key, obj ? "created" : "null")
         // 收集并返回页面对象信息
         const dic = {
             obj: obj,

@@ -18,6 +18,14 @@ TOOLS = {
     "derive_uvdoc_grid_model.py", "split_lock.py", "source_snapshot.py",
     "package_tar_xz.py", "export_cuda_source.py", "record_gpu_e2e.py", "verify_public_payload.py", "freeze_gpu_runtime.py", "prepare_cuda_overlay.py",
     "staging_smoke.py", "measure_closure.py", "release_gate_inputs.py", "finalize_release.py",
+    "record_gpu_startup.py", "gpu_startup_evidence.py", "prepare_products.py",
+    "merge_runtime.py", "runtime_archive_layout.py", "audit_runtime_archives.py", "measure_runtime_layout.py",
+}
+NATIVE_SOURCES = {
+    "build/windows/CudaWorker/CMakeLists.txt",
+    "build/windows/CudaWorker/worker_main.cpp",
+    "build/windows/CudaWorker/worker.manifest",
+    "build/windows/CudaWorker/resource.rc.in",
 }
 DOCS = {
     "BUILD_WINDOWS_CUDA.md", "BUILD_WINDOWS_CUDA_en.md", "PLUGIN_API.md", "README_CUDA_PLUGIN.md",
@@ -26,6 +34,7 @@ DOCS = {
     "RELEASE_3.0.2_DRAFT.md", "RELEASE_CUDA_3.0.2_DRAFT.md", "RELEASE_3.0.2_REVIEW.md",
     "RELEASE_3.0.3_DRAFT.md", "RELEASE_CUDA_3.0.3_DRAFT.md",
     "RELEASE_3.0.3_ACCEPTANCE.md", "RELEASE_3.0.3_REVIEW.md",
+    "RELEASE_CUDA_3.0.4_DRAFT.md", "RELEASE_CUDA_3.0.4_REVIEW.md",
 }
 
 
@@ -39,20 +48,29 @@ def selected_sources(repo: Path) -> list[Path]:
                      "build/requirements-gpu-plugin-windows-cu126.lock",
                      "build/sources-windows-cu126.lock.json",
                      "build/windows/Build-GpuPlugin.ps1", "build/windows/Audit-Package.ps1",
+                     "build/windows/runtime_archives_cuda.json",
                      "build/windows/Finalize-Release.ps1"} or
+            name in NATIVE_SOURCES or
             relative.parent == Path("build/tools") and relative.name in TOOLS or
             name.startswith("docs/") and relative.name in DOCS or
             relative.parent == Path("tests") and relative.name in {
                 "test_cuda_worker_client.py", "test_ocr_workflows.py", "test_public_payload.py",
                 "test_release_evidence_status.py", "test_release_gate_inputs.py",
                 "test_optional_model_strip.py", "test_cuda_overlay.py", "test_finalize_release.py",
-                "test_finalize_path_guards.py",
+                "test_finalize_path_guards.py", "test_cuda_native_launcher.py",
+                "test_gpu_startup_record.py", "test_gpu_startup_evidence.py",
+                "test_gpu_lock.py", "test_local_build_tools.py", "test_release_metadata.py",
+                "test_cuda_image_tiles.py", "test_runtime_archives.py", "test_runtime_archive_audit.py",
+                "test_runtime_archive_bootstrap.py", "test_runtime_archive_evidence.py",
             }):
             selected.append(relative)
     required = {"COPYING", "LICENSE", PLUGIN + "umi-plugin.json", PLUGIN + "api.py", PLUGIN + "worker.py",
                 "build/windows/Build-GpuPlugin.ps1", "build/tools/package_tar_xz.py", "build/tools/source_snapshot.py",
                 "build/windows/Finalize-Release.ps1", "build/tools/finalize_release.py", "tests/test_finalize_release.py",
-                "tests/test_finalize_path_guards.py"}
+                "tests/test_finalize_path_guards.py", "build/tools/record_gpu_startup.py",
+                "build/tools/gpu_startup_evidence.py", "tests/test_gpu_startup_record.py",
+                "tests/test_gpu_startup_evidence.py", "tests/test_cuda_native_launcher.py",
+                "docs/RELEASE_CUDA_3.0.4_DRAFT.md", "docs/RELEASE_CUDA_3.0.4_REVIEW.md"} | NATIVE_SOURCES
     missing = required - {path.as_posix() for path in selected}
     if missing:
         raise RuntimeError(f"CUDA source export lacks required public files: {sorted(missing)}")
@@ -66,7 +84,7 @@ def export_repository(repo: Path, output: Path, cache: Path) -> dict[str, object
     output.relative_to((repo / "build").resolve())
     selected = selected_sources(repo)
     archives = locked_sources(repo, cache)
-    version = version_from_about(repo / "UmiOCR-data/about.json")
+    version = version_from_about(repo / PLUGIN / "umi-plugin.json")
     files = [(repo / relative, relative) for relative in selected] + archives
     if len({relative.as_posix().casefold() for _, relative in files}) != len(files):
         raise RuntimeError("duplicate CUDA source export paths")
@@ -106,7 +124,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         repo = args.repo_root.resolve()
-        version = version_from_about(repo / "UmiOCR-data/about.json")
+        version = version_from_about(repo / PLUGIN / "umi-plugin.json")
         output = args.output_dir or repo / "build/artifacts" / f"{version.replace('.', '')}-plugin-repository"
         result = export_repository(repo, output, args.source_cache or repo / "build/cache/sources")
         print(f"Public CUDA source exported locally: {output}; version={version}; files={len(result['files'])}; E2E=NOT_RUN")

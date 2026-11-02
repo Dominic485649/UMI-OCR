@@ -18,10 +18,12 @@
 5. 一般旧版 PluginInfo 插件由 legacy 适配层零改动继续可用；明确已知的
    三个 2.x 实现先经过 3.0 技术迁移校验，不会先导入再拒绝。
 """
+from ..utils.runtime_i18n import tr
 
 import glob
 import importlib
 import json
+import math
 import os
 import site
 import sys
@@ -103,6 +105,11 @@ class PluginRecord:
         }
         if self.manifest:
             info.update(self.manifest.toDict())
+            # 只影响设置展示，不能改变插件激活和 DLL 加载的先后次序。
+            orders = [cap.meta.get("settingsOrder") for cap in self.manifest.capabilities if cap.type == "ocr"]
+            orders = [value for value in orders if type(value) in (int, float) and math.isfinite(value)]
+            if orders:
+                info["settingsOrder"] = min(orders)
         else:
             info.setdefault("name", self.id)
             info.setdefault("version", "")
@@ -123,6 +130,9 @@ class _PluginsControllerClass:
 
     def init(self):
         """扫描、校验并注册全部插件。返回供 QML 使用的汇总信息。"""
+        from ..mission.backend_runtime import BackendRuntime
+        # 先释放旧能力实例，再重置注册表；活跃/排队任务不得被刷新切断。
+        BackendRuntime.reset()
         loadBuiltinCapabilityTypes()
         resetAllCapabilities()
         PluginServices.reset()
@@ -142,7 +152,7 @@ class _PluginsControllerClass:
             try:
                 os.makedirs(PLUGINS_PATH)
             except OSError as e:
-                logger.error(f"插件目录创建失败: {PLUGINS_PATH} {e}")
+                logger.error(tr('插件目录创建失败: {plugins_path} {e}', plugins_path=PLUGINS_PATH, e=e))
             return self._summary()
 
         self._enabledState = self._readEnabledState()
@@ -179,11 +189,11 @@ class _PluginsControllerClass:
         """
         record = self.records.get(pluginId)
         if not record:
-            return f'[Error] 插件不存在："{pluginId}"'
+            return tr('[Error] 插件不存在："{pluginid}"', pluginid=pluginId)
         self._enabledState[pluginId] = bool(enabled)
         if not self._writeEnabledState():
-            return "[Error] 写入插件启用状态失败，请检查目录读写权限。"
-        return "[Success] 已保存，将在当前任务结束后自动刷新插件。"
+            return tr('[Error] 写入插件启用状态失败，请检查目录读写权限。')
+        return tr('[Success] 已保存，将在当前任务结束后自动刷新插件。')
 
     def isEnabled(self, pluginId):
         return self._enabledState.get(pluginId, True)
@@ -196,18 +206,18 @@ class _PluginsControllerClass:
         """
         record = self.records.get(pluginId)
         if not record:
-            return {"ok": False, "message": f'插件不存在："{pluginId}"', "details": {}}
+            return {"ok": False, "message": tr('插件不存在："{pluginid}"', pluginid=pluginId), "details": {}}
         if record.state not in (STATE_READY, STATE_UNHEALTHY):
             return {
                 "ok": False,
-                "message": record.message or f"插件当前状态为 {record.state} 。",
+                "message": record.message or tr('插件当前状态为 {state} 。', state=record.state),
                 "details": {"state": record.state},
             }
         manifest = record.manifest
         if not manifest or not manifest.health:
             result = {
                 "ok": True,
-                "message": "该插件未提供健康检查，已按加载成功处理。",
+                "message": tr('该插件未提供健康检查，已按加载成功处理。'),
                 "details": {"declared": False},
             }
             record.health = result
@@ -216,10 +226,10 @@ class _PluginsControllerClass:
             checker = self._resolveEntry(manifest, manifest.health)
             result = checker()
         except Exception as e:
-            logger.error(f"插件 {pluginId} 健康检查异常。", exc_info=True, stack_info=True)
-            result = {"ok": False, "message": f"健康检查异常：{e}", "details": {}}
+            logger.error(tr('插件 {pluginid} 健康检查异常。', pluginid=pluginId), exc_info=True, stack_info=True)
+            result = {"ok": False, "message": tr('健康检查异常：{e}', e=e), "details": {}}
         if not isinstance(result, dict):
-            result = {"ok": False, "message": "健康检查返回了不符合契约的结果。", "details": {}}
+            result = {"ok": False, "message": tr('健康检查返回了不符合契约的结果。'), "details": {}}
         result = {
             "ok": bool(result.get("ok")),
             "message": str(result.get("message") or ""),
@@ -241,7 +251,7 @@ class _PluginsControllerClass:
 
         if not self.isEnabled(name):
             record.state = STATE_DISABLED
-            record.message = "已被用户禁用。"
+            record.message = tr('已被用户禁用。')
             # 仍然读取清单，好让界面显示名称与版本
             if hasManifest(pluginDir):
                 manifest, _ = loadManifest(name, pluginDir)
@@ -264,7 +274,7 @@ class _PluginsControllerClass:
             if not probe:
                 record.state = STATE_INVALID
                 record.message = err
-                logger.error(f"插件 {name} 清单非法：{err}")
+                logger.error(tr('插件 {name} 清单非法：{err}', name=name, err=err))
                 return record
             record.manifest = probe
         else:
@@ -279,7 +289,7 @@ class _PluginsControllerClass:
             if not manifest:
                 record.state = STATE_INVALID
                 record.message = err
-                logger.error(f"加载旧版插件 {name} 失败：{err}")
+                logger.error(tr('加载旧版插件 {name} 失败：{err}', name=name, err=err))
                 return record
             record.manifest = manifest
 
@@ -298,8 +308,7 @@ class _PluginsControllerClass:
             known = ", ".join(knownCapabilityTypes()) or "-"
             record.state = STATE_INCOMPATIBLE
             record.message = (
-                f'插件声明了本宿主未知的能力类型：{", ".join(unknown)} 。'
-                f"当前宿主支持：{known} 。"
+                tr('插件声明了本宿主未知的能力类型：{items} 。当前宿主支持：{known} 。', items=', '.join(unknown), known=known)
             )
             return record
 
@@ -312,9 +321,9 @@ class _PluginsControllerClass:
         try:
             module = importlib.import_module(name)
         except Exception as e:
-            return None, f"动态导入包失败：{e}"
+            return None, tr('动态导入包失败：{e}', e=e)
         if not hasattr(module, "PluginInfo"):
-            return None, "__init__.py 中未定义 PluginInfo 。"
+            return None, tr('__init__.py 中未定义 PluginInfo 。')
         return adaptLegacyPluginInfo(name, pluginDir, module.PluginInfo)
 
     def _resolveConflicts(self):
@@ -332,8 +341,7 @@ class _PluginsControllerClass:
             if blocker:
                 record.state = STATE_CONFLICT
                 record.message = (
-                    f'与已启用的插件 "{blocker.id}" 互斥，两者不能同时启用。'
-                    f'请在插件管理中禁用其中一个。'
+                    tr('与已启用的插件 "{id}" 互斥，两者不能同时启用。请在插件管理中禁用其中一个。', id=blocker.id)
                 )
             else:
                 kept.append(record)
@@ -352,8 +360,8 @@ class _PluginsControllerClass:
                 self._registerPage(record, page)
         except Exception as e:
             record.state = STATE_ERROR
-            record.message = f"注册插件失败：{e}"
-            logger.error(f"注册插件 {record.id} 失败。", exc_info=True, stack_info=True)
+            record.message = tr('注册插件失败：{e}', e=e)
+            logger.error(tr('注册插件 {id} 失败。', id=record.id), exc_info=True, stack_info=True)
             self._rollback(record)
 
     def _mountRuntime(self, manifest, pluginDir):
@@ -377,7 +385,7 @@ class _PluginsControllerClass:
         for relative in manifest.vendorDirs:
             path = os.path.abspath(os.path.join(pluginDir, relative))
             if not os.path.isdir(path):
-                raise FileNotFoundError(f"插件 vendor 目录不存在：{path}")
+                raise FileNotFoundError(tr('插件 vendor 目录不存在：{path}', path=path))
             if path in sys.path:
                 continue
             if manifest.priority == PRIORITY_PREPEND:
@@ -390,7 +398,7 @@ class _PluginsControllerClass:
             full = os.path.abspath(os.path.join(pluginDir, pattern))
             matches = sorted(glob.glob(full)) if glob.has_magic(pattern) else [full]
             if not matches:
-                raise FileNotFoundError(f"插件 DLL 目录不存在：{full}")
+                raise FileNotFoundError(tr('插件 DLL 目录不存在：{full}', full=full))
             for path in matches:
                 if os.path.isdir(path):
                     _appendDllSearchPath(path, manifest.priority == PRIORITY_PREPEND)
@@ -457,7 +465,7 @@ class _PluginsControllerClass:
                 value = value()
         if not isinstance(value, dict):
             raise TypeError(
-                f"{capability.config.raw} 必须是字典或返回字典的可调用对象。"
+                tr('{raw} 必须是字典或返回字典的可调用对象。', raw=capability.config.raw)
             )
         if "global_options" in value or "local_options" in value:
             return value
@@ -473,14 +481,14 @@ class _PluginsControllerClass:
             if callable(value):
                 value = value()
         if not isinstance(value, dict):
-            raise TypeError(f"{service.config.raw} 必须是字典或返回字典的可调用对象。")
+            raise TypeError(tr('{raw} 必须是字典或返回字典的可调用对象。', raw=service.config.raw))
         return value
 
     def _resolveEntry(self, manifest, entry):
         module = importlib.import_module(entry.moduleName(manifest.id))
         if not hasattr(module, entry.attr):
             raise AttributeError(
-                f"{entry.moduleName(manifest.id)} 中不存在 {entry.attr} 。"
+                tr('{id} 中不存在 {attr} 。', id=entry.moduleName(manifest.id), attr=entry.attr)
             )
         return getattr(module, entry.attr)
 
@@ -509,8 +517,7 @@ class _PluginsControllerClass:
             # v1 在这里会静默失败（addPage 返回空串，页面创建不出来），
             # v2 明确降级为无控制器页并留下日志。
             logger.warning(
-                f"插件 {record.id} 的页面 {page.key} 声明了 needController ，"
-                f"但未提供 controller 入口，已按无控制器页加载。"
+                tr('插件 {id} 的页面 {key} 声明了 needController ，但未提供 controller 入口，已按无控制器页加载。', id=record.id, key=page.key)
             )
             info["needController"] = False
         self.pageInfos.append(info)
@@ -538,7 +545,7 @@ class _PluginsControllerClass:
             if isinstance(data, dict):
                 return {str(k): bool(v) for k, v in data.items()}
         except Exception:
-            logger.error(f"读取插件启用状态失败：{path}", exc_info=True)
+            logger.error(tr('读取插件启用状态失败：{path}', path=path), exc_info=True)
         return {}
 
     def _writeEnabledState(self):
@@ -547,7 +554,7 @@ class _PluginsControllerClass:
                 json.dump(self._enabledState, stream, ensure_ascii=False, indent=2)
             return True
         except Exception:
-            logger.error("写入插件启用状态失败。", exc_info=True)
+            logger.error(tr('写入插件启用状态失败。'), exc_info=True)
             return False
 
     # ========================= 【汇总】 =========================
