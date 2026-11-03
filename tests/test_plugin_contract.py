@@ -341,7 +341,7 @@ def _checkMigrationCase(root, pluginId, version, expected, capType="ocr", hostAp
                         and state["capabilities"] == [capType],
                         f"{label} 清单 metadata 仍可显示",
                     )
-            check(summary["host"]["hostApiVersion"] == "2.8", f"{label} Host API 仍是 2.8")
+            check(summary["host"]["hostApiVersion"] == "2.9", f"{label} Host API 为 2.9")
     finally:
         for name in list(sys.modules):
             if name == pluginId or name.startswith(pluginId + "."):
@@ -688,7 +688,7 @@ def test_end_to_end(tmp):
         set(summary["capabilityTypes"]) >= {"ocr", "document"},
         "宿主上报支持的能力类型",
     )
-    check(host_api.HOST_API_VERSION == "2.8", "共享服务契约提升宿主 API 至 2.8")
+    check(host_api.HOST_API_VERSION == "2.9", "图像规范化与安全富预览契约提升宿主 API 至 2.9")
     PluginServices.reset()
 
 

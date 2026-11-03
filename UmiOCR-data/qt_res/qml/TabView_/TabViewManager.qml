@@ -51,6 +51,7 @@ Item {
         const newPage = []
         const newIndex = []
         for(let i in openPageList){
+            if(!page.isSavedPageAvailable(openPageList[i])) continue
             const urlIndex = savedPageIndex(openPageList[i])
             if(urlIndex == -1){
                 console.error("【Error】上次url历史中的 "+openPageList[i]+" 已经丢失！")

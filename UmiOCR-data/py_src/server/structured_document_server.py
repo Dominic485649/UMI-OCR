@@ -29,7 +29,9 @@ MAX_RESERVED_JOB_BYTES = MAX_UPLOAD_BYTES + MAX_JOB_BYTES + 1024 * 1024
 MAX_TOTAL_BYTES = 512 * 1024 * 1024
 MAX_ASSET_BYTES = 16 * 1024 * 1024
 RETENTION_SECONDS = 3 * 3600
-SUFFIXES = {".pdf", ".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tif", ".tiff"}
+from ..utils.image_formats import DOCUMENT_SUFFIXES
+
+SUFFIXES = set(DOCUMENT_SUFFIXES)
 TERMINAL = {"succeeded", "partial", "failed", "cancelled"}
 JOBS = {}
 LOCK = threading.RLock()
@@ -45,6 +47,17 @@ def _safe_path(path, root=None):
     if root is not None and not resolved.is_relative_to(Path(root).resolve()):
         raise ValueError(tr('资源路径不属于当前任务。'))
     return resolved
+
+
+def _input_name(raw_name, suffix):
+    # 保留上传文件身份，但绝不把客户端目录、设备名或控制字符当成本地路径。
+    name = str(raw_name).replace("\\", "/").rsplit("/", 1)[-1]
+    stem = Path(name).stem
+    stem = "".join(char if ord(char) >= 32 and char not in '<>:"/\\|?*' else "_" for char in stem).strip(" .")
+    while len(stem.encode("utf-16-le")) > 200: stem = stem[:-1]
+    if not stem: stem = "document"
+    if re.fullmatch(r"(?i)(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])", stem): stem = "_" + stem
+    return stem + suffix
 
 
 def _error(message, code=804):
@@ -246,7 +259,7 @@ class DocumentJob:
             text = str(result.get("text") or "\n\n".join(str(page.get("text") or "") for page in pages))
             markdown = str(result.get("markdown") or "\n\n".join(str(page.get("markdown") or page.get("text") or "") for page in pages) or text)
             if kind == "txt":
-                return text.encode("utf-8"), "text/plain; charset=utf-8", "document.txt"
+                return markdown.encode("utf-8"), "text/plain; charset=utf-8", "document.md.txt"
             if kind == "md":
                 return markdown.encode("utf-8"), "text/markdown; charset=utf-8", "document.md"
             if kind == "json":
@@ -268,7 +281,6 @@ class DocumentJob:
             result = relative_assets(result)
             with zipfile.ZipFile(stream, "w", zipfile.ZIP_DEFLATED) as archive:
                 archive.writestr("document.md", markdown)
-                archive.writestr("document.txt", text)
                 archive.writestr("document.json", json.dumps(result, ensure_ascii=False, indent=2))
                 for asset_id, path in self.assets.items():
                     source = _safe_path(path, self.root / "assets")
@@ -355,7 +367,7 @@ def init(app):
                 root.mkdir(parents=True, exist_ok=False)
                 (root / ".http-document-job").write_text(identifier, encoding="ascii")
                 (root / "assets").mkdir()
-                source = root / ("input" + suffix)
+                source = _safe_path(root / _input_name(item.raw_filename, suffix), root)
                 size = 0
                 with source.open("xb") as stream:
                     while True:

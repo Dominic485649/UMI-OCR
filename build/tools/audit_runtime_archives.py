@@ -35,8 +35,8 @@ def public_content(name, data, terms):
     if not terms or PurePosixPath(name).suffix.lower() not in TEXT_SUFFIXES:
         return
     text = data.decode("utf-8-sig", errors="replace")
-    if name == "py_src/plugins_controller/manifest.py":
-        # 和Audit-Package一致：只豁免拒绝旧插件ID的独立集合成员行。
+    if name in {"py_src/plugins_controller/manifest.py", "py_src/utils/ui_unlock.py"}:
+        # 仅允许这两个宿主模块声明精确插件ID；不是插件实现、导入或模型路径的例外。
         text = "\n".join(line for line in text.splitlines() if not LEGACY_REJECTION_LINE.fullmatch(line))
     folded = text.casefold()
     for term in terms:

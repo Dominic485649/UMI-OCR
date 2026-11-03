@@ -118,6 +118,15 @@ class Mission:
             self._startMsns()
         return "[Success]"
 
+    def rejectDeferredMissions(self, message):
+        self._msnMutex.lock()
+        try:
+            pending, self._deferredMissions = self._deferredMissions, {}
+        finally:
+            self._msnMutex.unlock()
+        for info, _items in pending.values():
+            self._callMissionEnd(info, "[Error] " + str(message))
+
     def _cancelExecutions(self, executions):
         pass
 

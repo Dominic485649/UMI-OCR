@@ -68,5 +68,7 @@ UmiOCR-data/i18n/_
 build/artifacts/
 build/audit/
 build/logs/
+# Optional UI-unlock implementation is private and never exported as source.
+build/private/
 $tmp/
 temp_doc/

@@ -34,6 +34,9 @@ def run(runtime, plugin, output):
     from PySide6.QtQml import QQmlComponent, QQmlEngine, qmlRegisterType
     from PySide6.QtQuickControls2 import QQuickStyle
 
+    from py_src.document.markdown_preview import initialize_preview, MarkdownPreviewConnector
+    initialize_preview()
+    qmlRegisterType(MarkdownPreviewConnector, "MarkdownPreviewConnector", 1, 0, "MarkdownPreviewConnector")
     QQuickStyle.setStyle("Basic")
     app = QGuiApplication(["document-page-contracts"])
     engine = QQmlEngine()
@@ -206,7 +209,7 @@ def run(runtime, plugin, output):
         evaluate('page.selectDocument("A.pdf")')
         preview.previewInfo.emit({"path": "A.pdf", "page": 1, "pageCount": 3, "error": ""})
         evaluate('page.setCurrentPage(2)')
-        assert evaluate('page.resultText(0)').toString() == "第二页"
+        assert evaluate('page.resultText(0)').toString() == "# 第二页"
         assert json.loads(evaluate('page.resultText(2)').toString())["page"] == 2
         assert evaluate('page.resultBlocks[0].content').toString() == "第二页块"
         assert evaluate('page.structuredResult.partial').toBool()
@@ -214,7 +217,7 @@ def run(runtime, plugin, output):
 
         evaluate('page.cancelParse(); page.onMissionEnd("mission-1","[Warning] cancelled")')
         assert not evaluate('page.parsing').toBool()
-        assert evaluate('page.resultText(0)').toString() == "第二页"
+        assert evaluate('page.resultText(0)').toString() == "# 第二页"
         assert evaluate('page.documentStates["A.pdf"]').toString() == "partial"
         evaluate('page.onMissionPartial("mission-1",' + json.dumps({**event, "page": 3}, ensure_ascii=False) + ')')
         assert evaluate('page.documentResults["A.pdf"].data.pages.length').toInt() == 1
@@ -226,7 +229,7 @@ def run(runtime, plugin, output):
         assert evaluate('page.currentPage').toInt() == 3
         assert evaluate('page.pageCount').toInt() == 3
         evaluate('page.wholeDocument=true')
-        assert evaluate('page.resultText(0)').toString() == "最终整篇"
+        assert evaluate('page.resultText(0)').toString() == "# 最终"
         evaluate('page.selectBlock(page.resultBlocks[0])')
         assert evaluate('page.currentPage').toInt() == 2
         assert evaluate('page.selectedBlockKey').toString() == "2:g2"
@@ -240,6 +243,26 @@ def run(runtime, plugin, output):
         assert evaluate('page.runPaths.length + page.finishedPaths.length + page.pageProgress').toNumber() == 0
         checkpoint()
         checks.append("最终重组结果替换临时结果但不改源页数/浏览页，整篇结构块跳转对应页面，清空不重置参数")
+
+        geometry = {"geometry.pdf": {"code": 100, "data": {"pages": [{"page": 1, "width": 1200, "height": 800,
+            "blocks": [{"id": "geometry", "bbox": [[100, 80], [500, 80], [500, 240], [100, 240]]}]}]}}}
+        evaluate('page.addPaths(["geometry.pdf"]); page.documentResults=' + json.dumps(geometry))
+        preview_item = page.findChild(QObject, "structuredPagePreview")
+        engine.globalObject().setProperty("testedPreview", engine.newQObject(preview_item))
+        evaluate('testedPreview.imageSW=600; testedPreview.imageSH=400; page.previewLoading=false')
+        checkpoint()
+        def regions(item):
+            yield item
+            for child in item.childItems(): yield from regions(child)
+        overlay = preview_item.property("overlayLayer")
+        region = next(item for item in regions(overlay) if item.objectName() == "documentRegion:1:geometry")
+        assert [region.property(key) for key in ("x", "y", "width", "height")] == [50, 40, 200, 80]
+        evaluate('testedPreview.scale=1.75')
+        assert [region.property(key) for key in ("x", "y", "width", "height")] == [50, 40, 200, 80], "视图缩放不能再乘到源几何上"
+        evaluate('testedPreview.imageSW=900; testedPreview.imageSH=600')
+        checkpoint()
+        assert [region.property(key) for key in ("x", "y", "width", "height")] == [75, 60, 300, 120]
+        checks.append("真实版面委托按推理页到预览像素转换，视图缩放不重复计算，异步尺寸变化重映射")
 
         cases = helper.test_preview_connector_races(app, ROOT / "UmiOCR-data")
         checkpoint()

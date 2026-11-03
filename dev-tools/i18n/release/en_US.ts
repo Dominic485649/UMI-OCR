@@ -610,6 +610,34 @@ Adding placeholders can prevent old files from being overwritten by new files.</
         <source>其它</source>
         <translation>Others</translation>
     </message>
+
+    <message><source>Markdown 格式</source><translation>Markdown</translation></message>
+
+    <message><source>保存识别内容及原始页信息，保留公式与代码的 Markdown 标记</source><translation>Save recognized content and source-page information, preserving Markdown formulas and code</translation></message>
+
+    <message><source>文件名中 %date 的日期格式。支持插入以下占位符：
+%Y 年、 %m 月、 %d 日、 %H 小时、&#32;
+%M 分钟、 %S 秒 、 %unix 时间戳&#32;
+举例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</source><translation>Date format for %date in the file name. The following placeholders are supported:
+%Y year, %m month, %d day, %H hour,&#32;
+%M minute, %S second, %unix timestamp&#32;
+Example: %Y-%m-%d_%H-%M
+Generated: 2023-09-01_12-13.md</translation></message>
+
+    <message><source>无需填写拓展名。支持插入以下占位符：
+%date 日期时间
+%name 原文档名
+%range 识别页数范围。只有识别页数小于总页数时才会显示。
+举例：[OCR]_%name%range_%date
+生成：[OCR]_文档A(p2-10)_20230901_1213.md
+添加占位符可以避免旧文件被新文件覆盖。</source><translation>No need to fill in the extension name. The following placeholders are supported:
+%date Date and time
+%name Original folder name/file name
+%range Page range. Only displayed when the OCR page count is less than the total page count.
+Example: [OCR]_%name%range_%date
+Generated: [OCR]_Document(p2-10)_2023-09-01_12-13.md
+Adding placeholders can prevent old files from being overwritten by new files.</translation></message>
 </context>
 <context>
     <name>BatchOCR</name>
@@ -930,6 +958,36 @@ Generated: 2023-09-01_12-13.txt</translation>
         <source>其它</source>
         <translation>Others</translation>
     </message>
+
+    <message><source>Markdown 单独文件</source><translation>Separate Markdown files</translation></message>
+
+    <message><source>Markdown 图文格式</source><translation>Markdown with images</translation></message>
+
+    <message><source>为每张图片单独生成 Markdown 文件</source><translation>Create a separate Markdown file for each image</translation></message>
+
+    <message><source>保留识别内容、公式与代码的 Markdown 标记，可用 Markdown 阅读器浏览</source><translation>Preserve recognized content, formulas and code in Markdown for viewing in a Markdown reader</translation></message>
+
+    <message><source>文件名中 %date 的日期格式。支持插入以下占位符：
+%Y 年、 %m 月、 %d 日、 %H 小时、&#32;
+%M 分钟、 %S 秒 、 %unix 时间戳&#32;
+举例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</source><translation>Date format for %date in the file name. The following placeholders are supported:
+%Y year, %m month, %d day, %H hour,&#32;
+%M minute, %S second, %unix timestamp&#32;
+Example: %Y-%m-%d_%H-%M
+Generated: 2023-09-01_12-13.md</translation></message>
+
+    <message><source>无需填写拓展名。支持插入以下占位符：
+%date 日期时间
+%name 原文件夹名/文件名
+举例：[OCR]_%name_%date
+生成：[OCR]_我的图片_2023-09-01_12-13.md
+添加占位符可以避免旧文件被新文件覆盖。</source><translation>No need to fill in the extension name. The following placeholders are supported:
+%date Date and time
+%name Original folder name/file name
+Example: [OCR]_%name_%date
+Generated: [OCR]_MyImage_2023-09-01_12-13.md
+Adding placeholders can prevent old files from being overwritten by new files.</translation></message>
 </context>
 <context>
     <name>Configs</name>
@@ -1708,6 +1766,18 @@ If you don&apos;t want to see this notification, disable advanced mode in global
         <source>终止文字识别任务</source>
         <translation>Stop OCR tasks</translation>
     </message>
+
+    <message><source>当前使用 %1，任务结束后切换到 %2</source><translation>Using %1; switching to %2 when tasks finish</translation></message>
+
+    <message><source>插件刷新失败</source><translation>Plugin refresh failed</translation></message>
+
+    <message><source>未知错误</source><translation>Unknown error</translation></message>
+
+    <message><source>模型切换失败：%1</source><translation>Model switch failed: %1</translation></message>
+
+    <message><source>模型配置应用失败</source><translation>Failed to apply model settings</translation></message>
+
+    <message><source>正在等待并应用模型设置…</source><translation>Waiting to apply model settings…</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>
@@ -2996,6 +3066,8 @@ Exception message: %2</translation>
         <source>右键菜单</source>
         <translation>Right-click menu</translation>
     </message>
+
+    <message><source>此模型不提供识别置信度</source><translation>This model does not provide recognition confidence</translation></message>
 </context>
 <context>
     <name>ScreenshotManager</name>
@@ -3683,5 +3755,34 @@ Can be set as default off in global settings</translation>
             <source>页面预览</source>
             <translation>Page preview</translation>
         </message>
-    </context>
+
+    <message><source>Markdown 源码</source><translation>Markdown source</translation></message>
+
+    <message><source>文档部分完成：%1 页，%2 个版面块；详情见结果提示。</source><translation>Document partially completed: %1 pages, %2 layout blocks. Check the result notice for details.</translation></message>
+
+    <message><source>预览</source><translation>Preview</translation></message>
+</context>
+<context><name>DocumentMarkdownPreview</name>
+    <message><source>打开网页</source><translation>Open webpage</translation></message>
+
+    <message><source>打开链接</source><translation>Open link</translation></message>
+
+    <message><source>文档超过 16 MiB 预览预算，请查看 Markdown 源码或导出文件。</source><translation>This document exceeds the 16 MiB preview limit. View the Markdown source or export the file.</translation></message>
+
+    <message><source>此段内容较长，按源码显示以保持预览响应。</source><translation>This block is long and is shown as source to keep the preview responsive.</translation></message>
+
+    <message><source>离线预览加载失败，请切换到 Markdown 源码查看结果。</source><translation>The offline preview could not load. Switch to Markdown source to view the result.</translation></message>
+
+    <message><source>解析结果将在这里渲染。可切换到 Markdown 源码查看原始内容。</source><translation>Parsed results will appear here. Switch to Markdown source to view the original content.</translation></message>
+
+    <message><source>部分图片未获授权或超出预览预算，已阻止加载。原始 Markdown 未改变。</source><translation>Some images were blocked because they are unauthorized or exceed preview limits. The original Markdown is unchanged.</translation></message>
+
+    <message><source>预览进程已退出（%1），请切换页签重试或查看 Markdown 源码。</source><translation>The preview process exited (%1). Switch tabs to retry or view the Markdown source.</translation></message>
+
+    <message><source>放大</source><translation>Zoom in</translation></message>
+
+    <message><source>缩小</source><translation>Zoom out</translation></message>
+
+    <message><source>重置缩放</source><translation>Reset zoom</translation></message>
+</context>
 </TS>

@@ -186,6 +186,10 @@ function Copy-ReleaseSource([string]$Destination) {
         "UmiOCR-data\py_src\plugins_controller\services.py",
         "UmiOCR-data\py_src\server\http_utils.py",
         "UmiOCR-data\py_src\ocr\score.py",
+        "LICENSES\markdown-preview\manifest.json",
+        "LICENSES\QtWebEngine\manifest.json",
+        "LICENSES\QtWebEngine\third-party-notices.zip",
+        "third_party\qtwebengine-everywhere-src-6.11.2.tar.xz",
         "third_party\pymupdf-1.28.0.tar.gz",
         "third_party\ffmpeg-4.4.4.tar.xz"
     )

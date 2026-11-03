@@ -65,6 +65,66 @@ class RuntimeCoordinator:
         self._max_waiters = max_waiters
         self._reservations = {}
         self._managers = weakref.WeakSet()
+        self._admissions_deferred = threading.Event()
+        self._configuring_thread = None
+        self._finishing = 0
+        self._listeners = []
+
+    def subscribe(self, callback):
+        with self._condition:
+            self._listeners.append(weakref.WeakMethod(callback))
+
+    def _notify_changed(self):
+        with self._condition:
+            callbacks = [item() for item in self._listeners if item() is not None]
+            self._listeners = [item for item in self._listeners if item() is not None]
+        for callback in callbacks:
+            try:
+                callback()
+            except RuntimeError:
+                # Qt 对象可能已在关闭窗口时销毁，通知不能破坏模型收尾。
+                continue
+
+    def admissions_deferred(self):
+        return self._admissions_deferred.is_set()
+
+    def defer_admissions(self, enabled):
+        # 先设置全局屏障；期间新建的 HTTP manager 也会延后接纳。
+        if enabled:
+            self._admissions_deferred.set()
+        else:
+            self._admissions_deferred.clear()
+        for manager in self.managers():
+            manager.deferAdmissions(bool(enabled))
+
+    def configuration_busy(self):
+        with self._condition:
+            return bool(self._finishing or self.busy())
+
+    @contextmanager
+    def finishing(self):
+        with self._condition:
+            self._finishing += 1
+        try:
+            yield
+        finally:
+            with self._condition:
+                self._finishing -= 1
+            self._notify_changed()
+
+    @contextmanager
+    def reconfiguration(self):
+        with self._condition:
+            if self.configuration_busy():
+                raise BackendBusy(tr('模型任务或资源清理尚未完成，切换将自动延后。'))
+            self._configuring_thread = threading.get_ident()
+        try:
+            yield
+        finally:
+            with self._condition:
+                self._configuring_thread = None
+                self._condition.notify_all()
+            self._notify_changed()
 
     def register_manager(self, manager):
         with self._condition:
@@ -111,10 +171,12 @@ class RuntimeCoordinator:
             self._reservations.pop(key, None)
             self._condition.notify_all()
         self._close_unused(suppress_errors=True)
+        self._notify_changed()
 
     def busy(self, owner=None):
         with self._condition:
-            return bool(self._thread is not None or self._queue or self._reservations)
+            configuring = self._configuring_thread is not None and self._configuring_thread != threading.get_ident()
+            return bool(configuring or self._thread is not None or self._queue or self._reservations)
 
     def status(self):
         with self._condition:
@@ -127,6 +189,8 @@ class RuntimeCoordinator:
         ticket = object()
         nested = False
         with self._condition:
+            if self._configuring_thread is not None and self._configuring_thread != thread:
+                raise BackendBusy(tr('模型配置正在应用，请稍后重试。'))
             if self._thread == thread:
                 if self._owner != owner:
                     raise BackendBusy(tr('同一执行任务不能嵌套使用不同模型。'))
@@ -167,6 +231,7 @@ class RuntimeCoordinator:
                     self._condition.notify_all()
             if not nested and activate:
                 self._close_unused(suppress_errors=True)
+            self._notify_changed()
 
     def _close_unused(self, *, suppress_errors=False):
         """最后一个句柄关闭后做最终 stop；忙时留到许可/预约退出再收尾。"""

@@ -100,6 +100,30 @@ class RuntimeArchiveTests(unittest.TestCase):
         self.assertTrue((self.root / "vendor.zip").is_file())
         self.assertFalse((self.root / "vendor/six.py").exists())
 
+    def test_nested_freeze_description_does_not_freeze_a_candidate(self):
+        policy = self.package()
+        record = {"status": "PREPARED_NOT_FROZEN", "description": {
+            "purpose": "immutable-review-product-not-approval", "package_root": str(self.root)}}
+        self.write("build/audit/prepared.json", json.dumps(record), root=self.project)
+        self.aggregate(policy)
+        self.assertTrue((self.root / "vendor.zip").is_file())
+
+    def test_actual_overlapping_freeze_is_rejected_without_writes(self):
+        policy = self.package()
+        self.write("build/audit/frozen.json", json.dumps({
+            "purpose": "immutable-review-product-not-approval", "package_root": str(self.root)}), root=self.project)
+        with self.assertRaisesRegex(LayoutError, "already frozen"):
+            self.aggregate(policy)
+        self.assert_no_assembly()
+
+    def test_malformed_actual_freeze_still_fails_closed(self):
+        policy = self.package()
+        self.write("build/audit/frozen.json", json.dumps({
+            "purpose": "immutable-review-product-not-approval"}), root=self.project)
+        with self.assertRaisesRegex(LayoutError, "Invalid existing freeze"):
+            self.aggregate(policy)
+        self.assert_no_assembly()
+
     def external_hashes(self):
         return {name: layout.sha256_bytes(data) for name, data in self.original.items()}
 

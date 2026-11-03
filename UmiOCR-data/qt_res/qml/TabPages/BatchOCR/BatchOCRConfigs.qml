@@ -4,10 +4,12 @@
 
 import QtQuick 2.15
 import "../../Configs"
+import "../../Configs/MarkdownOutputMigration.js" as MarkdownOutputMigration
 
 Configs {
     category_: "BatchOCR"
     property var ocrSource: null
+    onConfigurationReloaded: MarkdownOutputMigration.migrate(this, UmiSettings)
     panelLayout: qmlapp.globalConfigs.ocrManager.modelPanelLayout(this)
     valueSources: ocrSource ? ({"ocr": ocrSource}) : ({})
     Component.onCompleted: { ocrSource = qmlapp.globalConfigs.ocrManager.taskSource(category_) }
@@ -59,13 +61,13 @@ Configs {
             },
             "fileNameFormat": {
                 "title": qsTr("文件名格式"),
-                "toolTip": qsTr("无需填写拓展名。支持插入以下占位符：\n%date 日期时间\n%name 原文件夹名/文件名\n举例：[OCR]_%name_%date\n生成：[OCR]_我的图片_2023-09-01_12-13.txt\n添加占位符可以避免旧文件被新文件覆盖。"),
+                "toolTip": qsTr("无需填写拓展名。支持插入以下占位符：\n%date 日期时间\n%name 原文件夹名/文件名\n举例：[OCR]_%name_%date\n生成：[OCR]_我的图片_2023-09-01_12-13.md\n添加占位符可以避免旧文件被新文件覆盖。"),
                 "default": "[OCR]_%name_%date",
                 "advanced": true, // 高级选项
             },
             "datetimeFormat": {
                 "title": qsTr("日期时间格式"),
-                "toolTip": qsTr("文件名中 %date 的日期格式。支持插入以下占位符：\n%Y 年、 %m 月、 %d 日、 %H 小时、 \n%M 分钟、 %S 秒 、 %unix 时间戳 \n举例：%Y年%m月%d日_%H-%M\n生成：2023年09月01日_12-13.txt"),
+                "toolTip": qsTr("文件名中 %date 的日期格式。支持插入以下占位符：\n%Y 年、 %m 月、 %d 日、 %H 小时、 \n%M 分钟、 %S 秒 、 %unix 时间戳 \n举例：%Y年%m月%d日_%H-%M\n生成：2023年09月01日_12-13.md"),
                 "default": "%Y%m%d_%H%M",
                 "advanced": true, // 高级选项
             },
@@ -76,24 +78,14 @@ Configs {
                 "enabledFold": true,
                 "fold": false,
 
-                "txt": {
-                    "title": qsTr("txt 标准格式"),
-                    "toolTip": qsTr("含原图片文件名和识别文字"),
+                "md": {
+                    "title": qsTr("Markdown 图文格式"),
+                    "toolTip": qsTr("保留识别内容、公式与代码的 Markdown 标记，可用 Markdown 阅读器浏览"),
                     "default": true,
                 },
-                "txtPlain": {
-                    "title": qsTr("p.txt 纯文字格式"),
-                    "toolTip": qsTr("仅输出识别文字，不含图片标题"),
-                    "default": false,
-                },
-                "txtIndividual": {
-                    "title": qsTr("txt 单独文件"),
-                    "toolTip": qsTr("对每张图片，生成同名txt文件，仅输出识别文字"),
-                    "default": false,
-                },
-                "md": {
-                    "title": qsTr("md 图文混排"),
-                    "toolTip": qsTr("Markdown图文混排格式，可用Markdown阅读器浏览文件"),
+                "mdIndividual": {
+                    "title": qsTr("Markdown 单独文件"),
+                    "toolTip": qsTr("为每张图片单独生成 Markdown 文件"),
                     "default": false,
                 },
                 "csv": {
@@ -130,8 +122,7 @@ Configs {
 
 /*
 输出文件类型
-    .txt 标准格式
-    .txt 纯文本格式
-    .txt 多个独立文件
+    .md Markdown 图文格式
+    .md 多个独立文件
     .jsonl 原始信息
 */

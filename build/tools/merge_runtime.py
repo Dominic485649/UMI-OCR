@@ -148,7 +148,10 @@ def _reject_frozen(root, project_root):
             if b"immutable-review-product-not-approval" not in header:
                 continue
             record = layout.read_json(path)
-            frozen = record.get("package_root") if isinstance(record, dict) else None
+            # 嵌套说明快照不等于正式冻结；仅顶层 purpose 声明有约束力。
+            if not isinstance(record, dict) or record.get("purpose") != "immutable-review-product-not-approval":
+                continue
+            frozen = record.get("package_root")
             if not isinstance(frozen, str):
                 raise LayoutError(f"Invalid existing freeze record: {path}")
             if _inside(root, frozen) or _inside(frozen, root):

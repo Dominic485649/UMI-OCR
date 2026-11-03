@@ -610,6 +610,34 @@
         <source>其它</source>
         <translation>その他</translation>
     </message>
+
+    <message><source>Markdown 格式</source><translation>Markdown 形式</translation></message>
+
+    <message><source>保存识别内容及原始页信息，保留公式与代码的 Markdown 标记</source><translation>認識結果と元のページ情報を保存し、数式とコードの Markdown 記法を保持</translation></message>
+
+    <message><source>文件名中 %date 的日期格式。支持插入以下占位符：
+%Y 年、 %m 月、 %d 日、 %H 小时、&#32;
+%M 分钟、 %S 秒 、 %unix 时间戳&#32;
+举例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</source><translation>ファイル名内の %date の日付形式です。次のプレースホルダを挿入できます：
+%Y 年、 %m 月、 %d 日、 %H 時、&#32;
+%M 分、 %S 秒、 %unix タイムスタンプ
+例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</translation></message>
+
+    <message><source>无需填写拓展名。支持插入以下占位符：
+%date 日期时间
+%name 原文档名
+%range 识别页数范围。只有识别页数小于总页数时才会显示。
+举例：[OCR]_%name%range_%date
+生成：[OCR]_文档A(p2-10)_20230901_1213.md
+添加占位符可以避免旧文件被新文件覆盖。</source><translation>拡張子は不要です。次のプレースホルダーを使用できます：
+%date 日付と時刻
+%name 元の文書名
+%range OCR のページ範囲。認識するページ数が総ページ数より少ない場合にのみ表示されます。
+例：[OCR]_%name%range_%date
+生成例：[OCR]_文書A(p2-10)_20230901_1213.md
+プレースホルダーを追加すると、古いファイルが新しいファイルに上書きされるのを防げます。</translation></message>
 </context>
 <context>
     <name>BatchOCR</name>
@@ -930,6 +958,36 @@
         <source>其它</source>
         <translation>その他</translation>
     </message>
+
+    <message><source>Markdown 单独文件</source><translation>画像ごとの Markdown ファイル</translation></message>
+
+    <message><source>Markdown 图文格式</source><translation>画像付き Markdown</translation></message>
+
+    <message><source>为每张图片单独生成 Markdown 文件</source><translation>画像ごとに Markdown ファイルを作成</translation></message>
+
+    <message><source>保留识别内容、公式与代码的 Markdown 标记，可用 Markdown 阅读器浏览</source><translation>認識結果、数式、コードの Markdown 記法を保持。Markdown リーダーで閲覧できます</translation></message>
+
+    <message><source>文件名中 %date 的日期格式。支持插入以下占位符：
+%Y 年、 %m 月、 %d 日、 %H 小时、&#32;
+%M 分钟、 %S 秒 、 %unix 时间戳&#32;
+举例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</source><translation>ファイル名内の %date の日付形式です。次のプレースホルダを挿入できます：
+%Y 年、 %m 月、 %d 日、 %H 時、&#32;
+%M 分、 %S 秒、 %unix タイムスタンプ
+例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</translation></message>
+
+    <message><source>无需填写拓展名。支持插入以下占位符：
+%date 日期时间
+%name 原文件夹名/文件名
+举例：[OCR]_%name_%date
+生成：[OCR]_我的图片_2023-09-01_12-13.md
+添加占位符可以避免旧文件被新文件覆盖。</source><translation>拡張子は不要です。次のプレースホルダを挿入できます：
+%date 日付と時刻
+%name 元のフォルダ名/ファイル名
+例：[OCR]_%name_%date
+生成：[OCR]_マイピクチャ_2023-09-01_12-13.md
+プレースホルダを追加すると、古いファイルが新しいファイルに上書きされるのを防ぐことができます。</translation></message>
 </context>
 <context>
     <name>Configs</name>
@@ -1708,6 +1766,18 @@
         <source>终止文字识别任务</source>
         <translation>OCRタスクを停止</translation>
     </message>
+
+    <message><source>当前使用 %1，任务结束后切换到 %2</source><translation>現在は %1 を使用中。タスク終了後に %2 に切り替えます</translation></message>
+
+    <message><source>插件刷新失败</source><translation>プラグインの更新に失敗</translation></message>
+
+    <message><source>未知错误</source><translation>不明なエラー</translation></message>
+
+    <message><source>模型切换失败：%1</source><translation>モデルの切り替えに失敗：%1</translation></message>
+
+    <message><source>模型配置应用失败</source><translation>モデル設定の適用に失敗</translation></message>
+
+    <message><source>正在等待并应用模型设置…</source><translation>モデル設定の適用を待機中…</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>
@@ -2996,6 +3066,8 @@ QR コードやバーコードを識別、生成する。
         <source>右键菜单</source>
         <translation>右クリックメニュー</translation>
     </message>
+
+    <message><source>此模型不提供识别置信度</source><translation>このモデルは認識の信頼度を提供しません</translation></message>
 </context>
 <context>
     <name>ScreenshotManager</name>
@@ -3683,5 +3755,34 @@ QR コードやバーコードを識別、生成する。
             <source>页面预览</source>
             <translation>ページプレビュー</translation>
         </message>
-    </context>
+
+    <message><source>Markdown 源码</source><translation>Markdown ソース</translation></message>
+
+    <message><source>文档部分完成：%1 页，%2 个版面块；详情见结果提示。</source><translation>文書は一部完了：%1 ページ、%2 個のレイアウトブロック。詳細は結果の通知を確認してください。</translation></message>
+
+    <message><source>预览</source><translation>プレビュー</translation></message>
+</context>
+<context><name>DocumentMarkdownPreview</name>
+    <message><source>打开网页</source><translation>ウェブページを開く</translation></message>
+
+    <message><source>打开链接</source><translation>リンクを開く</translation></message>
+
+    <message><source>文档超过 16 MiB 预览预算，请查看 Markdown 源码或导出文件。</source><translation>文書がプレビュー上限の 16 MiB を超えています。Markdown ソースを表示するか、ファイルを出力してください。</translation></message>
+
+    <message><source>此段内容较长，按源码显示以保持预览响应。</source><translation>このブロックは長いため、プレビューの応答性を保つためソースとして表示します。</translation></message>
+
+    <message><source>离线预览加载失败，请切换到 Markdown 源码查看结果。</source><translation>オフラインプレビューを読み込めません。Markdown ソースに切り替えて結果を確認してください。</translation></message>
+
+    <message><source>解析结果将在这里渲染。可切换到 Markdown 源码查看原始内容。</source><translation>解析結果をここに表示します。元の内容は Markdown ソースで確認できます。</translation></message>
+
+    <message><source>部分图片未获授权或超出预览预算，已阻止加载。原始 Markdown 未改变。</source><translation>一部の画像は許可されていないかプレビュー上限を超えるため、読み込みをブロックしました。元の Markdown は変更していません。</translation></message>
+
+    <message><source>预览进程已退出（%1），请切换页签重试或查看 Markdown 源码。</source><translation>プレビュープロセスが終了しました（%1）。タブを切り替えて再試行するか、Markdown ソースを確認してください。</translation></message>
+
+    <message><source>放大</source><translation>拡大</translation></message>
+
+    <message><source>缩小</source><translation>縮小</translation></message>
+
+    <message><source>重置缩放</source><translation>倍率をリセット</translation></message>
+</context>
 </TS>

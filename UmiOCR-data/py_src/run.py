@@ -69,6 +69,10 @@ def runQml(engineAddImportPath, quitAfterMs=0, startupTrace=None):
     # 初始化渲染器
     app_opengl.initOpengl()
 
+    # 自定义资源 scheme 与 WebEngineQuick 必须先于 QApplication 初始化。
+    from .document.markdown_preview import initialize_preview, MarkdownPreviewConnector
+    initialize_preview()
+
     # ==================== 2. 启动qt ====================
     if startupTrace is not None:
         startupTrace.detail("qt-application", "begin")
@@ -106,6 +110,7 @@ def runQml(engineAddImportPath, quitAfterMs=0, startupTrace=None):
         startupTrace.detail("connectors-import", "end", outcome="ok")
         startupTrace.detail("connectors-register", "begin")
 
+    qmlRegisterType(MarkdownPreviewConnector, "MarkdownPreviewConnector", 1, 0, "MarkdownPreviewConnector")
     qmlRegisterType(TagPageConnector, "TagPageConnector", 1, 0, "TagPageConnector")
     qmlRegisterType(MissionConnector, "MissionConnector", 1, 0, "MissionConnector")
     qmlRegisterType(PubSubConnector, "PubSubConnector", 1, 0, "PubSubConnector")

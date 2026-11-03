@@ -17,6 +17,13 @@ import sys
 import tarfile
 from pathlib import Path
 
+_chunks_spec = importlib.util.spec_from_file_location("umi_gate_chunks", Path(__file__).with_name("chunked_files.py"))
+chunks = importlib.util.module_from_spec(_chunks_spec)
+_chunks_spec.loader.exec_module(chunks)
+_directed_spec = importlib.util.spec_from_file_location("umi_directed_release312", Path(__file__).with_name("release312_directed_evidence.py"))
+directed = importlib.util.module_from_spec(_directed_spec)
+_directed_spec.loader.exec_module(directed)
+
 PLUGIN_ID = "win32_PaddleOCRv6_CUDA"
 PUBLIC_REPOSITORIES = {
     "host": "https://github.com/Dominic485649/UMI-OCR",
@@ -214,6 +221,16 @@ def public_tag(url: str, tag: str, commit: str, *, cwd: Path) -> dict:
     return refs
 
 
+def _checked_git_blob(checkout: Path, oid: bytes, maximum: int) -> bytes:
+    size_text = _git(["cat-file", "-s", oid.decode("ascii")], cwd=checkout).strip()
+    if not size_text.isdigit() or not 0 < int(size_text) <= maximum:
+        raise ValueError("public source metadata/blob exceeds its size budget")
+    content = _git(["cat-file", "blob", oid.decode("ascii")], cwd=checkout)
+    if len(content) != int(size_text):
+        raise ValueError("public source Git blob changed or was truncated")
+    return content
+
+
 def git_source_matches(checkout: Path, commit: str, source: dict[str, str]) -> None:
     if not checkout.is_absolute() or not checkout.is_dir():
         raise ValueError("source receipt requires an existing absolute checkout path")
@@ -231,9 +248,36 @@ def git_source_matches(checkout: Path, commit: str, source: dict[str, str]) -> N
         if filename in objects:
             raise ValueError("duplicate public source path")
         objects[filename] = oid
-    if set(objects) != set(source):
+    ordinary = dict(source)
+    if chunks.SOURCE_INDEX in objects:
+        if chunks.SOURCE_INDEX in source:
+            raise ValueError("canonical source must contain original archives, not a chunk index")
+        index_bytes = _checked_git_blob(checkout, objects[chunks.SOURCE_INDEX], chunks.INDEX_LIMIT)
+        try:
+            index = chunks.parse_index(index_bytes, "source")
+        except chunks.layout.LayoutError as exc:
+            raise ValueError("public source chunk paths are unsafe") from exc
+        physical = {chunks.SOURCE_INDEX}
+        for item in index["files"]:
+            name = item["path"]
+            if ordinary.pop(name, None) != item["sha256"]:
+                raise ValueError("chunked public source is absent or differs from canonical source")
+            physical.update(part["path"] for part in item["parts"])
+        if set(objects) != set(ordinary) | physical:
+            raise ValueError("public chunked source has missing or extra physical members")
+        for item in index["files"]:
+            checksum, total = hashlib.sha256(), 0
+            for part in item["parts"]:
+                content = _checked_git_blob(checkout, objects[part["path"]], chunks.POLICIES["source"]["part"])
+                if len(content) != part["bytes"] or hashlib.sha256(content).hexdigest() != part["sha256"]:
+                    raise ValueError("public Git source chunk size or SHA256 differs")
+                checksum.update(content)
+                total += len(content)
+            if total != item["bytes"] or checksum.hexdigest() != item["sha256"]:
+                raise ValueError("reconstructed public Git source differs from canonical source")
+    elif set(objects) != set(source):
         raise ValueError("packaged source member set differs from the public commit")
-    names = sorted(source)
+    names = sorted(ordinary)
     content = _git(["cat-file", "--batch"], cwd=checkout, input_data=b"".join(objects[name] + b"\n" for name in names))
     offset = 0
     for name in names:
@@ -569,6 +613,8 @@ def _verify_base_capture_waiver(record, kind, binding, staging, authorized, auto
 
 
 def verify_current_source(record, kind: str, binding: dict, staging: Path, authorized: bool) -> dict:
+    if isinstance(record, dict) and record.get("validation_scope") == directed.SCOPE:
+        return directed.verify(record, kind, binding, staging, authorized, globals())
     if isinstance(record, dict) and record.get("validation_scope", "full") not in {"full", BASE_CAPTURE_SCOPE}:
         if record.get("validation_scope") != STARTUP_SCOPE:
             raise ValueError("Unknown current-source validation scope")

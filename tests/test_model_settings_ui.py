@@ -285,7 +285,7 @@ def run(data_root, source_root):
         js_eval('qmlapp.globalConfigs.getPluginServiceValues=getPluginServiceValues; init1({win32_PaddleOCRv6_CUDA:{global_options:{title:"CUDA",modelName:"PP-OCRv6_medium",type:"group"},local_options:{longSide:{default:4000},nested:{type:"group",limit:{default:2}}}}})')
         assert json.loads(js_eval('JSON.stringify(globalOptions.api.optionsList)').toString()) == [["win32_PaddleOCRv6_CUDA", "PP-OCRv6_medium"]]
         js_eval('busy=true')
-        assert js_eval('globalOptions.api.onChanged("other","win32_PaddleOCRv6_CUDA")').toBool()
+        assert js_eval('globalOptions.api.onChanged === undefined').toBool(), "忙时选择由全局待切换状态机接管，不能在选项层拒绝"
         assert js_eval('backendsBusy()').toBool()
         js_eval('busy=false')
         warmup = json.loads(js_eval('JSON.stringify(buildWarmupInfo())').toString())
@@ -301,7 +301,7 @@ def run(data_root, source_root):
         js_eval('init1({})')
         assert js_eval('Object.keys(localOptions).length').toInt() == 0
         assert not js_eval('"ocr" in configDict').toBool()
-        passed.append("实际管理函数：只提供已安装模型，繁忙拒绝切换，预热读页面真实键，统一策略映射并发布后端快照")
+        passed.append("实际管理函数：只提供已安装模型，不在选项层拒绝繁忙时的选择，预热读页面真实键，统一策略映射并发布后端快照")
         js_eval('''
           var pluginStates=[{id:"vl",name:"PaddleVL",state:"ready"},{id:"disabled",name:"禁用插件",state:"disabled"}];
           configDict={plugins:{title:"插件管理",type:"group",fullKey:"plugins"}};
@@ -389,6 +389,8 @@ def run(data_root, source_root):
 
         # 执行真实通知与截图回调函数，验证不会抑制部分结果警告或污染复制文字。
         screenshot_path = qml / "TabPages/ScreenshotOCR/ScreenshotOCR.qml"
+        sequence = (qml / "Widgets/Sequence.js").read_text(encoding="utf-8").replace(".pragma library", "")
+        js_eval("var Sequence=(function(){" + sequence + ";return {warnings:warnings};})()")
         js_eval(helper.qml_function(qml / "Widgets/ResultLayout/ResultsTableView.qml", "resultNotice"))
         js_eval(helper.qml_function(screenshot_path, "showSimple"))
         js_eval(helper.qml_function(screenshot_path, "onOcrGet"))

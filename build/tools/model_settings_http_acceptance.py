@@ -665,7 +665,8 @@ def execute_scenarios(client, runtime, observers, cuda, vl, structured, doc_serv
             require(status == 200 and "attachment" in headers.get("Content-Disposition", ""), f"Structured {kind} export failed")
             if kind == "zip":
                 with zipfile.ZipFile(io.BytesIO(payload)) as archive:
-                    require({"document.txt", "document.md", "document.json"} <= set(archive.namelist()), "ZIP export lacks required members")
+                    require({"document.md", "document.json"} <= set(archive.namelist())
+                            and not {"document.txt", "document.md.txt"}.intersection(archive.namelist()), "ZIP export has wrong format set")
                     require(all(not name.startswith(("/", "\\")) and ".." not in Path(name).parts for name in archive.namelist()), "Unsafe ZIP member")
                     require(b"file://" not in archive.read("document.json"), "ZIP exposes local resource URI")
             else:

@@ -24,7 +24,7 @@ PageClass = {
 
 # 插件提供的页控制器注册表放在 page_registry ：它只依赖标准库，
 # 这样插件发现阶段登记页控制器时不会把 PySide6 拉进来。
-from .page_registry import getPluginPageClass
+from .page_registry import getPluginPageClass, isPluginPageAvailable
 
 
 TagPageConnObj = None  # 记录实例
@@ -50,9 +50,15 @@ class TagPageConnector(QObject):
 
     # ========================= 【增删改查】 =========================
 
+    @Slot(str, result=bool)
+    def isPageAvailable(self, key):
+        return isPluginPageAvailable(key)
+
     # 增： 新增一个class为key的控制器，返回这个控制器的标识符。失败返回空字符串
     @Slot(str, result=str)
     def addPage(self, key):
+        if not isPluginPageAvailable(key):
+            return ""
         if key in self.pageClass:
             page_class = self.pageClass[key]
             if isinstance(page_class, str):
@@ -82,6 +88,8 @@ class TagPageConnector(QObject):
     # 增： 新增一个不带控制器的简单页
     @Slot(str, result=str)
     def addSimplePage(self, key):
+        if not isPluginPageAvailable(key):
+            return ""
         ctrlKey = self._getCtrlKey(key)
         self.pages[ctrlKey] = {
             "pyObj": None,

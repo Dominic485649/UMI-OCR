@@ -96,6 +96,11 @@ Item {
         }
     }
 
+    function isSavedPageAvailable(value) {
+        const key = String(value).replace(/\\/g, "/").split("/").pop()
+        return connector.isPageAvailable(key.endsWith(".qml") ? key.slice(0, -4) : key)
+    }
+
     // 创建一个页面的组件类 comp
     function getComp(infoIndex) {
         const info = infoList[infoIndex]
@@ -125,6 +130,7 @@ Item {
     // 创建并返回一个 infoList[infoIndex] 页面。
     function newPage(infoIndex){
         const info = infoList[infoIndex]
+        if(!info || !connector.isPageAvailable(info.key)) return undefined
         // 实例化逻辑控制器
         let ctrlKey = ""
         if(typeof UmiStartupTrace !== "undefined") UmiStartupTrace.detail("page-controller", "begin", info.key, info.needController ? "controller" : "simple")

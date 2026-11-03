@@ -17,6 +17,23 @@ mirror and the application source notices remain required for AGPL-covered
 code, including the network-interaction source-offer obligation where it
 applies.
 
+## Offline Markdown Preview (3.1.2)
+
+The base application now includes the unmodified Qt WebEngine 6.11.2 runtime
+from the locked PySide6 wheel, including QtWebEngineProcess and Chromium
+resources. Qt/PySide and Chromium third-party obligations remain separate.
+`LICENSES/QtWebEngine/manifest.json` binds the exact same-version official
+source archive and a read-only collection of 2,170 license/notice/attribution
+files in `third-party-notices.zip`. The full source archive is retained under
+`source/third_party/qtwebengine-everywhere-src-6.11.2.tar.xz`; this does not claim
+that this project rebuilt Qt or Chromium. LGPL/GPL texts are retained here.
+
+The fixed offline preview uses markdown-it 15.0.3 (MIT), DOMPurify 3.4.17
+(MPL-2.0 OR Apache-2.0), KaTeX 0.19.1 and its fonts (MIT), and highlight.js
+11.12.0 (BSD-3-Clause). `LICENSES/markdown-preview/` retains each original npm
+source/distribution archive, license and an input/runtime hash manifest.
+No CDN, model download or package lifecycle script is used by the preview.
+
 ## PaddleOCR Model Weights
 
 The GPU plugin ships exactly five checked weights:

@@ -365,6 +365,9 @@ def check_report(metadata, kind, binding, release_gates, receipt_hash):
     elif current.get("validation_scope") == gates.BASE_CAPTURE_SCOPE:
         if kind != "base" or not gates.verified_base_capture_waiver(current):
             raise FinalizationError("The reviewed base-only capture waiver is invalid or belongs to another component")
+    elif current.get("validation_scope") == gates.directed.SCOPE:
+        if current.get("artifact_kind") != kind or not gates.directed.verified_receipt(current):
+            raise FinalizationError("The current directed scope is invalid or belongs to another reviewed product")
     elif current.get("validation_scope", "full") != "full":
         raise FinalizationError("Unknown finalization validation scope")
     if (not isinstance(statuses, dict) or set(statuses) != required or

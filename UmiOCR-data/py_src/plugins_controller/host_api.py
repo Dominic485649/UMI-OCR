@@ -17,7 +17,7 @@ import os
 import sys
 
 # 宿主契约版本。修改时必须同步 docs/PLUGIN_API.md 的兼容矩阵。
-HOST_API_VERSION = "2.8"
+HOST_API_VERSION = "2.9"
 
 # 清单文件名
 MANIFEST_NAME = "umi-plugin.json"

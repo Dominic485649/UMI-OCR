@@ -4,6 +4,7 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import "Sequence.js" as Sequence
 
 Menu {
     id: mRoot
@@ -14,7 +15,7 @@ Menu {
     width: size_.line * 10
     // 兼容旧条目 [func, text, color]；新条目可含 enabled、tip、children。
     function value(entry, key, legacyIndex, fallback) {
-        if(Array.isArray(entry)) return entry.length > legacyIndex ? entry[legacyIndex] : fallback
+        if(Sequence.isSequence(entry)) return entry.length > legacyIndex ? entry[legacyIndex] : fallback
         return entry && entry[key] !== undefined ? entry[key] : fallback
     }
     function isEnabled(entry) { return !!value(entry, "enabled", 3, true) }
@@ -63,7 +64,7 @@ Menu {
                     id: menuRow
                     width: menuColumn.width
                     height: size_.line + size_.smallSpacing * 2
-                    property var entry: modelData
+                    property var entry: mRoot.menuList[index]
                     Button_ {
                         objectName: mRoot.value(menuRow.entry, "objectName", 6, "")
                         anchors.fill: parent

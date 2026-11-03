@@ -1,4 +1,10 @@
-# Umi-OCR 3.0.3 統合修正と配布について
+# Umi-OCR 3.1.2
+
+今回の Windows x64 コンポーネント：[本体 3.1.2](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.1.2)、[CUDA 3.0.5](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.5)、[PaddleVL 3.1.2](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.1.2)。各コンポーネントは独立したバージョンを持ちます。実際の公開状態、添付ファイル、チェックサム、分割アーカイブの復元手順は各 Release を参照してください。PaddleVL の文書解析は標準では HTTP 経由で利用します。画面キャプチャ、HDR、混在・複数ディスプレイの今回の検証は NOT_RUN のままです。
+
+以下の 3.0.3 の日付付き記録は履歴であり、現在のダウンロード状態ではありません。[メイン README](README.md#下载发行版)に今回のコンポーネントとインストール手順を記載しています。
+
+## 3.0.3 統合修正と配布の履歴
 
 メインリポジトリ：https://github.com/Dominic485649/UMI-OCR
 

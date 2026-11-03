@@ -9,7 +9,7 @@ class Output:
     def __init__(self, argd):
         self.dir = argd["outputDir"]  # 输出路径（文件夹）
         self.fileName = argd["outputFileName"]  # 文件名
-        self.outputPath = f"{self.dir}/{self.fileName}.txt"  # 输出路径
+        self.outputPath = f"{self.dir}/{self.fileName}.md"  # 输出路径
         self.ignoreBlank = argd["ignoreBlank"]  # 忽略空白文件
 
     def print(self, res):  # 输出图片信息

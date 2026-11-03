@@ -10,7 +10,7 @@ from uuid import uuid4
 from .batch_runtime import Attempt, BatchPage, OutputSession
 from ..mission.mission_ocr import MissionOCR
 from ..utils.utils import allowedFileName
-from ..ocr.output import Output
+from ..ocr.output import Output, ui_output_factories
 
 
 class BatchOCR(BatchPage):
@@ -60,8 +60,7 @@ class BatchOCR(BatchPage):
             "outputFileName": argd["mission.fileName"], "startDatetime": argd["startDatetime"],
             "ignoreBlank": argd["mission.ignoreBlank"], "attemptPrefix": True,
         }
-        factories = [(key[len("mission.filesType."):], Output[key[len("mission.filesType."):]])
-                     for key, enabled in argd.items() if key.startswith("mission.filesType.") and enabled]
+        factories = ui_output_factories(argd, registry=Output)
         return OutputSession(factories, output_argd)
 
     def _take_pending(self):

@@ -9,7 +9,7 @@ import time
 from .batch_runtime import Attempt, BatchPage, OutputSession
 from ..mission.mission_doc import MissionDOC
 from ..utils import utils
-from ..ocr.output import Output
+from ..ocr.output import Output, ui_output_factories
 
 
 class BatchDOC(BatchPage):
@@ -40,7 +40,7 @@ class BatchDOC(BatchPage):
         name = name.replace("%name", os.path.splitext(os.path.basename(path))[0])
         if not utils.allowedFileName(name):
             raise ValueError(f"输出文件名【{name}】含有不允许的字符。")
-        # 所有格式共享完整 attempt UUID，包含首轮，禁止覆盖旧尝试的 TXT/CSV。
+        # 所有格式共享完整 attempt UUID，包含首轮，禁止覆盖旧尝试的 Markdown/CSV。
         if attempt_id:
             name += "." + attempt_id
         output_argd = {
@@ -49,8 +49,7 @@ class BatchDOC(BatchPage):
             "ignoreBlank": argd["mission.ignoreBlank"], "originPath": path, "password": password,
             "attemptPrefix": bool(attempt_id),
         }
-        factories = [(key[len("mission.filesType."):], Output[key[len("mission.filesType."):]])
-                     for key, enabled in argd.items() if key.startswith("mission.filesType.") and enabled]
+        factories = ui_output_factories(argd, registry=Output)
         return OutputSession(factories, output_argd)
 
     def _advance(self):

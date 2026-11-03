@@ -15,31 +15,41 @@ _JXL_SUFFIXES = {".jxl"}
 _JXR_SUFFIXES = {".jxr", ".wdp", ".hdp"}
 
 
-def decode_image_bgr(source):
+def decode_image_bgr(source, *, max_pixels=None, max_side=None):
     """Decode a path or encoded bytes to contiguous BGR uint8 pixels."""
     data, suffix = _read_source(source)
     format_ = _detect_format(data, suffix)
+    def bounded(image):
+        height, width = image.shape[:2]
+        if ((max_pixels is not None and width * height > max_pixels)
+                or (max_side is not None and max(width, height) > max_side)):
+            raise ImageDecodeError("IMAGE_DECODE_BUDGET：图片超过解码像素预算。")
+        return image
     try:
+        if max_pixels is not None and format_ not in {"jxl", "jxr"}:
+            with Image.open(BytesIO(data)) as metadata:
+                if metadata.width * metadata.height > max_pixels or (max_side and max(metadata.size) > max_side):
+                    raise ImageDecodeError("IMAGE_DECODE_BUDGET：图片超过解码像素预算。")
         if format_ == "avif":
             image = _decode_with_pillow(data, require_avif=True)
-            return _to_bgr8(image, "rgb")
+            return _to_bgr8(bounded(image), "rgb")
         if format_ in {"jxl", "jxr"}:
-            image = _decode_with_imagecodecs(data, format_)
-            return _to_bgr8(image, "rgb")
+            image = _decode_with_imagecodecs(data, format_, max_pixels=max_pixels)
+            return _to_bgr8(bounded(image), "rgb")
 
         image = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
         if image is not None:
             image = _apply_exif_orientation(image, data)
-            return _to_bgr8(image, "bgr")
-        return _to_bgr8(_decode_with_pillow(data), "rgb")
+            return _to_bgr8(bounded(image), "bgr")
+        return _to_bgr8(bounded(_decode_with_pillow(data)), "rgb")
     except ImageDecodeError:
         raise
     except Exception as exc:
         raise ImageDecodeError(f"无法解码 {format_.upper()} 图片：{exc}") from exc
 
 
-def decode_image_pil(source):
-    bgr = decode_image_bgr(source)
+def decode_image_pil(source, *, max_pixels=None, max_side=None):
+    bgr = decode_image_bgr(source, max_pixels=max_pixels, max_side=max_side)
     return Image.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB), "RGB")
 
 
@@ -104,7 +114,7 @@ def _decode_with_pillow(data, require_avif=False):
         return np.asarray(image)
 
 
-def _decode_with_imagecodecs(data, format_):
+def _decode_with_imagecodecs(data, format_, *, max_pixels=None):
     try:
         import imagecodecs
     except ImportError as exc:
@@ -112,7 +122,16 @@ def _decode_with_imagecodecs(data, format_):
             "JPEG XL/JPEG XR 解码组件 imagecodecs 未安装或损坏。"
         ) from exc
     decoder = imagecodecs.jpegxl_decode if format_ == "jxl" else imagecodecs.jpegxr_decode
-    image = decoder(data)
+    kwargs = {"index": 0} if format_ == "jxl" else {}
+    if max_pixels is not None:
+        # 锁定 imagecodecs 在创建像素数组前检查 out 缓冲容量；不让超大头部直接分配任意输出。
+        kwargs["out"] = bytearray(min(max_pixels * 8, 256 * 1024 * 1024))
+    try:
+        image = decoder(data, **kwargs)
+    except ValueError as exc:
+        if max_pixels is not None and "buffer" in str(exc).lower():
+            raise ImageDecodeError("IMAGE_DECODE_BUDGET：解码输出超过受限缓冲预算。") from exc
+        raise
     if image is None:
         raise ImageDecodeError(f"{format_.upper()} 解码器未返回图像。")
     return image

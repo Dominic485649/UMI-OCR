@@ -29,15 +29,17 @@ def source_hashes(component):
     else:
         roots = [data / name for name in ("py_src", "qt_res", "i18n")]
         paths = {data / name for name in ("main.py", "about.json", "version.py", "runtime_archive_bootstrap.py")}
-    extensions = {".py", ".qml", ".qm", ".csv", ".json", ".qrc", ".js", ".cpp", ".h", ".in", ".manifest"}
+    extensions = {".py", ".qml", ".qm", ".csv", ".json", ".qrc", ".js", ".cpp", ".h", ".in", ".manifest", ".html", ".css", ".woff", ".woff2"}
     for root in roots:
         paths.update(path for path in root.rglob("*") if path.is_file() and path.suffix.lower() in extensions
-                     and not {"vendor", "models", "__pycache__"}.intersection(path.parts))
+                     and not {"models", "__pycache__"}.intersection(path.parts)
+                     and (component != "cuda" or "vendor" not in path.parts))
     paths.update(ROOT / "build" / relative for relative in (
         "tools/source_snapshot.py", "tools/export_cuda_source.py", "windows/Audit-Package.ps1",
         "windows/Build-Release.ps1", "windows/Build-GpuPlugin.ps1", "sources-windows-cu126.lock.json",
         "windows/runtime_archives_host.json", "windows/runtime_archives_cuda.json",
-        "tools/merge_runtime.py", "tools/runtime_archive_layout.py", "tools/audit_runtime_archives.py"))
+        "tools/merge_runtime.py", "tools/runtime_archive_layout.py", "tools/audit_runtime_archives.py",
+        "qt-runtime-whitelist.json", "windows/Trim-Qt.ps1", "markdown-preview.lock.json"))
     return {path.relative_to(ROOT).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
             for path in sorted(paths) if path.is_file()}
 

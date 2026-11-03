@@ -250,7 +250,7 @@ def world(document=True, real_outputs=False):
         item = World(Path(directory), document, real_outputs)
         manager_name = "MissionDOC" if document else "MissionOCR"
         with patch.object(item.module, manager_name, item.manager):
-            output_patch = patch.object(item.module, "Output", {"txt": item.factory}) if not real_outputs else patch.dict({}, {})
+            output_patch = patch.object(item.module, "Output", {"md": item.factory}) if not real_outputs else patch.dict({}, {})
             with output_patch:
                 item.page = item.module.BatchDOC("批量文档测试", item.mailbox) if document else item.module.BatchOCR("批量图片测试", item.mailbox)
                 item.page._start_worker = item.mailbox.spawn
@@ -470,7 +470,7 @@ def test_reocr_only_one_doc_unique_all_outputs_and_failure_keeps_previous():
         w.complete(1)
         w.done()
         old_artifacts = w.page.getArtifacts(a["path"])
-        assert len(old_artifacts) == 6 and all(item["saved"] and item["openable"] for item in old_artifacts)
+        assert len(old_artifacts) == 4 and all(item["saved"] and item["openable"] for item in old_artifacts)
         old_bytes = {item["path"]: Path(item["path"]).read_bytes() for item in old_artifacts}
         result = w.page.reOCR(a["path"], w.argd)
         assert result["ok"] and not w.page.reOCR(a["path"], w.argd)["ok"]
@@ -489,7 +489,7 @@ def test_reocr_only_one_doc_unique_all_outputs_and_failure_keeps_previous():
         assert all(Path(path).read_bytes() == value for path, value in old_bytes.items())
         assert w.manager.paths() == ["A.pdf", "B.pdf", "A.pdf", "A.pdf"]
         choice = w.page.openArtifact(a["path"])
-        assert not choice["ok"] and len(choice["artifacts"]) == 6
+        assert not choice["ok"] and len(choice["artifacts"]) == 4
         selected = w.page.openArtifact(a["path"], "csv")
         assert selected["ok"] and selected["path"].endswith(".csv")
         assert w.page.getOriginal(a["path"])["exists"]
@@ -757,7 +757,7 @@ def test_review_individual_output_identity_source_and_specified():
             w.until_jobs(1)
             w.complete(0)
             w.done()
-            files = list(w.root.rglob("*.txt"))
+            files = list(w.root.rglob("*.md"))
             assert len(files) == 2, f"同名输入发生覆盖：{directory_type} 只生成 {len(files)} 份。"
             if directory_type == "source":
                 assert {path.parent for path in files} == {first_dir, second_dir}, "未按每个输入的原目录保存。"
@@ -824,7 +824,7 @@ def test_review_individual_receipts_are_linear_and_row_scoped():
             def getArtifacts(self):
                 return list(self.receipts)
         w.argd.update({"mission.filesType.txt": False, "mission.filesType.txtIndividual": True})
-        with patch.object(OCR, "Output", {"txtIndividual": ReceiptOutput}):
+        with patch.object(OCR, "Output", {"mdIndividual": ReceiptOutput}):
             w.page.msnPaths(paths, w.argd)
             w.until_jobs(1)
             w.complete(0)

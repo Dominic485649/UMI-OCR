@@ -1,4 +1,14 @@
-# Umi-OCR CUDA 插件 v3.0.4 启动修复候选
+# Umi-OCR CUDA 插件 v3.0.5
+
+本次独立组件为 CUDA 3.0.5，配套主程序 3.1.2／Host API 2.9；插件声明的兼容范围仍为 `>=2.7,<3.0`，不要求与主程序同版。实际发布状态、附件与校验和见 [CUDA 3.0.5 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.5)，主程序见 [3.1.2 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.1.2)。
+
+本次复用已核验的 3.0.5 运行程序与依赖，不重新编译插件。重新执行了真实导入图片、两页 PDF、可搜索 PDF 输出、模型释放和 CUDA-only 失败路径，模型与运行锁未变；源码、许可和正式归档仍须通过各自门禁。桌面捕获、HDR、混屏／多屏继续 NOT_RUN。
+
+先完整解压主程序，再将 CUDA `.tar.xz` 解压到同一根目录，保留 `LICENSES/plugins/win32_PaddleOCRv6_CUDA/` 的许可与对应源码，不覆盖运行中的程序。PaddleVL 3.1.2 在 [独立 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.1.2) 提供，文档解析默认通过 HTTP 使用；模型权重和第三方组件仍受其各自许可约束。
+
+## 历史 3.0.4 启动修复准备记录
+
+以下日期与下载说明保留为历史，不代表本次组件版本或发布状态。
 
 CUDA 插件仓库为 [Dominic485649/UMI-OCR_plugins](https://github.com/Dominic485649/UMI-OCR_plugins)。本仓库提供 CUDA 源码与必要构建、测试、依赖锁和许可材料。
 

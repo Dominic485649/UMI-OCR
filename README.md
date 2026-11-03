@@ -63,10 +63,10 @@
 
 <div align="center">
   <strong>开源、可批量的离线 OCR 软件</strong><br>
-  <sub>Umi-OCR 3.0.3：面向 Windows 10/11 x64；交付状态见上方日期记录</sub>
+  <sub>Umi-OCR 3.1.2：面向 Windows 10/11 x64；主程序与插件独立版本、分别下载</sub>
 </div><br>
 
-- **公开版本**：基础程序与 CUDA 插件免费公开提供；第三方插件开发与接入开放。
+- **公开组件**：基础程序、CUDA 和 PaddleVL 插件独立交付；第三方插件开发与接入开放。
 - **方便**：解压即用，离线运行，无需网络。
 - **高效**：默认使用离线 PP-OCRv6_medium 高精度流水线，统一识别多语言文字。
 - **灵活**：支持命令行、HTTP接口等外部调用方式。
@@ -102,19 +102,30 @@ PDF 预览、PDF 页面读取、文档 OCR，以及单层和双层可搜索 PDF 
 
 ## 下载发行版
 
-**2026-10-22 本轮重建开始前的下载状态：** 已有 `v3.0.3` 源码标签，但没有 3.0.3 binary Release；以下保留 **3.0.1 Windows x64 正式 Release**（`v3.0.1`）的有效二进制链接，不表示新程序已经发布，也不替换历史 3.0.2 候选身份。基础程序与 CUDA 插件分别下载，CPU 与 PaddleOCR-VL 不包含在公开资产中。
+本次 Windows x64 组件独立维护版本，实际发布状态、附件与校验和以各 Release 页面为准：
 
-- **基础程序**：[主仓库 v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1)。
-- **CUDA 插件**：[插件仓库 v3.0.1 Release](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.1)。
+| 组件 | 版本与下载 | 用途 |
+| --- | --- | --- |
+| 主程序基础包 | [Umi-OCR 3.1.2](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.1.2) | 不内置 OCR 推理插件，先完整解压 |
+| CUDA 插件 | [CUDA 3.0.5](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.5) | PP-OCRv6_medium 图片及 PDF OCR |
+| PaddleVL 插件 | [PaddleVL 3.1.2](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.1.2) | 图片 OCR 与 HTTP 文档解析 |
 
-配套文档：
-- [3.0.1 主程序 Release 说明](docs/RELEASE_3.0.1_DRAFT.md)
-- [CUDA 插件 Release 说明](docs/RELEASE_CUDA_3.0.1_DRAFT.md)
-- [CUDA 插件说明（保留的 3.0.2 准备文档）](docs/README_CUDA_PLUGIN.md)
+主程序 Host API 为 2.9；CUDA 声明 `>=2.7,<3.0`，PaddleVL 声明 `>=2.9,<3.0`。兼容性不以产品版本号相同判断。PaddleVL 文档解析默认通过 HTTP 提供，默认界面不展示文档任务页。
 
-共用运行时为 Python 3.13.16、Qt 6.11.2。归档采用 `.tar.xz`，当前使用标准 LZMA2 默认压缩等级。完整解压基础程序，再将 CUDA 插件解压到主程序根目录；需要兼容 CUDA 12.6 的 NVIDIA 显卡与驱动，不需要系统 CUDA Toolkit。
+共用运行时为 Python 3.13.16、Qt 6.11.2。完整解压基础程序，再将插件 `.tar.xz` 解压到同一主程序根目录，不覆盖运行中的程序。CUDA 需要兼容 CUDA 12.6 的 NVIDIA 显卡与驱动，不需要系统 CUDA Toolkit。
 
-CPU 与 CUDA 的识别效果相同，CPU 速度较慢；PaddleOCR-VL 精度高，速度接近 CPU。CPU 和 PaddleOCR-VL 插件单独收费提供，请联系 QQ 群【AWJ | Umi-OCR】：https://qm.qq.com/q/5XHoXCOU26 。收费用于覆盖开发、测试和维护成本，作者也需要生活并回收持续投入；建议先使用免费的 CUDA 版本，不要求购买收费插件。
+超出附件大小限制的归档以 `.tar.xz.001`、`.002` 等分卷提供。下载全部分卷、`archive-chunks.json` 和恢复脚本，放到同一目录；使用 [恢复脚本](build/windows/Restore-ReleaseArchive.ps1) 指定已解压的主程序目录，验证并恢复完整 `.tar.xz` 后再解压。恢复工具不会覆盖现存文件，也不下载模型。
+
+配套说明：[本次更新](docs/RELEASE_3.1.2_DRAFT.md)、[CUDA 插件](docs/README_CUDA_PLUGIN.md)、[HTTP 接口](docs/http/README.md)和[对应源码](SOURCE-CODE.md)。截图捕获、HDR、混屏／多屏的本次验证保持 NOT_RUN，不以其它验收通过代替。
+
+CPU 及额外交付、开发和支持服务可联系 QQ 群 [【AWJ | Umi-OCR】](https://qm.qq.com/q/5XHoXCOU26)。收费服务不限制接收者依法享有的开源许可权利；模型及第三方组件仍按各自许可和来源声明使用。
+
+<details>
+<summary>历史下载记录：2026-10-22 重建开始前</summary>
+
+当时已有 v3.0.3 源码标签，尚无对应 binary Release；当时保留的是 [主程序 v3.0.1](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.0.1) 与 [CUDA v3.0.1](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.1) 下载链接，公开范围不含 CPU 或 PaddleVL。该记录只描述当时状态，不代替本次组件表。
+
+</details>
 
 ## 开始使用
 

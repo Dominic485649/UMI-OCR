@@ -20,6 +20,7 @@ TOOLS = {
     "staging_smoke.py", "measure_closure.py", "release_gate_inputs.py", "finalize_release.py",
     "record_gpu_startup.py", "gpu_startup_evidence.py", "prepare_products.py",
     "merge_runtime.py", "runtime_archive_layout.py", "audit_runtime_archives.py", "measure_runtime_layout.py",
+    "chunked_files.py", "release312_directed_evidence.py",
 }
 NATIVE_SOURCES = {
     "build/windows/CudaWorker/CMakeLists.txt",
@@ -35,6 +36,7 @@ DOCS = {
     "RELEASE_3.0.3_DRAFT.md", "RELEASE_CUDA_3.0.3_DRAFT.md",
     "RELEASE_3.0.3_ACCEPTANCE.md", "RELEASE_3.0.3_REVIEW.md",
     "RELEASE_CUDA_3.0.4_DRAFT.md", "RELEASE_CUDA_3.0.4_REVIEW.md",
+    "RELEASE_CUDA_3.0.5_DRAFT.md",
 }
 
 
@@ -54,7 +56,7 @@ def selected_sources(repo: Path) -> list[Path]:
             relative.parent == Path("build/tools") and relative.name in TOOLS or
             name.startswith("docs/") and relative.name in DOCS or
             relative.parent == Path("tests") and relative.name in {
-                "test_cuda_worker_client.py", "test_ocr_workflows.py", "test_public_payload.py",
+                "test_cuda_worker_client.py", "test_cuda_warmup.py", "test_ocr_workflows.py", "test_public_payload.py",
                 "test_release_evidence_status.py", "test_release_gate_inputs.py",
                 "test_optional_model_strip.py", "test_cuda_overlay.py", "test_finalize_release.py",
                 "test_finalize_path_guards.py", "test_cuda_native_launcher.py",
@@ -62,6 +64,7 @@ def selected_sources(repo: Path) -> list[Path]:
                 "test_gpu_lock.py", "test_local_build_tools.py", "test_release_metadata.py",
                 "test_cuda_image_tiles.py", "test_runtime_archives.py", "test_runtime_archive_audit.py",
                 "test_runtime_archive_bootstrap.py", "test_runtime_archive_evidence.py",
+                "test_chunked_files.py", "test_release312_directed_evidence.py", "test_release312_native.py", "test_windows_tray.py",
             }):
             selected.append(relative)
     required = {"COPYING", "LICENSE", PLUGIN + "umi-plugin.json", PLUGIN + "api.py", PLUGIN + "worker.py",

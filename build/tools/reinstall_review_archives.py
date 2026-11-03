@@ -103,9 +103,13 @@ def verify_install_capacity(records, target, reserve_bytes=1024**3):
             raise ctypes.WinError(ctypes.get_last_error())
         cluster = max(cluster, values[0].value * values[1].value)
     required = 0
-    for _record_path, record, _archive in records.values():
+    for component, (_record_path, record, _archive) in records.items():
         source = layout.plain_path(record["inputRoot"])
-        source.relative_to(ROOT / "build")
+        allowed = [ROOT / "build"]
+        if component == "vl":
+            allowed.append(ROOT.parent / "Umi-OCR-Plugin/build")
+        if not any(source.is_relative_to(boundary) for boundary in allowed):
+            raise ValueError("容量输入不在所选组件的已授权项目 build 内")
         files = layout.tree_files(source)
         if set(files) != set(record["payload"]):
             raise ValueError("容量估计需要仍保留的完整打包输入，不采用未知或已改变目录")

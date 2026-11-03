@@ -16,7 +16,7 @@ from umi_log import logger
 from call_func import CallFunc
 from bottle import request, static_file, HTTPError
 from .ocr_server import _apply_preset_options, get_ocr_options
-from ..ocr.output import Output
+from ..ocr.output import output_factories
 from ..mission.mission_doc import MissionDOC, DocSuf
 from ..utils.utils import initConfigDict
 from ..ocr.output.tools import getDataText
@@ -209,7 +209,7 @@ class _DocUnit:
         self,
         base_url,  # 下载基础url
         file_types=["pdfLayered"],  # 输出文件类型，可选：
-        # txt, txtPlain, jsonl, csv, pdfLayered, pdfOneLayer
+        # md, txt/txtPlain（Markdown .md.txt 兼容别名）, jsonl, csv, pdfLayered, pdfOneLayer
         ignore_blank=True,  # 忽略空白页数
     ):
         if not self.is_done:
@@ -245,8 +245,8 @@ class _DocUnit:
         # 创建输出器
         output = []
         try:
-            for f in file_types:
-                output.append(Output[f](outputArgd))
+            for _key, factory in output_factories(file_types, compatibility=True):
+                output.append(factory(outputArgd))
         except Exception as e:
             return {"code": 203, "data": tr('初始化输出器失败。{e}', e=e)}
 
@@ -569,7 +569,7 @@ def init(UmiWeb):
             return {"code": 104, "data": tr('is_data、is_unread 必须为布尔值，format 必须为 dict 或 text。')}
         return doc_unit.get_result(is_data, format, is_unread)
 
-    '\n    获取文件，方法：POST\n    json参数：\n    "id"="",  # 任务ID\n    "file_types"=["pdfLayered"],  # 输出文件类型，可选：\n    # ["txt", "txtPlain", "jsonl", "csv", "pdfLayered", "pdfOneLayer"]\n    "ignore_blank"=True,  # 忽略空白页数\n\n    返回值： {}\n    '
+    '\n    获取文件，方法：POST\n    json参数：\n    "id"="",  # 任务ID\n    "file_types"=["pdfLayered"],  # 输出文件类型，可选：\n    # ["md", "txt", "txtPlain", "jsonl", "csv", "pdfLayered", "pdfOneLayer"]\n    "ignore_blank"=True,  # 忽略空白页数\n\n    返回值： {}\n    '
 
     @UmiWeb.route("/api/doc/download", method="POST")
     def _download_build():

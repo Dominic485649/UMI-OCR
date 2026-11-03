@@ -15,6 +15,19 @@ $pysideRoot = (Resolve-Path -LiteralPath (Join-Path $sitePackages "PySide6")).Pa
 $qmlRoot = (Resolve-Path -LiteralPath (Join-Path $pysideRoot "qml")).Path
 $pluginsRoot = (Resolve-Path -LiteralPath (Join-Path $pysideRoot "plugins")).Path
 $config = Get-Content -Raw -LiteralPath $WhitelistPath | ConvertFrom-Json
+# 裁剪只操作尚未运行的本项目构建树，不修改依赖种子或固定安装。
+if (-not $sitePackages.StartsWith((Join-Path $RepoRoot "build") + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+    throw "Qt trimming must stay in this project's build tree."
+}
+$buildDataRoot = Split-Path -Parent $sitePackages
+$active = @(Get-CimInstance Win32_Process | Where-Object {
+    $_.ProcessId -ne $PID -and (
+        ($_.ExecutablePath -and $_.ExecutablePath.StartsWith($buildDataRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) -or
+        ($_.CommandLine -and $_.CommandLine.Replace('/', '\').IndexOf($buildDataRoot, [StringComparison]::OrdinalIgnoreCase) -ge 0))
+})
+if ($active.Count) { throw "Qt build tree is in use; close its processes normally before trimming." }
+$links = @(Get-ChildItem -Recurse -Force -LiteralPath $pysideRoot | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint })
+if ($links.Count) { throw "Qt build tree contains links/junctions; refusing trim." }
 $removedFiles = 0
 $removedBytes = [int64]0
 
@@ -110,9 +123,28 @@ $translations = Join-Path $pysideRoot "translations"
 if (Test-Path -LiteralPath $translations) {
     $localePattern = ($config.translationLocales | ForEach-Object { [regex]::Escape([string]$_) }) -join "|"
     Get-ChildItem -File -LiteralPath $translations | ForEach-Object {
-        if ($_.Name -notmatch "^(qt|qtbase|qtdeclarative)_($localePattern)\.qm$") {
+        if ($_.Name -notmatch "^(qt|qtbase|qtdeclarative|qtwebengine)_($localePattern)\.qm$") {
             Remove-PySideItem $_.FullName
         }
+    }
+}
+
+$resourcesRoot = Join-Path $pysideRoot "resources"
+foreach ($name in $config.webEngineResources) {
+    if (-not (Test-Path -LiteralPath (Join-Path $resourcesRoot $name))) { throw "Required WebEngine resource is missing: $name" }
+}
+if (Test-Path -LiteralPath $resourcesRoot) {
+    Get-ChildItem -File -LiteralPath $resourcesRoot | ForEach-Object {
+        if ($_.Name -notin $config.webEngineResources) { Remove-PySideItem $_.FullName }
+    }
+}
+$webLocales = Join-Path $translations "qtwebengine_locales"
+foreach ($locale in $config.webEngineLocales) {
+    if (-not (Test-Path -LiteralPath (Join-Path $webLocales "$locale.pak"))) { throw "Required WebEngine locale is missing: $locale" }
+}
+if (Test-Path -LiteralPath $webLocales) {
+    Get-ChildItem -File -LiteralPath $webLocales | ForEach-Object {
+        if ($_.BaseName -notin $config.webEngineLocales) { Remove-PySideItem $_.FullName }
     }
 }
 
@@ -122,7 +154,14 @@ Get-ChildItem -File -LiteralPath $pysideRoot -Filter "*.pyd" | ForEach-Object {
     if (-not $allowedExtensions.Contains($_.Name)) { Remove-PySideItem $_.FullName }
 }
 Get-ChildItem -File -LiteralPath $pysideRoot -Filter "*.pyi" | ForEach-Object { Remove-PySideItem $_.FullName }
-Get-ChildItem -File -LiteralPath $pysideRoot -Filter "*.exe" | ForEach-Object { Remove-PySideItem $_.FullName }
+$allowedExecutables = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+foreach ($name in $config.executables) {
+    [void]$allowedExecutables.Add([string]$name)
+    if (-not (Test-Path -LiteralPath (Join-Path $pysideRoot $name))) { throw "Required Qt executable is missing: $name" }
+}
+Get-ChildItem -File -LiteralPath $pysideRoot -Filter "*.exe" | ForEach-Object {
+    if (-not $allowedExecutables.Contains($_.Name)) { Remove-PySideItem $_.FullName }
+}
 
 $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path -LiteralPath $vswhere)) { throw "vswhere.exe not found." }
@@ -143,6 +182,7 @@ foreach ($name in $config.pythonExtensions) {
     if (-not (Test-Path -LiteralPath $path)) { throw "Required PySide6 extension is missing: $path" }
     $dependencyRoots.Enqueue($path)
 }
+foreach ($name in $config.executables) { $dependencyRoots.Enqueue((Join-Path $pysideRoot ([string]$name))) }
 Get-ChildItem -Recurse -File -LiteralPath $qmlRoot,$pluginsRoot -Filter "*.dll" |
     ForEach-Object { $dependencyRoots.Enqueue($_.FullName) }
 
@@ -172,6 +212,9 @@ $manifest = [ordered]@{
     scanner = "PySide6/qmlimportscanner.exe"
     qmlModules = @($allowedQml | Sort-Object)
     pythonExtensions = @($config.pythonExtensions)
+    executables = @($config.executables)
+    webEngineResources = @($config.webEngineResources)
+    webEngineLocales = @($config.webEngineLocales)
     plugins = @($config.pluginFiles)
     rootDlls = @($keptRootDlls | Sort-Object)
     removedFiles = $removedFiles

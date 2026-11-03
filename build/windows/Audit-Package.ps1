@@ -202,10 +202,9 @@ if ($Kind -eq "base") {
         if ($relative -in @("source-snapshot.json", "source-provenance.json")) { continue }
         if ($textExtensions -notcontains $file.Extension.ToLower()) { continue }
         $contents = [string](Get-Content -Raw -LiteralPath $file.FullName)
-        if ($relative -eq "UmiOCR-data/py_src/plugins_controller/manifest.py") {
-            # The host names this exact old id to reject its incompatible
-            # implementation.  Exempt only that standalone set-entry line;
-            # actual imports, service paths and model binaries remain banned.
+        if ($relative -in @("UmiOCR-data/py_src/plugins_controller/manifest.py", "UmiOCR-data/py_src/utils/ui_unlock.py")) {
+            # 精确宿主模块可声明该插件ID用于迁移拒绝或UI能力路由。
+            # 只豁免独立声明行；插件实现、导入、服务和模型路径仍拒绝。
             $contents = ($contents -split "`r?`n" | Where-Object {
                 $_ -notmatch '^\s*["'']win32_PaddleOCRVL_1_6["''],?\s*$'
             }) -join "`n"
@@ -308,6 +307,14 @@ function Invoke-BaseAudit {
         "UmiOCR-data\qt_res\qml\ApiManager\OcrManager.qml",
         "UmiOCR-data\qt_res\qml\ApiManager\DocumentManager.qml",
         # Qt 运行时
+        "UmiOCR-data\py_src\document\markdown_preview.py",
+        "UmiOCR-data\qt_res\qml\Widgets\DocumentMarkdownPreview.qml",
+        "UmiOCR-data\qt_res\preview\index.html",
+        "UmiOCR-data\qt_res\preview\render.js",
+        "UmiOCR-data\qt_res\preview\reader.css",
+        "UmiOCR-data\site-packages\PySide6\QtWebEngineCore.pyd",
+        "UmiOCR-data\site-packages\PySide6\QtWebEngineQuick.pyd",
+        "UmiOCR-data\site-packages\PySide6\QtWebEngineProcess.exe",
         "UmiOCR-data\site-packages\PySide6\QtWidgets.pyd",
         "UmiOCR-data\site-packages\PySide6\Qt6Widgets.dll",
         "UmiOCR-data\site-packages\PySide6\qml\Qt\labs\platform\qmldir",
@@ -317,6 +324,31 @@ function Invoke-BaseAudit {
         "UmiOCR-data\site-packages\PySide6\plugins\styles\qmodernwindowsstyle.dll"
     )
     foreach ($relativePath in $requiredRuntime) { RequireFile $relativePath "基础包运行时闭包文件" }
+    $previewManifest = Join-Path $root "LICENSES/markdown-preview/manifest.json"
+    if (Test-Path -LiteralPath $previewManifest -PathType Leaf) {
+        try {
+            $preview = Get-Content -Raw -LiteralPath $previewManifest | ConvertFrom-Json
+            foreach ($package in $preview.packages) {
+                foreach ($entry in $package.files.PSObject.Properties) {
+                    $relative = $entry.Name
+                    if ($relative -notmatch '^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$' -or $relative.Split('/') -contains '..') {
+                        Fail "离线预览清单路径无效: $relative"
+                        continue
+                    }
+                    foreach ($prefix in @("UmiOCR-data/qt_res/preview/vendor/", "source/UmiOCR-data/qt_res/preview/vendor/")) {
+                        $path = Join-Path $root ($prefix + $relative)
+                        RequireFile ($prefix + $relative) "离线预览运行资源及对应源码"
+                        if (Test-Path -LiteralPath $path -PathType Leaf) {
+                            $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+                            if ($hash -ne $entry.Value.sha256 -or (Get-Item -LiteralPath $path).Length -ne $entry.Value.bytes) {
+                                Fail "离线预览资源与锁定清单不一致: $prefix$relative"
+                            }
+                        }
+                    }
+                }
+            }
+        } catch { Fail "离线预览资源清单核验失败: $_" }
+    } else { Fail "缺少离线预览资源清单" }
 
     # 基础包必需的第三方发行版
     # 与 py_src 的实际 import 集合一一对应，见 build/tools/measure_closure.py 的扫描结果。
@@ -347,7 +379,10 @@ function Invoke-BaseAudit {
         "LICENSES\RELEASE_EVIDENCE.md",
         "LICENSES\LGPL-2.1.txt",
         "LICENSES\LGPL-3.0.txt",
-        "LICENSES\GPL-3.0.txt"
+        "LICENSES\GPL-3.0.txt",
+        "LICENSES\markdown-preview\manifest.json",
+        "LICENSES\QtWebEngine\manifest.json",
+        "LICENSES\QtWebEngine\third-party-notices.zip"
     )
     if (-not $LocalCandidate) {
         $baseLicenseFiles += @(
@@ -403,6 +438,15 @@ function Invoke-BaseAudit {
             if (-not (Test-Path -LiteralPath (Join-Path $pysideRoot (Join-Path "qml" (Join-Path $relative "qmldir"))) -PathType Leaf)) {
                 Fail "Qt QML 模块缺失: $relative"
             }
+        }
+        foreach ($name in @($qtManifest.executables)) {
+            if (-not (Test-Path -LiteralPath (Join-Path $pysideRoot $name) -PathType Leaf)) { Fail "Qt 可执行文件缺失: $name" }
+        }
+        foreach ($name in @($qtManifest.webEngineResources)) {
+            if (-not (Test-Path -LiteralPath (Join-Path $pysideRoot "resources/$name") -PathType Leaf)) { Fail "WebEngine 资源缺失: $name" }
+        }
+        foreach ($locale in @($qtManifest.webEngineLocales)) {
+            if (-not (Test-Path -LiteralPath (Join-Path $pysideRoot "translations/qtwebengine_locales/$locale.pak") -PathType Leaf)) { Fail "WebEngine locale 缺失: $locale" }
         }
         foreach ($name in @($qtManifest.rootDlls)) {
             if (-not (Test-Path -LiteralPath (Join-Path $pysideRoot $name) -PathType Leaf)) {

@@ -610,6 +610,34 @@
         <source>其它</source>
         <translation>Другие</translation>
     </message>
+
+    <message><source>Markdown 格式</source><translation>Формат Markdown</translation></message>
+
+    <message><source>保存识别内容及原始页信息，保留公式与代码的 Markdown 标记</source><translation>Сохранять распознанный текст и сведения о страницах, включая формулы и код Markdown</translation></message>
+
+    <message><source>文件名中 %date 的日期格式。支持插入以下占位符：
+%Y 年、 %m 月、 %d 日、 %H 小时、&#32;
+%M 分钟、 %S 秒 、 %unix 时间戳&#32;
+举例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</source><translation>Формат даты для %date в имени файла. Поддерживается вставка следующих заполнителей:
+%Y год, %m месяц, %d день, %H час,
+%M минут, %S секунд, временная метка %unix
+Пример: %Y год %m месяц %d день_%H-%M
+Сгенерируется: 1 сентября 2023 г._12-13.md</translation></message>
+
+    <message><source>无需填写拓展名。支持插入以下占位符：
+%date 日期时间
+%name 原文档名
+%range 识别页数范围。只有识别页数小于总页数时才会显示。
+举例：[OCR]_%name%range_%date
+生成：[OCR]_文档A(p2-10)_20230901_1213.md
+添加占位符可以避免旧文件被新文件覆盖。</source><translation>Нет необходимости заполнять расширение. Поддерживаются следующие заполнители:
+%date datetime
+%name Исходное название документа
+%range определяет диапазон страниц. Он отображается только в том случае, если количество распознанных страниц меньше общего количества страниц.
+Например: [OCR]_%name%range_%date
+Сгенерировано: [OCR]_Document A(p2-10)_20230901_1213.md
+Добавление заполнителей предотвращает перезапись старых файлов новыми.</translation></message>
 </context>
 <context>
     <name>BatchOCR</name>
@@ -930,6 +958,36 @@
         <source>其它</source>
         <translation>Другие</translation>
     </message>
+
+    <message><source>Markdown 单独文件</source><translation>Отдельные файлы Markdown</translation></message>
+
+    <message><source>Markdown 图文格式</source><translation>Markdown с изображениями</translation></message>
+
+    <message><source>为每张图片单独生成 Markdown 文件</source><translation>Создавать отдельный файл Markdown для каждого изображения</translation></message>
+
+    <message><source>保留识别内容、公式与代码的 Markdown 标记，可用 Markdown 阅读器浏览</source><translation>Сохранять текст, формулы и код в формате Markdown для просмотра в Markdown-редакторе</translation></message>
+
+    <message><source>文件名中 %date 的日期格式。支持插入以下占位符：
+%Y 年、 %m 月、 %d 日、 %H 小时、&#32;
+%M 分钟、 %S 秒 、 %unix 时间戳&#32;
+举例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</source><translation>Формат даты для %date в имени файла. Поддерживается вставка следующих заполнителей:
+%Y год, %m месяц, %d день, %H час,
+%M минут, %S секунд, временная метка %unix
+Пример: %Y год %m месяц %d день_%H-%M
+Сгенерируется: 1 сентября 2023 г._12-13.md</translation></message>
+
+    <message><source>无需填写拓展名。支持插入以下占位符：
+%date 日期时间
+%name 原文件夹名/文件名
+举例：[OCR]_%name_%date
+生成：[OCR]_我的图片_2023-09-01_12-13.md
+添加占位符可以避免旧文件被新文件覆盖。</source><translation>Расширение указывать не нужно. Поддерживаются следующие подстановки:
+%date Дата и время
+%name Исходное имя папки/файла
+Пример: [OCR]_%name_%date
+Результат: [OCR]_МоёИзображение_2023-09-01_12-13.md
+Подстановки позволяют избежать перезаписи старых файлов новыми.</translation></message>
 </context>
 <context>
     <name>Configs</name>
@@ -1708,6 +1766,18 @@
         <source>终止文字识别任务</source>
         <translation>Остановить задачи OCR</translation>
     </message>
+
+    <message><source>当前使用 %1，任务结束后切换到 %2</source><translation>Используется %1; после завершения задач будет выбран %2</translation></message>
+
+    <message><source>插件刷新失败</source><translation>Не удалось обновить плагины</translation></message>
+
+    <message><source>未知错误</source><translation>Неизвестная ошибка</translation></message>
+
+    <message><source>模型切换失败：%1</source><translation>Не удалось переключить модель: %1</translation></message>
+
+    <message><source>模型配置应用失败</source><translation>Не удалось применить настройки модели</translation></message>
+
+    <message><source>正在等待并应用模型设置…</source><translation>Ожидание применения настроек модели…</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>
@@ -2996,6 +3066,8 @@
         <source>右键菜单</source>
         <translation>Меню правой кнопки мыши</translation>
     </message>
+
+    <message><source>此模型不提供识别置信度</source><translation>Эта модель не предоставляет оценку уверенности распознавания</translation></message>
 </context>
 <context>
     <name>ScreenshotManager</name>
@@ -3683,5 +3755,34 @@
             <source>页面预览</source>
             <translation>Предпросмотр страницы</translation>
         </message>
-    </context>
+
+    <message><source>Markdown 源码</source><translation>Исходный Markdown</translation></message>
+
+    <message><source>文档部分完成：%1 页，%2 个版面块；详情见结果提示。</source><translation>Документ обработан частично: страниц — %1, блоков — %2. Подробности в уведомлении о результате.</translation></message>
+
+    <message><source>预览</source><translation>Предпросмотр</translation></message>
+</context>
+<context><name>DocumentMarkdownPreview</name>
+    <message><source>打开网页</source><translation>Открыть веб-страницу</translation></message>
+
+    <message><source>打开链接</source><translation>Открыть ссылку</translation></message>
+
+    <message><source>文档超过 16 MiB 预览预算，请查看 Markdown 源码或导出文件。</source><translation>Документ превышает предел предпросмотра 16 МиБ. Откройте исходный Markdown или экспортируйте файл.</translation></message>
+
+    <message><source>此段内容较长，按源码显示以保持预览响应。</source><translation>Этот блок слишком длинный и показан как исходный текст, чтобы предпросмотр оставался отзывчивым.</translation></message>
+
+    <message><source>离线预览加载失败，请切换到 Markdown 源码查看结果。</source><translation>Не удалось загрузить автономный предпросмотр. Перейдите к исходному Markdown.</translation></message>
+
+    <message><source>解析结果将在这里渲染。可切换到 Markdown 源码查看原始内容。</source><translation>Здесь появятся результаты анализа. Исходное содержимое доступно на вкладке Markdown.</translation></message>
+
+    <message><source>部分图片未获授权或超出预览预算，已阻止加载。原始 Markdown 未改变。</source><translation>Некоторые изображения заблокированы: доступ не разрешён или превышен предел предпросмотра. Исходный Markdown не изменён.</translation></message>
+
+    <message><source>预览进程已退出（%1），请切换页签重试或查看 Markdown 源码。</source><translation>Процесс предпросмотра завершён (%1). Переключите вкладку для повтора или откройте исходный Markdown.</translation></message>
+
+    <message><source>放大</source><translation>Увеличить</translation></message>
+
+    <message><source>缩小</source><translation>Уменьшить</translation></message>
+
+    <message><source>重置缩放</source><translation>Сбросить масштаб</translation></message>
+</context>
 </TS>

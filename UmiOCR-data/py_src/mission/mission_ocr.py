@@ -20,23 +20,10 @@ from ..ocr.api import getApiOcr, getLocalOptions
 from ..ocr.score import averageScore
 from ..utils.utils import argdIntConvert
 
-# 合法文件后缀
-ImageSuf = [
-    ".jpg",
-    ".jpe",
-    ".jpeg",
-    ".jfif",
-    ".png",
-    ".avif",
-    ".webp",
-    ".jxl",
-    ".jxr",
-    ".wdp",
-    ".hdp",
-    ".bmp",
-    ".tif",
-    ".tiff",
-]
+from ..utils.image_formats import IMAGE_SUFFIXES
+
+# 保留旧导入名称，格式只维护一份。
+ImageSuf = list(IMAGE_SUFFIXES)
 
 
 class __MissionOcrClass(ManagedMission):
@@ -169,24 +156,26 @@ class __MissionOcrClass(ManagedMission):
 
     def setApi(self, apiKey, info):  # 设置api
         # 成功返回 [Success] ，失败返回 [Error] 开头的字符串
-        if self.getMissionListsLength() or (self._global_manager and BackendRuntime.busy()):
+        if self.getMissionListsLength() or (self._global_manager and BackendRuntime.configuration_busy()):
             return tr('[Error] 当前任务尚未完成，请稍后切换。')
         if not apiKey:
             self.shutdown()
             self._api = None
             self._apiKey = ""
             return "[Success]"
-        self._apiKey = apiKey
-        info = self._dictShortKey(info)
-        # 如果api对象已启动，则先停止
-        if self._api:
-            self._api.stop()
-        # 句柄按能力/插件复用真实 API，HTTP 不再创建重复 CUDA worker。
         from ..ocr.api import getApiKeys
         if apiKey not in getApiKeys():
-            self._apiKey = ""
-            self._api = None
             return f'[Error] "{apiKey}" is not a registered OCR capability.'
+        previous_key = self._apiKey
+        self._apiKey = apiKey
+        try:
+            info = self._dictShortKey(info)
+            if self._api:
+                self._api.stop()
+        except Exception:
+            self._apiKey = previous_key
+            raise
+        # 句柄按能力/插件复用真实 API，HTTP 不再创建重复 CUDA worker。
         if self._global_manager:
             BackendRuntime.configure("ocr", apiKey, info)
         res = BackendRuntime.handle("ocr", apiKey, info, getApiOcr)

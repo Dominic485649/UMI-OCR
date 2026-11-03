@@ -5,6 +5,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import "../"
+import "../Sequence.js" as Sequence
 
 Item {
     ListModel { id: resultsModel } // OCR结果模型
@@ -17,13 +18,7 @@ Item {
 
     // 警告只用于状态栏、提示和通知，绝不混入 OCR 正文或复制内容。
     function resultNotice(res) {
-        const warnings = []
-        const source = Array.isArray(res.warnings) ? res.warnings : (res.warnings ? [res.warnings] : [])
-        for(const warning of source) {
-            if(warning === undefined || warning === null) continue
-            const text = String(typeof warning === "object" ? (warning.message || JSON.stringify(warning)) : warning).trim()
-            if(text && warnings.indexOf(text) < 0) warnings.push(text)
-        }
+        const warnings = Sequence.warnings(res.warnings)
         const partial = res.partial === true && (res.code === 100 || res.code === 101)
         return {
             partial: partial,
@@ -81,9 +76,12 @@ Item {
                 res.title += " | " + (execution.device || qsTr("设备未确认"))
                     + " · " + (execution.model || execution.pluginId || qsTr("模型未确认"))
             }
-            if(typeof res.score === "number" && isFinite(res.score) && res.score > 0) {
+            if(typeof res.score === "number" && isFinite(res.score) && res.score >= 0) {
                 const t2 = res.score.toFixed(2)
                 res.title += " | "+qsTr("置信度 %1").arg(t2)
+            }
+            else if(res.confidenceSupported === false) {
+                res.title += " | " + qsTr("此模型不提供识别置信度")
             }
         }
         // 添加到列表模型

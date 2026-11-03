@@ -1,4 +1,10 @@
-# Umi-OCR 3.0.3 Merged Fixes and Delivery Notes
+# Umi-OCR 3.1.2
+
+Current Windows x64 components: [application 3.1.2](https://github.com/Dominic485649/UMI-OCR/releases/tag/v3.1.2), [CUDA 3.0.5](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.0.5) and [PaddleVL 3.1.2](https://github.com/Dominic485649/UMI-OCR_plugins/releases/tag/v3.1.2). Components are versioned independently; check each Release page for its actual publication status, assets, checksums and archive-volume instructions. PaddleVL document parsing is provided through HTTP by default. Capture/HDR/mixed-monitor validation remains NOT_RUN.
+
+The dated 3.0.3 records below are historical, not the current download status. Current installation and component details are listed in the [main README](README.md#下载发行版).
+
+## Historical 3.0.3 Merged Fixes and Delivery Notes
 
 Main repository: https://github.com/Dominic485649/UMI-OCR
 

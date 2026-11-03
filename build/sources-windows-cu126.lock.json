@@ -15,6 +15,16 @@
   ],
   "thirdPartySources": [
     {
+      "name": "qtwebengine-everywhere-src-6.11.2.tar.xz",
+      "url": "https://download.qt.io/official_releases/qt/6.11/6.11.2/submodules/qtwebengine-everywhere-src-6.11.2.tar.xz",
+      "size": 580351104,
+      "sha256": "6101c1aa00ff933d1b65ee5d167f76e8d71b9ac5b378b0111277723ebda7c163",
+      "component": "QtWebEngine",
+      "version": "6.11.2",
+      "license": "LGPL-3.0-or-later OR GPL-2.0-or-later OR commercial; Chromium third-party terms",
+      "checksum_evidence": "SHA-256 Digest header from the official download.qt.io response, checked 2026-11-03"
+    },
+    {
       "name": "pymupdf-1.28.0.tar.gz",
       "url": "https://files.pythonhosted.org/packages/8e/e9/6d6c5d6c0a3551bffd47681a6240caf941727f195b45593cf20ab36f018f/pymupdf-1.28.0.tar.gz",
       "size": 87637751,

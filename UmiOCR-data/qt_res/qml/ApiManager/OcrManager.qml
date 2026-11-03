@@ -77,13 +77,6 @@ Item {
             "title": qsTr("识别模型"),
             "toolTip": qsTr("截图、批量图片和批量文档共用此模型选择；各页面的识别参数分别保存。"),
             "optionsList": [],
-            "onChanged": (value, old)=>{
-                if(old === undefined) return
-                if(qmlapp.globalConfigs.backendsBusy() || applying || qmlapp.globalConfigs.applyPhase !== 0) {
-                    qmlapp.popup.simple(qsTr("无法切换模型"), qsTr("任务正在运行或模型配置正在应用，请稍后重试。"))
-                    return true
-                }
-            },
         },
     }
 
@@ -91,67 +84,29 @@ Item {
 
     // ========================= 【外部接口】 =========================
 
-    // 应用更改，showSuccess=false时不显示成功提示
+    // 配置应用统一交给全局串行状态机，运行期间只记录目标。
     function applyConfigs(showSuccess=true) {
+        qmlapp.globalConfigs.requestBackendApply()
+    }
 
+    function backendSpec() {
+        const nowKey = Object.keys(localOptions).length ? qmlapp.globalConfigs.getValue("ocr.api") : ""
+        if(nowKey && !localOptions.hasOwnProperty(nowKey))
+            throw new Error(qsTr("OCR API 列表中不存在%1").arg(nowKey))
+        const info = {}
+        const all = qmlapp.globalConfigs.getValueDict()
+        for(const key in all)
+            if(nowKey && key.startsWith("ocr." + nowKey + ".")) info[key] = all[key]
+        const services = qmlapp.globalConfigs.getPluginServiceValues(nowKey, serviceRefs[nowKey] || [])
+        for(const key in services) info[key] = services[key]
+        return {apiKey: nowKey, info: info}
+    }
 
-        // 验证
-        if(Object.keys(localOptions).length === 0){
-            qmlapp.popup.message("", noBackendHint(), "error")
-            return
-        }
-
-        // 获取当前全局 apiKey ，验证在本字典中的存在性
-        const nowKey = qmlapp.globalConfigs.getValue("ocr.api")
-        if(!localOptions.hasOwnProperty(nowKey)) {
-            const s = qsTr("OCR API 列表中不存在%1").arg(nowKey)
-            qmlapp.popup.message("", s, "error")
-            return
-        }
-        // 验证 py 是否有执行中的任务
-        const lengths = qmlapp.msnConnector.callPy("ocr", "getMissionListsLength", [])
-        const msnLen = Object.keys(lengths).length
-        if(msnLen > 0) {
-            qmlapp.globalConfigs.requestBackendApply()
-            return
-        }
-        // 从全局配置中，提取出目前apiKey对应的配置项
-        const allDict = qmlapp.globalConfigs.getValueDict()
-        const ocrk = "ocr."+nowKey
-        const info = {} // 汇聚为配置信息
-        for(let k in allDict) { // 从全局配置中，提取以该api开头的键/值
-            if(k.startsWith(ocrk)) {
-                info[k] = allDict[k]
-            }
-        }
-        const serviceInfo = qmlapp.globalConfigs.getPluginServiceValues(
-            nowKey, serviceRefs[nowKey] || [])
-        for(let k in serviceInfo)
-            info[k] = serviceInfo[k]
-        // 将配置信息发送给py，然后验证操作是否成功
-        applying = true
-        qmlapp.msnConnector.callPy("ocr", "deferAdmissions", [true])
-        applyCallback = function(msg) {
-        msg = String(msg)
-
-        // 成功，写入记录
-        if(msg.startsWith("[Success]")) {
-            apiKey = nowKey
-            refreshDeployedPages()
-            scheduleWarmup()
-            refreshModelState(false)
-            if(showSuccess) { // 显示弹窗
-                qmlapp.popup.simple(qsTr("文字识别接口应用成功"), qsTr("当前API为【%1】").arg(nowKey))
-            }
-        }
-        else {
-            qmlapp.popup.message(qsTr("文字识别接口应用失败"), msg, "error")
-        }
-        applying = false
-        if(!qmlapp.globalConfigs.backendApplyPending && qmlapp.globalConfigs.applyPhase === 0)
-            qmlapp.msnConnector.callPy("ocr", "deferAdmissions", [false])
-        }
-        qmlapp.msnConnector.requestCall("ocr", "setApi", [nowKey, info])
+    function backendApplied(spec) {
+        apiKey = spec.apiKey
+        refreshDeployedPages()
+        if(!apiKey) warmupTimer.stop()
+        refreshModelState(false)
     }
 
     // 终止所有任务
@@ -246,7 +201,7 @@ Item {
         const source = page.valueSources.ocr
         if(source) items.push(...taskParameterItems(source))
         if(items.length)
-            layout.unshift({key: "ocr", origin: {title: qsTr("文字识别"), type: "group"}, items: items})
+            layout.unshift({key: "ocr", origin: {title: (typeof global.backendSwitchMessage === "function" ? global.backendSwitchMessage() : "") || qsTr("文字识别"), type: "group"}, items: items})
         return layout
     }
 
@@ -330,17 +285,7 @@ Item {
     }
 
     // 初始化2：应用更改
-    function init2() {
-        if(Object.keys(localOptions).length === 0) {
-            apiKey = ""
-            refreshDeployedPages()
-            warmupTimer.stop()
-            qmlapp.msnConnector.callPy("ocr", "setApi", ["", {}])
-            return
-        }
-        applyConfigs(false)
-        console.log("OcrManager 初始化OCR管理器完毕！")
-    }
+    function init2() { applyConfigs(false) }
 
     function buildWarmupInfo() {
         if(!apiKey || !localOptions.hasOwnProperty(apiKey))

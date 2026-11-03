@@ -41,6 +41,11 @@ class ManagedMission(Mission):
             finally:
                 self._msnMutex.unlock()
 
+    def _enqueueMissionLocked(self, info, items):
+        if BackendRuntime.admissions_deferred():
+            self._deferAdmissions = True
+        return super()._enqueueMissionLocked(info, items)
+
     def _reserveMission(self, info):
         try:
             BackendRuntime.reserve(info["msnID"], getattr(self, "_apiKey", ""))
@@ -49,15 +54,17 @@ class ManagedMission(Mission):
         return ""
 
     def _callMissionEnd(self, info, message):
-        BackendRuntime.unreserve(info.get("msnID") or info.get("_reserved_msnID"))
-        try:
-            super()._callMissionEnd(info, message)
-        finally:
-            if (not self._global_manager and not getattr(self, "_retain_runtime", False)
-                    and not Mission.getMissionListsLength(self)):
-                api = getattr(self, "_api", None)
-                if api:
-                    api.stop()
+        # 先归还队列容量，允许 onEnd 重入；独立收尾屏障禁止此时改配置。
+        with BackendRuntime.finishing():
+            BackendRuntime.unreserve(info.get("msnID") or info.get("_reserved_msnID"))
+            try:
+                super()._callMissionEnd(info, message)
+            finally:
+                if (not self._global_manager and not getattr(self, "_retain_runtime", False)
+                        and not Mission.getMissionListsLength(self)):
+                    api = getattr(self, "_api", None)
+                    if api:
+                        api.stop()
 
     def getMissionListsLength(self):
         result = Mission.getMissionListsLength(self)
@@ -68,7 +75,7 @@ class ManagedMission(Mission):
         return result
 
     def backendsBusy(self):
-        return BackendRuntime.busy()
+        return BackendRuntime.configuration_busy()
 
     def configureBackends(self, values):
         return BackendRuntime.publish(values)

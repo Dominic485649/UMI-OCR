@@ -604,6 +604,34 @@ Adicionar marcadores evita que arquivos antigos sejam substituídos por novos.</
         <source>其它</source>
         <translation>outros</translation>
     </message>
+
+    <message><source>Markdown 格式</source><translation>Formato Markdown</translation></message>
+
+    <message><source>保存识别内容及原始页信息，保留公式与代码的 Markdown 标记</source><translation>Salvar o conteúdo reconhecido e as informações da página, preservando fórmulas e código em Markdown</translation></message>
+
+    <message><source>文件名中 %date 的日期格式。支持插入以下占位符：
+%Y 年、 %m 月、 %d 日、 %H 小时、&#32;
+%M 分钟、 %S 秒 、 %unix 时间戳&#32;
+举例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</source><translation>Formato de data de %date no nome do arquivo. Os seguintes marcadores são aceitos:
+%Y ano, %m mês, %d dia, %H hora,
+%M minuto, %S segundo, %unix carimbo de tempo
+Exemplo: %Yano%mmês%ddia_%H-%M
+Resultado: 2023ano09mês01dia_12-13.md</translation></message>
+
+    <message><source>无需填写拓展名。支持插入以下占位符：
+%date 日期时间
+%name 原文档名
+%range 识别页数范围。只有识别页数小于总页数时才会显示。
+举例：[OCR]_%name%range_%date
+生成：[OCR]_文档A(p2-10)_20230901_1213.md
+添加占位符可以避免旧文件被新文件覆盖。</source><translation>Não é necessário informar a extensão. Os seguintes marcadores são aceitos:
+%date Data e hora
+%name Nome original do documento
+%range Intervalo de páginas reconhecidas. Aparece somente quando o número de páginas reconhecidas é menor que o total.
+Exemplo: [OCR]_%name%range_%date
+Resultado: [OCR]_DocumentoA(p2-10)_20230901_1213.md
+Adicionar marcadores evita que arquivos antigos sejam substituídos por novos.</translation></message>
 </context>
 <context>
     <name>BatchOCR</name>
@@ -924,6 +952,36 @@ Resultado: 2023ano09mês01dia_12-13.txt</translation>
         <source>其它</source>
         <translation>outros</translation>
     </message>
+
+    <message><source>Markdown 单独文件</source><translation>Arquivos Markdown separados</translation></message>
+
+    <message><source>Markdown 图文格式</source><translation>Markdown com imagens</translation></message>
+
+    <message><source>为每张图片单独生成 Markdown 文件</source><translation>Criar um arquivo Markdown para cada imagem</translation></message>
+
+    <message><source>保留识别内容、公式与代码的 Markdown 标记，可用 Markdown 阅读器浏览</source><translation>Preservar o conteúdo reconhecido, fórmulas e código para leitura em um visualizador Markdown</translation></message>
+
+    <message><source>文件名中 %date 的日期格式。支持插入以下占位符：
+%Y 年、 %m 月、 %d 日、 %H 小时、&#32;
+%M 分钟、 %S 秒 、 %unix 时间戳&#32;
+举例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</source><translation>Formato de data de %date no nome do arquivo. Os seguintes marcadores são aceitos:
+%Y ano, %m mês, %d dia, %H hora,
+%M minuto, %S segundo, %unix carimbo de tempo
+Exemplo: %Yano%mmês%ddia_%H-%M
+Resultado: 2023ano09mês01dia_12-13.md</translation></message>
+
+    <message><source>无需填写拓展名。支持插入以下占位符：
+%date 日期时间
+%name 原文件夹名/文件名
+举例：[OCR]_%name_%date
+生成：[OCR]_我的图片_2023-09-01_12-13.md
+添加占位符可以避免旧文件被新文件覆盖。</source><translation>Não é necessário informar a extensão. Os seguintes marcadores são aceitos:
+%date Data e hora
+%name Nome original da pasta/arquivo
+Exemplo: [OCR]_%name_%date
+Resultado: [OCR]_MinhaImagem_2023-09-01_12-13.md
+Adicionar marcadores evita que arquivos antigos sejam substituídos por novos.</translation></message>
 </context>
 <context>
     <name>Configs</name>
@@ -1702,6 +1760,18 @@ Se não quiser ver esta notificação, desative o modo avançado nas definiçõe
         <source>终止文字识别任务</source>
         <translation>Parar tarefas de OCR</translation>
     </message>
+
+    <message><source>当前使用 %1，任务结束后切换到 %2</source><translation>Usando %1; alternar para %2 ao concluir as tarefas</translation></message>
+
+    <message><source>插件刷新失败</source><translation>Falha ao atualizar os plugins</translation></message>
+
+    <message><source>未知错误</source><translation>Erro desconhecido</translation></message>
+
+    <message><source>模型切换失败：%1</source><translation>Falha ao trocar o modelo: %1</translation></message>
+
+    <message><source>模型配置应用失败</source><translation>Falha ao aplicar as configurações do modelo</translation></message>
+
+    <message><source>正在等待并应用模型设置…</source><translation>Aguardando para aplicar as configurações do modelo…</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>
@@ -2986,6 +3056,8 @@ Informações de exceção: %2</translation>
         <source>右键菜单</source>
         <translation>Menu do botão direito do rato</translation>
     </message>
+
+    <message><source>此模型不提供识别置信度</source><translation>Este modelo não fornece confiança de reconhecimento</translation></message>
 </context>
 <context>
     <name>ScreenshotManager</name>
@@ -3673,5 +3745,34 @@ Pode ser definido como desativado por padrão nas configurações globais</trans
             <source>页面预览</source>
             <translation>Visualização da página</translation>
         </message>
-    </context>
+
+    <message><source>Markdown 源码</source><translation>Código-fonte Markdown</translation></message>
+
+    <message><source>文档部分完成：%1 页，%2 个版面块；详情见结果提示。</source><translation>Documento parcialmente concluído: %1 páginas, %2 blocos de layout. Veja o aviso do resultado.</translation></message>
+
+    <message><source>预览</source><translation>Prévia</translation></message>
+</context>
+<context><name>DocumentMarkdownPreview</name>
+    <message><source>打开网页</source><translation>Abrir a página Web</translation></message>
+
+    <message><source>打开链接</source><translation>Abrir link</translation></message>
+
+    <message><source>文档超过 16 MiB 预览预算，请查看 Markdown 源码或导出文件。</source><translation>O documento excede o limite de 16 MiB da prévia. Veja o código-fonte Markdown ou exporte o arquivo.</translation></message>
+
+    <message><source>此段内容较长，按源码显示以保持预览响应。</source><translation>Este bloco é longo e será exibido como código-fonte para manter a prévia responsiva.</translation></message>
+
+    <message><source>离线预览加载失败，请切换到 Markdown 源码查看结果。</source><translation>Não foi possível carregar a prévia offline. Veja o resultado na aba de código-fonte Markdown.</translation></message>
+
+    <message><source>解析结果将在这里渲染。可切换到 Markdown 源码查看原始内容。</source><translation>Os resultados serão exibidos aqui. Veja o conteúdo original no código-fonte Markdown.</translation></message>
+
+    <message><source>部分图片未获授权或超出预览预算，已阻止加载。原始 Markdown 未改变。</source><translation>Algumas imagens foram bloqueadas por falta de autorização ou por excederem os limites da prévia. O Markdown original não foi alterado.</translation></message>
+
+    <message><source>预览进程已退出（%1），请切换页签重试或查看 Markdown 源码。</source><translation>O processo da prévia foi encerrado (%1). Troque de aba para tentar novamente ou veja o código-fonte Markdown.</translation></message>
+
+    <message><source>放大</source><translation>Ampliar</translation></message>
+
+    <message><source>缩小</source><translation>Reduzir</translation></message>
+
+    <message><source>重置缩放</source><translation>Redefinir zoom</translation></message>
+</context>
 </TS>

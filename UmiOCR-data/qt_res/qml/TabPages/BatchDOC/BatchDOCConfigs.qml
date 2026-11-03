@@ -4,10 +4,12 @@
 
 import QtQuick 2.15
 import "../../Configs"
+import "../../Configs/MarkdownOutputMigration.js" as MarkdownOutputMigration
 
 Configs {
     category_: "BatchPDF"
     property var ocrSource: null
+    onConfigurationReloaded: MarkdownOutputMigration.migrate(this, UmiSettings)
     panelLayout: qmlapp.globalConfigs.ocrManager.modelPanelLayout(this)
     valueSources: ocrSource ? ({"ocr": ocrSource}) : ({})
     Component.onCompleted: { ocrSource = qmlapp.globalConfigs.ocrManager.taskSource(category_) }
@@ -82,13 +84,13 @@ Configs {
             },
             "fileNameFormat": {
                 "title": qsTr("文件名格式"),
-                "toolTip": qsTr("无需填写拓展名。支持插入以下占位符：\n%date 日期时间\n%name 原文档名\n%range 识别页数范围。只有识别页数小于总页数时才会显示。\n举例：[OCR]_%name%range_%date\n生成：[OCR]_文档A(p2-10)_20230901_1213.txt\n添加占位符可以避免旧文件被新文件覆盖。"),
+                "toolTip": qsTr("无需填写拓展名。支持插入以下占位符：\n%date 日期时间\n%name 原文档名\n%range 识别页数范围。只有识别页数小于总页数时才会显示。\n举例：[OCR]_%name%range_%date\n生成：[OCR]_文档A(p2-10)_20230901_1213.md\n添加占位符可以避免旧文件被新文件覆盖。"),
                 "default": "[OCR]_%name%range_%date",
                 "advanced": true,
             },
             "datetimeFormat": {
                 "title": qsTr("日期时间格式"),
-                "toolTip": qsTr("文件名中 %date 的日期格式。支持插入以下占位符：\n%Y 年、 %m 月、 %d 日、 %H 小时、 \n%M 分钟、 %S 秒 、 %unix 时间戳 \n举例：%Y年%m月%d日_%H-%M\n生成：2023年09月01日_12-13.txt"),
+                "toolTip": qsTr("文件名中 %date 的日期格式。支持插入以下占位符：\n%Y 年、 %m 月、 %d 日、 %H 小时、 \n%M 分钟、 %S 秒 、 %unix 时间戳 \n举例：%Y年%m月%d日_%H-%M\n生成：2023年09月01日_12-13.md"),
                 "default": "%Y%m%d_%H%M",
                 "advanced": true,
             },
@@ -109,15 +111,10 @@ Configs {
                     "toolTip": qsTr("创建空白PDF文档，只写入识别文字，不含图片"),
                     "default": false,
                 },
-                "txt": {
-                    "title": qsTr("txt 标准格式"),
-                    "toolTip": qsTr("含识别文字和页数信息"),
-                    "default": false,
-                },
-                "txtPlain": {
-                    "title": qsTr("p.txt 纯文字格式"),
-                    "toolTip": qsTr("输出所有识别文字"),
-                    "default": false,
+                "md": {
+                    "title": qsTr("Markdown 格式"),
+                    "toolTip": qsTr("保存识别内容及原始页信息，保留公式与代码的 Markdown 标记"),
+                    "default": true,
                 },
                 "csv": {
                     "title": qsTr("csv 表格文件(Excel)"),

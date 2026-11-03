@@ -11,6 +11,9 @@ import "../ApiManager"
 Configs {
     id: gRoot
     lazyPanel: true
+    property bool autoInitialize: true
+    property bool documentUiEnabled: false
+    property var documentUiBackendIds: []
     category_: "Global"
     autoLoad: false
     panelLayout: buildPanelLayout()
@@ -555,7 +558,9 @@ Configs {
     }
     function buildPanelLayout() {
         const revision = definitionRevision
-        const layout = defaultPanelLayout().filter(entry => entry.key !== "ocr" && entry.key !== "pluginServices")
+        const showDocument = documentUiEnabled || Object.keys(documentManager.localOptions).some(key => documentUiBackendIds.indexOf(key) < 0)
+        const layout = defaultPanelLayout().filter(entry => entry.key !== "ocr" && entry.key !== "pluginServices"
+            && (entry.key !== "document" || showDocument))
         const document = layout.find(entry => entry.key === "document")
         if(document) {
             const backendKeys = pluginStates.map(info => "document." + info.id)
@@ -650,6 +655,7 @@ Configs {
     property var fontPanel: undefined // 缓存字体控制面板组件引用
 
     Component.onCompleted: {
+        if(!autoInitialize) return
         // 初始化主题
         theme.manager.init()
         configDict.ui.theme.optionsList = theme.manager.getOptionsList()
@@ -688,15 +694,42 @@ Configs {
     property bool backendApplyPending: false
     property bool pluginRefreshPending: false
     property int applyPhase: 0
+    property int backendApplyRevision: 0
+    property var appliedBackendSpecs: ({})
+    property string backendApplyError: ""
+
+    function backendFingerprint(value) {
+        function ordered(item) {
+            if(item === null || typeof item !== "object") return item
+            if(typeof item.length === "number") return Array.from(item).map(ordered)
+            const result = {}
+            for(const key of Object.keys(item).sort()) result[key] = ordered(item[key])
+            return result
+        }
+        return JSON.stringify(ordered(value))
+    }
+    function backendSwitchMessage() {
+        if(backendApplyError) return qsTr("模型切换失败：%1").arg(backendApplyError)
+        if(!backendApplyPending && applyPhase === 0) return ""
+        function display(key) {
+            const option = ocrManager.globalOptions.api.optionsList.find(item => item[0] === key)
+            return option ? option[1] : key
+        }
+        const desired = getValue("ocr.api") || ""
+        if(ocrManager.apiKey && desired !== ocrManager.apiKey)
+            return qsTr("当前使用 %1，任务结束后切换到 %2").arg(display(ocrManager.apiKey)).arg(display(desired))
+        return qsTr("正在等待并应用模型设置…")
+    }
     function requestBackendApply() {
-        for(const kind of ["ocr", "document"])
-            qmlapp.msnConnector.callPy(kind, "deferAdmissions", [true])
+        qmlapp.msnConnector.deferBackendAdmissions(true)
         backendApplyPending = true
+        backendApplyError = ""
+        backendApplyRevision++
         applyTimer.restart()
+        Qt.callLater(tryApplyBackends)
     }
     function requestPluginRefresh() { pluginRefreshPending = true; requestBackendApply() }
     function backendsBusy() {
-        // MissionOCR 聚合 GUI、HTTP、执行中和排队请求；文档队列另作兼容兜底。
         if(qmlapp.msnConnector.callPy("ocr", "backendsBusy", [])) return true
         for(const kind of ["ocr", "document"]) {
             const lengths = qmlapp.msnConnector.callPy(kind, "getMissionListsLength", [])
@@ -704,11 +737,82 @@ Configs {
         }
         return false
     }
-    onValueCommitted: function(key, value) {
-        if(key.startsWith("ocr.lifecycle.")) {
-            // 生命周期不改变识别参数，不重建后端；忙时维护由全局周期稍后补做。
-            Qt.callLater(syncModelLifecycle)
+    function finishBackendApply(error="") {
+        backendApplyPending = false
+        backendApplyError = error
+        applyPhase = 0
+        applyTimer.stop()
+        if(error) qmlapp.msnConnector.rejectDeferredAdmissions(error)
+        else pluginsConnector.releaseUnusedServices(ocrManager.apiKey)
+        qmlapp.msnConnector.deferBackendAdmissions(false)
+        if(error) qmlapp.popup.message(qsTr("模型配置应用失败"), error, "error")
+        else {
+            syncModelLifecycle()
+            qmlapp.pubSub.publish("<<settingsReload>>")
         }
+    }
+    function tryApplyBackends() {
+        if(!backendApplyPending || applyPhase === 1 || applyPhase === 2 || backendsBusy()
+                || pluginsConnector.isBusy() || qmlapp.msnConnector.isBusy()) return
+        if(pluginRefreshPending && applyPhase === 0) {
+            applyPhase = 1
+            qmlapp.msnConnector.requestBackendApply({revision: backendApplyRevision, reset: true,
+                interfaces: {ocr: {apiKey: "", info: {}}, document: {apiKey: "", info: {}}}})
+            return
+        }
+        if(pluginRefreshPending) {
+            pluginRefreshPending = false
+            initPlugins()
+            reload()
+            appliedBackendSpecs = ({})
+        }
+        const interfaces = {}
+        try {
+            for(const kind of ["ocr", "document"]) {
+                const spec = capabilityManagers[kind].backendSpec()
+                if(backendFingerprint(spec) !== backendFingerprint(appliedBackendSpecs[kind]))
+                    interfaces[kind] = spec
+            }
+        } catch(error) { finishBackendApply(String(error)); return }
+        if(!Object.keys(interfaces).length) { finishBackendApply(); return }
+        backendApplyPending = false
+        publishBackendSnapshots()
+        applyPhase = 2
+        qmlapp.msnConnector.requestBackendApply({revision: backendApplyRevision, interfaces: interfaces})
+    }
+    Connections {
+        target: qmlapp.msnConnector
+        function onRuntimeChanged() { Qt.callLater(tryApplyBackends) }
+        function onOperationFinished(kind, operation, result) {
+            if(kind !== "backends" || operation !== "apply") return
+            if(applyPhase === 1) {
+                if(result.state !== "applied") {
+                    applyPhase = 0
+                    if(result.state === "pending") { Qt.callLater(tryApplyBackends); return }
+                    pluginRefreshPending = false
+                    finishBackendApply(result.message || qsTr("插件刷新失败"))
+                    return
+                }
+                applyPhase = 3
+                pluginsConnector.requestOperation("shutdownServices", "", "", null)
+                return
+            }
+            const applied = Object.assign({}, appliedBackendSpecs)
+            for(const key in result.applied || {}) {
+                applied[key] = result.applied[key]
+                capabilityManagers[key].backendApplied(result.applied[key])
+            }
+            appliedBackendSpecs = applied
+            applyPhase = 0
+            if(result.state === "pending" || result.revision !== backendApplyRevision || backendApplyPending) {
+                backendApplyPending = true
+                Qt.callLater(tryApplyBackends)
+            } else if(result.state === "failed") finishBackendApply(result.message || qsTr("未知错误"))
+            else finishBackendApply()
+        }
+    }
+    onValueCommitted: function(key, value) {
+        if(key.startsWith("ocr.lifecycle.")) Qt.callLater(syncModelLifecycle)
         else if(key.startsWith("ocr.") || key.startsWith("document.") || key.startsWith("pluginServices.")) {
             publishBackendSnapshots()
             requestBackendApply()
@@ -718,39 +822,7 @@ Configs {
         id: applyTimer
         interval: 200
         repeat: true
-        onTriggered: {
-            if(backendsBusy() || pluginsConnector.isBusy() || qmlapp.msnConnector.isBusy() || ocrManager.applying || documentManager.applying) return
-            if(applyPhase === 2) {
-                // Edits during an asynchronous transition are applied in the next cycle.
-                if(pluginRefreshPending || backendApplyPending) { applyPhase = 0; return }
-                pluginsConnector.releaseUnusedServices(ocrManager.apiKey)
-                for(const kind of ["ocr", "document"])
-                    qmlapp.msnConnector.callPy(kind, "deferAdmissions", [false])
-                applyPhase = 0
-                stop()
-                syncModelLifecycle()
-                // 排空且接口重建完成后再刷新已打开页面的配置和文案快照。
-                qmlapp.pubSub.publish("<<settingsReload>>")
-                return
-            }
-            if(pluginRefreshPending && applyPhase === 0) {
-                qmlapp.msnConnector.requestCall("ocr", "setApi", ["", {}])
-                qmlapp.msnConnector.requestCall("document", "setApi", ["", {}])
-                pluginsConnector.requestOperation("shutdownServices", "", "", null)
-                applyPhase = 1
-                return
-            }
-            if(pluginRefreshPending) {
-                pluginRefreshPending = false
-                initPlugins()
-                reload()
-            }
-            backendApplyPending = false
-            publishBackendSnapshots()
-            applyPhase = 2
-            ocrManager.init2()
-            documentManager.init2()
-        }
+        onTriggered: tryApplyBackends()
     }
 
     function updateHttpService() {
@@ -774,6 +846,8 @@ Configs {
         // 初始化插件
         let pluginInfos = pluginsConnector.init()
         if(!pluginInfos) return false // 没有加载插件
+        documentUiEnabled = !!(pluginInfos.uiFeatures && pluginInfos.uiFeatures.documentUi)
+        documentUiBackendIds = Array.from((pluginInfos.uiFeatures && pluginInfos.uiFeatures.documentUiBackends) || [])
         // 记录失败信息
         if(pluginInfos.errors && Object.keys(pluginInfos.errors).length > 0) {
             const errs = pluginInfos.errors

@@ -610,6 +610,34 @@
         <source>其它</source>
         <translation>மற்றொன்று</translation>
     </message>
+
+    <message><source>Markdown 格式</source><translation>Markdown வடிவம்</translation></message>
+
+    <message><source>保存识别内容及原始页信息，保留公式与代码的 Markdown 标记</source><translation>அடையாளம் கண்ட உள்ளடக்கத்தையும் மூலப் பக்கத் தகவலையும் சூத்திரங்கள் மற்றும் குறியீட்டின் Markdown குறியீடுகளுடன் சேமி</translation></message>
+
+    <message><source>文件名中 %date 的日期格式。支持插入以下占位符：
+%Y 年、 %m 月、 %d 日、 %H 小时、&#32;
+%M 分钟、 %S 秒 、 %unix 时间戳&#32;
+举例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</source><translation>கோப்புப் பெயரிலுள்ள %date தேதியின் வடிவம். பின்வரும் ஒதுக்கிடங்களைப் பயன்படுத்தலாம்:
+%Y ஆண்டு, %m மாதம், %d நாள், %H மணி,
+%M நிமிடம், %S விநாடி, %unix நேர முத்திரை
+எடுத்துக்காட்டு: %Yஆண்டு%mமாதம்%dநாள்_%H-%M
+உருவாக்கம்: 2023ஆண்டு09மாதம்01நாள்_12-13.md</translation></message>
+
+    <message><source>无需填写拓展名。支持插入以下占位符：
+%date 日期时间
+%name 原文档名
+%range 识别页数范围。只有识别页数小于总页数时才会显示。
+举例：[OCR]_%name%range_%date
+生成：[OCR]_文档A(p2-10)_20230901_1213.md
+添加占位符可以避免旧文件被新文件覆盖。</source><translation>கோப்பு நீட்டிப்பைக் குறிப்பிடத் தேவையில்லை. பின்வரும் ஒதுக்கிடங்களைப் பயன்படுத்தலாம்:
+%date தேதி மற்றும் நேரம்
+%name அசல் ஆவணப் பெயர்
+%range அறியப்படும் பக்க வரம்பு. அறியப்படும் பக்கங்கள் மொத்தப் பக்கங்களை விடக் குறைவாக இருக்கும்போது மட்டும் காட்டப்படும்.
+எடுத்துக்காட்டு: [OCR]_%name%range_%date
+உருவாக்கம்: [OCR]_ஆவணம்A(p2-10)_20230901_1213.md
+ஒதுக்கிடங்களைச் சேர்ப்பது பழைய கோப்புகளைப் புதிய கோப்புகள் மேலெழுதுவதைத் தடுக்கும்.</translation></message>
 </context>
 <context>
     <name>BatchOCR</name>
@@ -930,6 +958,36 @@
         <source>其它</source>
         <translation>மற்றொன்று</translation>
     </message>
+
+    <message><source>Markdown 单独文件</source><translation>தனித்தனி Markdown கோப்புகள்</translation></message>
+
+    <message><source>Markdown 图文格式</source><translation>படங்களுடன் Markdown</translation></message>
+
+    <message><source>为每张图片单独生成 Markdown 文件</source><translation>ஒவ்வொரு படத்திற்கும் தனி Markdown கோப்பை உருவாக்கு</translation></message>
+
+    <message><source>保留识别内容、公式与代码的 Markdown 标记，可用 Markdown 阅读器浏览</source><translation>அடையாளம் கண்ட உள்ளடக்கம், சூத்திரங்கள் மற்றும் குறியீட்டின் Markdown குறியீடுகளைத் தக்கவைத்து Markdown வாசிப்பானில் பார்க்கலாம்</translation></message>
+
+    <message><source>文件名中 %date 的日期格式。支持插入以下占位符：
+%Y 年、 %m 月、 %d 日、 %H 小时、&#32;
+%M 分钟、 %S 秒 、 %unix 时间戳&#32;
+举例：%Y年%m月%d日_%H-%M
+生成：2023年09月01日_12-13.md</source><translation>கோப்புப் பெயரிலுள்ள %date தேதியின் வடிவம். பின்வரும் ஒதுக்கிடங்களைப் பயன்படுத்தலாம்:
+%Y ஆண்டு, %m மாதம், %d நாள், %H மணி,
+%M நிமிடம், %S விநாடி, %unix நேர முத்திரை
+எடுத்துக்காட்டு: %Yஆண்டு%mமாதம்%dநாள்_%H-%M
+உருவாக்கம்: 2023ஆண்டு09மாதம்01நாள்_12-13.md</translation></message>
+
+    <message><source>无需填写拓展名。支持插入以下占位符：
+%date 日期时间
+%name 原文件夹名/文件名
+举例：[OCR]_%name_%date
+生成：[OCR]_我的图片_2023-09-01_12-13.md
+添加占位符可以避免旧文件被新文件覆盖。</source><translation>கோப்பு நீட்டிப்பைக் குறிப்பிடத் தேவையில்லை. பின்வரும் ஒதுக்கிடங்களைப் பயன்படுத்தலாம்:
+%date தேதி மற்றும் நேரம்
+%name அசல் கோப்புறை/கோப்புப் பெயர்
+எடுத்துக்காட்டு: [OCR]_%name_%date
+உருவாக்கம்: [OCR]_என்படம்_2023-09-01_12-13.md
+ஒதுக்கிடங்களைச் சேர்ப்பது பழைய கோப்புகளைப் புதிய கோப்புகள் மேலெழுதுவதைத் தடுக்கும்.</translation></message>
 </context>
 <context>
     <name>Configs</name>
@@ -1708,6 +1766,18 @@
         <source>终止文字识别任务</source>
         <translation>உரை அறிதல் பணிகளை நிறுத்து</translation>
     </message>
+
+    <message><source>当前使用 %1，任务结束后切换到 %2</source><translation>தற்போது %1 பயன்பாட்டில் உள்ளது; பணிகள் முடிந்ததும் %2-க்கு மாறும்</translation></message>
+
+    <message><source>插件刷新失败</source><translation>செருகுநிரலைப் புதுப்பிக்க முடியவில்லை</translation></message>
+
+    <message><source>未知错误</source><translation>அறியப்படாத பிழை</translation></message>
+
+    <message><source>模型切换失败：%1</source><translation>மாதிரியை மாற்ற முடியவில்லை: %1</translation></message>
+
+    <message><source>模型配置应用失败</source><translation>மாதிரி அமைப்புகளைப் பயன்படுத்த முடியவில்லை</translation></message>
+
+    <message><source>正在等待并应用模型设置…</source><translation>மாதிரி அமைப்புகளைப் பயன்படுத்தக் காத்திருக்கிறது…</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>
@@ -2996,6 +3066,8 @@ OCR செருகுநிரல் காப்பகத்தை Umi-OCR ந
         <source>右键菜单</source>
         <translation>வலது சொடுக்கு பட்டியல்</translation>
     </message>
+
+    <message><source>此模型不提供识别置信度</source><translation>இந்த மாதிரி அடையாளம் காணுதலின் நம்பகத்தன்மை மதிப்பை வழங்குவதில்லை</translation></message>
 </context>
 <context>
     <name>ScreenshotManager</name>
@@ -3683,5 +3755,34 @@ OCR செருகுநிரல் காப்பகத்தை Umi-OCR ந
             <source>页面预览</source>
             <translation>பக்க முன்னோட்டம்</translation>
         </message>
-    </context>
+
+    <message><source>Markdown 源码</source><translation>Markdown மூல உரை</translation></message>
+
+    <message><source>文档部分完成：%1 页，%2 个版面块；详情见结果提示。</source><translation>ஆவணம் பகுதியாக முடிந்தது: %1 பக்கங்கள், %2 தளவமைப்புத் தொகுதிகள். விவரங்களை முடிவு அறிவிப்பில் பார்க்கவும்.</translation></message>
+
+    <message><source>预览</source><translation>முன்னோட்டம்</translation></message>
+</context>
+<context><name>DocumentMarkdownPreview</name>
+    <message><source>打开网页</source><translation>வலைப்பக்கத்தைத் திறக்கவும்</translation></message>
+
+    <message><source>打开链接</source><translation>இணைப்பைத் திற</translation></message>
+
+    <message><source>文档超过 16 MiB 预览预算，请查看 Markdown 源码或导出文件。</source><translation>இந்த ஆவணம் 16 MiB முன்னோட்ட வரம்பை மீறுகிறது. Markdown மூல உரையைப் பார்க்கவும் அல்லது கோப்பை ஏற்றுமதி செய்யவும்.</translation></message>
+
+    <message><source>此段内容较长，按源码显示以保持预览响应。</source><translation>முன்னோட்டம் விரைவாக இயங்க இந்த நீளமான பகுதி மூல உரையாகக் காட்டப்படுகிறது.</translation></message>
+
+    <message><source>离线预览加载失败，请切换到 Markdown 源码查看结果。</source><translation>இணையமில்லா முன்னோட்டத்தை ஏற்ற முடியவில்லை. முடிவைக் காண Markdown மூல உரைக்கு மாறவும்.</translation></message>
+
+    <message><source>解析结果将在这里渲染。可切换到 Markdown 源码查看原始内容。</source><translation>பகுப்பாய்வு முடிவுகள் இங்கே காட்டப்படும். அசல் உள்ளடக்கத்தைக் காண Markdown மூல உரைக்கு மாறலாம்.</translation></message>
+
+    <message><source>部分图片未获授权或超出预览预算，已阻止加载。原始 Markdown 未改变。</source><translation>அனுமதி இல்லாததால் அல்லது முன்னோட்ட வரம்பை மீறியதால் சில படங்கள் தடுக்கப்பட்டன. அசல் Markdown மாற்றப்படவில்லை.</translation></message>
+
+    <message><source>预览进程已退出（%1），请切换页签重试或查看 Markdown 源码。</source><translation>முன்னோட்டச் செயல்முறை முடிந்தது (%1). மீண்டும் முயல தாவலை மாற்றவும் அல்லது Markdown மூல உரையைப் பார்க்கவும்.</translation></message>
+
+    <message><source>放大</source><translation>பெரிதாக்கு</translation></message>
+
+    <message><source>缩小</source><translation>சிறிதாக்கு</translation></message>
+
+    <message><source>重置缩放</source><translation>அளவாக்கத்தை மீட்டமை</translation></message>
+</context>
 </TS>

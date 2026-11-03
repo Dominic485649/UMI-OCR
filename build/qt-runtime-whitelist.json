@@ -9,7 +9,11 @@
     "QtQml.pyd",
     "QtQuick.pyd",
     "QtQuickControls2.pyd",
-    "QtWidgets.pyd"
+    "QtWidgets.pyd",
+    "QtPrintSupport.pyd",
+    "QtWebChannel.pyd",
+    "QtWebEngineCore.pyd",
+    "QtWebEngineQuick.pyd"
   ],
   "requiredQmlModules": [
     "Qt/labs/folderlistmodel",
@@ -31,7 +35,8 @@
     "QtQuick/Layouts",
     "QtQuick/Shapes",
     "QtQuick/Templates",
-    "QtQuick/Window"
+    "QtQuick/Window",
+    "QtWebEngine"
   ],
   "excludedQmlPrefixes": [
     "QtQuick/Controls/FluentWinUI3",
@@ -64,12 +69,21 @@
     "zh_CN",
     "zh_TW"
   ],
+  "executables": ["QtWebEngineProcess.exe"],
+  "webEngineResources": [
+    "icudtl.dat",
+    "qtwebengine_devtools_resources.pak",
+    "qtwebengine_resources.pak",
+    "qtwebengine_resources_100p.pak",
+    "qtwebengine_resources_200p.pak",
+    "v8_context_snapshot.bin"
+  ],
+  "webEngineLocales": ["en-US", "ja", "pt-BR", "ru", "ta", "zh-CN", "zh-TW"],
   "removeDirectories": [
     "doc",
     "glue",
     "include",
     "metatypes",
-    "resources",
     "scripts",
     "typesystems"
   ]

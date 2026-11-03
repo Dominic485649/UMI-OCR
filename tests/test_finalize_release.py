@@ -26,7 +26,8 @@ from unittest.mock import patch
 
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[1]
-WORK = ROOT / "build/tmp/startup-small-files-20261028-r1/formal-container-integration-r1/finalize-tests"
+WORK = Path(os.environ.get("UMI_RELEASE_TEST_WORK_ROOT", str(ROOT / "build/tmp/finalize-release-tests")))
+WORK.relative_to(ROOT / "build/tmp")
 
 
 def load(name, path):
@@ -73,7 +74,8 @@ class FinalizeFixtures(unittest.TestCase):
             "build/tools/verify_release_evidence.py", "build/tools/package_tar_xz.py",
             "build/tools/prepare_cuda_overlay.py", "build/tools/verify_public_payload.py",
             "build/tools/audit_runtime_archives.py", "build/tools/runtime_archive_layout.py",
-            "build/tools/merge_runtime.py",
+            "build/tools/merge_runtime.py", "build/tools/chunked_files.py",
+            "build/tools/release312_directed_evidence.py",
         )
         for name in trusted:
             target = self.repo / name

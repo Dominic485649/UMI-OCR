@@ -311,12 +311,12 @@ URL：`/api/doc/download`
 - **file_types** ：数组，每一项为字符串。只填写一个值时，返回单个文件的下载链接。填写多个值时，返回单个zip压缩包下载链接，其中打包了多个文件。
     - `"pdfLayered"` （默认）：双层可搜索PDF。
     - `"pdfOneLayer"` ：单层纯文本PDF。
-    - `"txt"` ：带页数等信息的txt文件。
-    - `"txtPlain"` ：只含识别文本的txt文件。
+    - `"md"` ：Markdown 图文文件，推荐使用。
+    - `"txt"`、`"txtPlain"` ：仅供旧客户端兼容。自 3.1.2 起，两者都是与 `md` 相同的 UTF-8 Markdown，扩展名为 `.md.txt`，不再生成另一份纯文本；同时请求这两个别名只生成一个兼容文件。
     - `"jsonl"` ：与 `result` 接口， `format="dict"` 的格式类似。每行为一个json对象。
     - `"csv"` ：表格，每行为一页的识别文本。
 - **ignore_blank** ：布尔值。是否忽略空页（没有文字的页数）。
-  - `true` （默认）：如 txt、csv 等文件中，会跳过空页。
+  - `true` （默认）：如 Markdown、CSV 等文件中，会跳过空页。
   - `false` ：不跳过空页，文件中空页的内容记为空字符串。
 > 注： Umi-OCR `v2.1.4` 及以前的版本， `ignore_blank` 参数存在问题，请使用最新版本。
 

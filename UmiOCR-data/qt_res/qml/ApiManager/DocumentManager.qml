@@ -31,13 +31,6 @@ Item {
         "api": {
             "title": qsTr("当前接口"),
             "optionsList": [],
-            "onChanged": (value, old)=>{
-                if(old === undefined) return
-                if(qmlapp.globalConfigs.backendsBusy() || applying || qmlapp.globalConfigs.applyPhase !== 0) {
-                    qmlapp.popup.simple(qsTr("无法切换模型"), qsTr("任务正在运行或模型配置正在应用，请稍后重试。"))
-                    return true
-                }
-            },
         },
     }
 
@@ -45,76 +38,31 @@ Item {
 
     // ========================= 【外部接口】 =========================
 
-    // 应用更改，showSuccess=false时不显示成功提示
-    function applyConfigs(showSuccess=true) {
+    function applyConfigs(showSuccess=true) { qmlapp.globalConfigs.requestBackendApply() }
 
-        function successUpdate() {
-            for (let key in deployDict) {
-                const p = deployDict[key].page
-                if(!p.configDict) {
-                    delete deployDict[key]
-                    continue
-                }
-                const k = deployDict[key].configKey
-                p.configDict[k] = localOptions[apiKey]
-                p.reload()
-            }
-        }
-
-        if(Object.keys(localOptions).length === 0){
-            qmlapp.popup.message("", noBackendHint(), "error")
-            return
-        }
-
-        const nowKey = qmlapp.globalConfigs.getValue("document.api")
-        if(!localOptions.hasOwnProperty(nowKey)) {
-            const s = qsTr("结构化文档接口列表中不存在 %1").arg(nowKey)
-            qmlapp.popup.message("", s, "error")
-            return
-        }
-        // 验证 py 是否有执行中的任务
-        const lengths = qmlapp.msnConnector.callPy("document", "getMissionListsLength", [])
-        const msnLen = Object.keys(lengths).length
-        if(msnLen > 0) {
-            qmlapp.globalConfigs.requestBackendApply()
-            return
-        }
-        // 从全局配置中，提取出目前apiKey对应的配置项
-        const allDict = qmlapp.globalConfigs.getValueDict()
-        const prefix = "document." + nowKey
+    function backendSpec() {
+        const nowKey = Object.keys(localOptions).length ? qmlapp.globalConfigs.getValue("document.api") : ""
+        if(nowKey && !localOptions.hasOwnProperty(nowKey))
+            throw new Error(qsTr("结构化文档接口列表中不存在 %1").arg(nowKey))
         const info = {}
-        for(let k in allDict) {
-            if(k.startsWith(prefix)) {
-                info[k] = allDict[k]
-            }
-        }
-        const serviceInfo = qmlapp.globalConfigs.getPluginServiceValues(
-            nowKey, serviceRefs[nowKey] || [])
-        for(let k in serviceInfo)
-            info[k] = serviceInfo[k]
-        applying = true
-        qmlapp.msnConnector.callPy("document", "deferAdmissions", [true])
-        applyCallback = function(msg) {
-        msg = String(msg)
+        const all = qmlapp.globalConfigs.getValueDict()
+        for(const key in all)
+            if(nowKey && key.startsWith("document." + nowKey + ".")) info[key] = all[key]
+        const services = qmlapp.globalConfigs.getPluginServiceValues(nowKey, serviceRefs[nowKey] || [])
+        for(const key in services) info[key] = services[key]
+        return {apiKey: nowKey, info: info}
+    }
 
-        if(msg.startsWith("[Success]")) {
-            apiKey = nowKey
-            successUpdate()
-            // 应用之后立刻做一次健康检查：只有检查通过才允许显示"可用"
-            healthOk = false
-            healthMessage = qsTr("尚未启动；首次解析时检查并加载。")
-            if(showSuccess) {
-                qmlapp.popup.simple(qsTr("结构化文档接口应用成功"), qsTr("当前接口为【%1】").arg(nowKey))
-            }
+    function backendApplied(spec) {
+        apiKey = spec.apiKey
+        for(const key in deployDict) {
+            const entry = deployDict[key]
+            if(!entry.page || !entry.page.configDict) { delete deployDict[key]; continue }
+            entry.page.configDict[entry.configKey] = localOptions[apiKey] || {title: "", type: "group"}
+            entry.page.reload()
         }
-        else {
-            qmlapp.popup.message(qsTr("结构化文档接口应用失败"), msg, "error")
-        }
-        applying = false
-        if(!qmlapp.globalConfigs.backendApplyPending && qmlapp.globalConfigs.applyPhase === 0)
-            qmlapp.msnConnector.callPy("document", "deferAdmissions", [false])
-        }
-        qmlapp.msnConnector.requestCall("document", "setApi", [nowKey, info])
+        healthOk = false
+        healthMessage = qsTr("尚未启动；首次解析时检查并加载。")
     }
 
     // 健康检查。showMessage=true 时弹窗展示结果。
@@ -209,15 +157,7 @@ Item {
     }
 
     // 初始化2：应用更改
-    function init2() {
-        if(Object.keys(localOptions).length === 0) {
-            apiKey = ""
-            qmlapp.msnConnector.callPy("document", "setApi", ["", {}])
-            return
-        }
-        applyConfigs(false)
-        console.log("DocumentManager 初始化结构化文档管理器完毕！")
-    }
+    function init2() { applyConfigs(false) }
 
     Connections {
         target: qmlapp.msnConnector

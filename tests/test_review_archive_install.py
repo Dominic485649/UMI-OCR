@@ -124,6 +124,24 @@ class ReviewArchiveInstallTests(unittest.TestCase):
                 with self.subTest(path=path), self.assertRaises(ValueError):
                     module.installation_work_root(path)
 
+    def test_vl_capacity_accepts_only_the_explicit_sibling_plugin_build(self):
+        from unittest import mock
+        repository = self.root / "Umi-OCR"
+        repository.mkdir()
+        source = self.root / "Umi-OCR-Plugin/build/candidate"
+        source.mkdir(parents=True)
+        (source / "value.txt").write_bytes(b"data")
+        record = {"inputRoot": str(source), "payload": {"value.txt": hashlib.sha256(b"data").hexdigest()}}
+        target = repository / "new-install"
+        with mock.patch.object(module, "ROOT", repository):
+            result = module.verify_install_capacity({"vl": (None, record, None)}, target, reserve_bytes=0)
+            self.assertGreater(result["payloadClusterUpperBytes"], 0)
+            with self.assertRaises(ValueError):
+                module.verify_install_capacity({"base": (None, record, None)}, target)
+            record["inputRoot"] = str(self.root)
+            with self.assertRaises(ValueError):
+                module.verify_install_capacity({"vl": (None, record, None)}, target)
+
     def test_capacity_failure_precedes_target_creation(self):
         from types import SimpleNamespace
         from unittest import mock

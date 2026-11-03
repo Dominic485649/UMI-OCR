@@ -20,7 +20,43 @@ MsnObjDict = {
 # 任务连接器类（不限制单例）
 class MissionConnector(QObject):
     operationFinished = Signal(str, str, "QVariant")
+    runtimeChanged = Signal()
     _pending = 0
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        from .backend_runtime import BackendRuntime
+        BackendRuntime.subscribe(self._runtimeChanged)
+
+    def _runtimeChanged(self):
+        self.runtimeChanged.emit()
+
+    @Slot(bool)
+    def deferBackendAdmissions(self, enabled):
+        from .backend_runtime import BackendRuntime
+        BackendRuntime.defer_admissions(enabled)
+
+    @Slot(str)
+    def rejectDeferredAdmissions(self, message):
+        from .backend_runtime import BackendRuntime
+        for manager in BackendRuntime.managers():
+            manager.rejectDeferredMissions(message)
+
+    @Slot("QVariant")
+    def requestBackendApply(self, request):
+        from ..plugins_controller.services import _to_python_value
+        from ..utils.thread_pool import threadRun
+        from .backend_apply import apply_backends
+        from .backend_runtime import BackendRuntime
+        values = _to_python_value(request)
+        self._pending += 1
+        def run():
+            try:
+                result = apply_backends(BackendRuntime, MsnObjDict, values)
+            finally:
+                self._pending -= 1
+            self.operationFinished.emit("backends", "apply", result)
+        threadRun(run)
 
     @Slot(result=bool)
     def isBusy(self):

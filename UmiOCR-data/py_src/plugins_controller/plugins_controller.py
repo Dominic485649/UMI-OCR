@@ -59,6 +59,7 @@ from .manifest import (
     loadTranslator,
 )
 from .services import PluginServices
+from ..utils.ui_unlock import is_ui_feature_enabled, required_page_feature, ui_feature_snapshot
 
 # 插件 总目录
 PLUGINS_PATH = "plugins"
@@ -105,6 +106,8 @@ class PluginRecord:
         }
         if self.manifest:
             info.update(self.manifest.toDict())
+            info["pages"] = [page.key for page in self.manifest.pages
+                             if is_ui_feature_enabled(required_page_feature(self.id, page.key))]
             # 只影响设置展示，不能改变插件激活和 DLL 加载的先后次序。
             orders = [cap.meta.get("settingsOrder") for cap in self.manifest.capabilities if cap.type == "ocr"]
             orders = [value for value in orders if type(value) in (int, float) and math.isfinite(value)]
@@ -136,6 +139,8 @@ class _PluginsControllerClass:
         loadBuiltinCapabilityTypes()
         resetAllCapabilities()
         PluginServices.reset()
+        from ..tag_pages.page_registry import resetPluginPageClasses
+        resetPluginPageClasses()
         if self._resourceArchives:
             from PySide6.QtCore import QResource
             for path in self._resourceArchives: QResource.unregisterResource(path)
@@ -493,6 +498,9 @@ class _PluginsControllerClass:
         return getattr(module, entry.attr)
 
     def _registerPage(self, record, page):
+        from ..tag_pages.page_registry import setPluginPageFeature
+        feature = required_page_feature(record.id, page.key)
+        setPluginPageFeature(page.key, feature)
         info = {
             "key": page.key,
             "url": ("qrc:/plugins/" + record.id + "/" + os.path.relpath(page.qml, record.path).replace("\\", "/")
@@ -511,7 +519,7 @@ class _PluginsControllerClass:
             def factory(_manifest=manifest, _entry=page.controller):
                 return self._resolveEntry(_manifest, _entry)
 
-            registerPluginPageClass(page.key, factory)
+            registerPluginPageClass(page.key, factory, requiredFeature=feature)
         elif info["needController"]:
             # 旧版插件声明了 needController 但没有可注册的控制器入口。
             # v1 在这里会静默失败（addPage 返回空串，页面创建不出来），
@@ -520,13 +528,17 @@ class _PluginsControllerClass:
                 tr('插件 {id} 的页面 {key} 声明了 needController ，但未提供 controller 入口，已按无控制器页加载。', id=record.id, key=page.key)
             )
             info["needController"] = False
-        self.pageInfos.append(info)
+        if is_ui_feature_enabled(feature):
+            self.pageInfos.append(info)
 
     def _rollback(self, record):
+        from ..tag_pages.page_registry import unregisterPluginPageClass
         for capability in record.manifest.capabilities:
             registry = getCapabilityRegistry(capability.type)
             if registry:
                 registry.unregister(record.id)
+        for page in record.manifest.pages:
+            unregisterPluginPageClass(page.key)
         self.pageInfos = [p for p in self.pageInfos if p.get("pluginKey") != record.id]
         PluginServices.unregisterPlugin(record.id)
 
@@ -578,6 +590,7 @@ class _PluginsControllerClass:
             "host": hostEnvironment(),
             "pluginsPath": os.path.abspath(PLUGINS_PATH),
             "capabilityTypes": knownCapabilityTypes(),
+            "uiFeatures": ui_feature_snapshot(),
         }
 
 

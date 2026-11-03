@@ -3,6 +3,9 @@
 # ===============================================
 
 from copy import deepcopy
+from pathlib import Path
+
+from ..utils.image_formats import IMAGE_SUFFIXES
 
 from PySide6.QtCore import QObject, Slot, Signal
 from PySide6.QtGui import QPixmap, QImage
@@ -62,6 +65,19 @@ class DocPreviewConnector(QObject):
             return
         info = {"path": path, "page": page + 1, "pageCount": 0, "error": ""}
         try:
+            if Path(path).suffix.lower() in IMAGE_SUFFIXES:
+                from ..document.image_input import image_frame
+                self._closePreviewDoc()
+                frame, count = image_frame(path, page)
+                try:
+                    info.update(pageCount=count, width=frame.width, height=frame.height, coordinateSpace="image-pixels")
+                    CallFunc.now(self._deliverPreviewInfo, revision, dict(info))
+                    image = QImage(frame.tobytes(), frame.width, frame.height, frame.width * 3,
+                                   QImage.Format.Format_RGB888).copy()
+                finally:
+                    frame.close()
+                CallFunc.now(self._deliverPreview, revision, image, page, 1)
+                return
             key = (session, path, password)
             if key != self._previewKey:
                 self._closePreviewDoc()

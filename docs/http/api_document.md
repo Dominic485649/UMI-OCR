@@ -14,7 +14,7 @@
 
 `POST /api/document/upload` 使用 multipart/form-data：
 
-- `file`：PDF 或支持的图片。
+- `file`：PDF，或与图片 OCR 共用的 JPG/JPE/JPEG/JFIF、PNG、WebP、AVIF、JXL、JXR/WDP/HDP、BMP、TIF/TIFF 图片（后缀不区分大小写）。图片统一处理 EXIF 方向及透明白底；TIFF 保留逐帧／页范围，其他多帧图片与图片 OCR 一样取首帧。格式能力仍受文件、解码像素及时间预算约束，损坏或超限输入会明确失败。
 - `json`：以下 JSON 对象，可省略。
 
 ```json
@@ -69,7 +69,9 @@
 {"jobId": "上传返回的任务ID", "format": "zip"}
 ```
 
-`format` 支持 `txt`、`md`、`json`、`zip`。结束后可下载完整或部分结果，正文不混入警告。仅完成部分页时，文本按原页号排序导出；JSON 保留部分标记和逐页结果。ZIP 内 Markdown 和 JSON 的资源地址均改为归档内的相对路径。
+`format` 支持 `md`、`json`、`zip`，以及仅供 HTTP 兼容的 `txt`。`md` 返回 `document.md`；`txt` 返回与 `md` 字节完全相同的 UTF-8 Markdown，MIME 为 `text/plain`，文件名为 `document.md.txt`，不再是独立纯文本生成器。默认 ZIP 只包含 `document.md`、`document.json` 与资源，不附送 TXT。
+
+结束后可下载完整或部分结果，正文不混入警告。仅完成部分页时，Markdown 按原页号排序导出；JSON 保留部分标记和逐页结果。ZIP 内 Markdown 和 JSON 的资源地址均改为归档内的相对路径。结果中的 `text` 字段及旧接口 `format=text` 仍保留，不受文件格式迁移影响。
 
 结果中的图片通过 `/api/document/assets/<jobId>/<assetId>` 返回。资源 ID 由宿主为当前任务生成，不接受客户端本地路径，不开放其他任务或模型目录。未知资源返回 404。
 

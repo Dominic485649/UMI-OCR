@@ -28,7 +28,7 @@ EXCLUDED_PARTS = {
 SOURCE_ROOTS = {"umiocr-data", "build", "tests", "benchmarks", "docs", "licenses", "third_party", ".github", "dev-tools", "pystand_for_umiocr"}
 ROOT_FILES = {"copying", "license", "source-code.md", "change_log.md", "pyproject.toml", ".gitignore", ".gitattributes", "version", "source-export.json"}
 SOURCE_SUFFIXES = {".py", ".ps1", ".qml", ".js", ".json", ".md", ".c", ".cpp", ".h", ".hpp", ".cmake", ".in", ".lock", ".yaml", ".yml", ".bat", ".cmd", ".sh", ".toml", ".ini", ".ts", ".po", ".png", ".jpg", ".jpeg", ".svg", ".ico", ".qrc", ".ttf", ".otf", ".webp", ".gif", ".qm", ".txt"}
-SOURCE_SUFFIXES.update({".rc", ".manifest", ".xml", ".qss", ".hlsl", ".glsl", ".vert", ".frag", ".csv"})
+SOURCE_SUFFIXES.update({".rc", ".manifest", ".xml", ".qss", ".hlsl", ".glsl", ".vert", ".frag", ".csv", ".html", ".css", ".woff", ".woff2"})
 EXCLUDED_PLUGIN_ROOTS = {
     "win32_paddleocrv6_cpu",
     "win32_paddleocrvl_1_6",
@@ -72,7 +72,10 @@ def is_excluded(relative: Path, *, public: bool) -> bool:
     lowered = [part.casefold() for part in relative.parts]
     if not lowered or relative.is_absolute() or ".." in relative.parts or any(":" in part for part in relative.parts):
         return True
-    if parts.intersection(EXCLUDED_PARTS):
+    excluded = parts.intersection(EXCLUDED_PARTS)
+    if lowered[:4] == ["umiocr-data", "qt_res", "preview", "vendor"] and relative.suffix.casefold() in {".js", ".css", ".woff2"}:
+        excluded.discard("vendor")  # 固定离线浏览器资源，不是 OCR 的推理依赖树。
+    if excluded:
         return True
     # This is an obsolete local-candidate inventory, not a source input or
     # a license text for the current CUDA-only products.

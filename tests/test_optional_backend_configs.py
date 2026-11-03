@@ -101,14 +101,15 @@ def check_capability(source_root, kind, engine):
         result = json.loads(evaluate(engine, '''
             messages = []; calls = []; apiKey = "旧后端";
             init1({}); initConfigDict(); init2();
-            JSON.stringify({messages: messages, calls: calls, apiKey: apiKey,
+            JSON.stringify({messages: messages, calls: calls, apiKey: apiKey, applied: applied,
                             configKeys: Object.keys(configDict), valueKeys: Object.keys(valueDict)});
         ''').toString())
         assert not result["messages"], (kind, phase, result)
         assert kind not in result["configKeys"], (kind, phase, result)
         assert f"{kind}.api" not in result["valueKeys"], (kind, phase, result)
-        assert result["apiKey"] == "", (kind, phase, result)
-        assert result["calls"] == [[kind, "setApi", ["", {}]]], (kind, phase, result)
+        assert result["apiKey"] == "旧后端", (kind, phase, result)
+        assert result["applied"] and result["calls"] == [], (kind, phase, result)
+        # 活动接口仅在串行配置完成后更新；空后端的实际清理由全局状态机覆盖。
 
         # 插件重新出现时仍恢复真实接口，配置缺少全局项时也使用真实后端标识。
         for options in (

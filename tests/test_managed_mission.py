@@ -162,6 +162,19 @@ class ManagedMissionTests(unittest.TestCase):
     def add(self, mission, value="item", **info):
         return mission.addMissionList(info, [{"path": value}])
 
+    def test_new_http_manager_obeys_global_pending_switch(self):
+        self.pool.defer_admissions(True)
+        mission = ControlledMission(self.pool, global_manager=False)
+        ident = self.add(mission, "new-http")
+        self.assertFalse(ident.startswith("[Error]"))
+        self.assertEqual(mission.getMissionListsLength(), {})
+        self.assertEqual(self.pool.status()["pendingTasks"], 0)
+        self.assertIn(ident, mission._deferredMissions)
+        self.pool.defer_admissions(False)
+        self.assertEqual(self.pool.status()["pendingTasks"], 1)
+        mission._taskRun()
+        self.assertFalse(self.pool.busy())
+
     def test_reserve_defer_and_enqueue_share_admission_lock(self):
         mission = ControlledMission(self.pool)
         reserved, proceed, changing, changed = [self.event() for _ in range(4)]
@@ -443,6 +456,10 @@ class ManagedMissionTests(unittest.TestCase):
         observations, messages = [], []
 
         def on_end(_info, message):
+            self.assertFalse(self.pool.busy(), "结束回调不占用模型执行许可或队列容量")
+            with self.assertRaises(source_managed.BackendBusy):
+                with self.pool.reconfiguration():
+                    self.fail("结束回调完成前不能切换配置")
             observations.append((mission.getMissionListsLength(), mission.backendsBusy(),
                                  mission._api.release()))
             messages.append(message)
@@ -452,7 +469,7 @@ class ManagedMissionTests(unittest.TestCase):
         self.add(mission, onEnd=on_end)
         mission._taskRun()
         self.assertEqual(len(observations), 1)
-        self.assertEqual(observations[0][:2], ({}, False))
+        self.assertEqual(observations[0][:2], ({}, True))
         self.assertTrue(observations[0][2].startswith("[Success]"))
         self.assertEqual(messages, ["[Success]", "[Success]"])
         self.assertFalse(self.pool.busy())

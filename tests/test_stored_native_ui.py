@@ -5,7 +5,7 @@ Prepare only (no Qt/window/process):
 Run only after the coordinator provides a fresh copy and execution window:
   <root>/UmiOCR-data/runtime/python.exe -I -B -X utf8 test_stored_native_ui.py
     --root <this-project/build/tmp-or-staging/fresh-copy> --output <new-audit-dir>
-    --profile base|combined --execute-authorized
+    --profile base|combined|navigation --execute-authorized
 
 This runs the candidate's main/initRuntimeEnvironment/py_src.run and real Qt,
 NOT Umi-OCR.exe or an EXE performance measurement. No source sandbox is mounted.
@@ -46,7 +46,7 @@ FORBIDDEN = frozenset({"paddle", "paddleocr", "paddlex", "openai", "onnxruntime"
 MEMBERS = ("py_src/run.py", "py_src/imports/umi_about.py", "py_src/utils/system_info.py",
     "py_src/utils/i18n_configs.py", "py_src/utils/utils.py", "py_src/utils/utils_connector.py",
     "py_src/utils/cuda_device_probe.py", "py_src/utils/_cuda_device_probe_worker.py")
-QML = ("Main.qml", "TabPages/About/About.qml", "Configs/GlobalConfigs.qml",
+QML = ("Main.qml", "TabPages/About/About.qml", "TabPages/Navigation/Navigation.qml", "Configs/GlobalConfigs.qml",
     "TabPages/GlobalConfigsPage/GlobalConfigsPage.qml", "Configs/NvidiaDeviceConfig.qml")
 REQUIRED = ("package_provenance", "first_frame", "about.pending", "about.ready", "about.copy",
     "languages", "model_settings", "no_models", "normal_exit", "payload_unchanged", "settings_restored")
@@ -256,7 +256,8 @@ def payload_hashes(root):
 
 
 def rule_hashes():
-    files = [Path(__file__), Path(__file__).with_name("test_model_settings_native_ui.py"),
+    files = [Path(__file__), Path(__file__).with_name("test_navigation_repository_link.py"),
+             Path(__file__).with_name("test_model_settings_native_ui.py"),
              Path(__file__).with_name("test_hot_ui.py"), Path(__file__).with_name("test_startup_system_info_i18n.py"),
              REPO / "build/tools/audit_runtime_archives.py", REPO / "build/tools/runtime_archive_layout.py"]
     return {str(path): sha(path) for path in files}
@@ -283,9 +284,19 @@ def audit_containers(root, output):
 
 def acceptance(report):
     checks = report.get("checks", {})
-    missing = [key for key in REQUIRED if checks.get(key, {}).get("status") != "PASS"]
+    required = tuple(key for key in REQUIRED if report.get("profile") != "navigation" or key != "model_settings")
+    missing = [key for key in required if checks.get(key, {}).get("status") != "PASS"]
     if report.get("profile") == "combined" and checks.get("task_sources", {}).get("status") != "PASS":
         missing.append("task_sources")
+    if report.get("homepage_repository_required") or report.get("profile") == "navigation":
+        homepage = checks.get("navigation_repository", {})
+        languages = homepage.get("languages", [])
+        if (homepage.get("status") != "PASS" or len(languages) != len(LANGUAGES)
+                or {item.get("code") for item in languages} != set(LANGUAGES)
+                or any(item.get("visible_link", {}).get("fully_visible") is not True
+                    or item.get("visible_link", {}).get("rendered_target") != "https://github.com/Dominic485649/UMI-OCR"
+                    for item in languages)):
+            missing.append("navigation_repository")
     failed = [key for key, value in checks.items() if value.get("status") == "FAIL"]
     okay = (report.get("scenario_completed") is True and report.get("normal_exit") is True
             and not missing and not failed and not report.get("errors") and not report.get("safety_blocks"))
@@ -314,7 +325,8 @@ def native(args, output):
         "diagnostic_states": [], "control_events": [], "owned_reuse": reuse, "scenario_completed": False, "normal_exit": False,
         "instrumentation": {"diagnostic_barrier": "test-only Event before original packaged collectSystemInfo; released after pending frame/copy; no synthesized values",
                             "clipboard": "packaged utils.copyText captures only this scenario's About text; no clipboard read/write"},
-        "limits": ["Not Umi-OCR.exe or an EXE/startup performance result", "No inference or model requests"]}
+        "limits": ["Not Umi-OCR.exe or an EXE/startup performance result", "No inference or model requests"],
+        "homepage_repository_required": bool(getattr(args, "check_homepage", False) or args.profile == "navigation")}
     report["checks"] = {key: {"status": "NOT_RUN"} for key in (*REQUIRED, "task_sources")}
     engines, release = [], threading.Event()
     app = previous_engine = finder = None
@@ -360,8 +372,9 @@ def native(args, output):
         os.MessageBox = lambda message, *a, **kw: report["errors"].append("Candidate startup diagnostic: " + str(message))
         from PySide6 import QtQml
         from PySide6.QtCore import QCoreApplication, QEvent, QFile, QIODevice, QPoint, QPointF, QRectF, QSettings, QTimer, Qt
-        from PySide6.QtGui import QKeyEvent, QMouseEvent
+        from PySide6.QtGui import QKeyEvent, QMouseEvent, QTextCursor
         from PySide6.QtQml import QQmlEngine, QQmlExpression
+        from PySide6.QtQuick import QQuickTextDocument
         from PySide6.QtWidgets import QApplication
         try:
             from PySide6.QtTest import QTest
@@ -453,20 +466,67 @@ def native(args, output):
                             return False
                         parent = parent.parentItem()
                     return True
+                def visible_area(item, rect=None):
+                    area = item.mapRectToScene(item.boundingRect() if rect is None else rect)
+                    area = area.intersected(QRectF(0, 0, window.width(), window.height()))
+                    parent = item
+                    while parent is not None and not area.isEmpty():
+                        if not parent.property("visible") or float(parent.property("opacity") or 0) < 0.9:
+                            return QRectF()
+                        if parent.property("clip"):
+                            area = area.intersected(parent.mapRectToScene(parent.boundingRect()))
+                        parent = parent.parentItem()
+                    return area
                 def texts(obj):
-                    values = []
-                    for item in descendants(obj):
-                        if item.metaObject().indexOfProperty("text") < 0: continue
-                        area = item.mapRectToScene(item.boundingRect()).intersected(QRectF(0, 0, window.width(), window.height()))
-                        parent = item
-                        while parent is not None and not area.isEmpty():
-                            if not parent.property("visible") or float(parent.property("opacity") or 0) < 0.9:
-                                area = QRectF(); break
-                            if parent.property("clip"):
-                                area = area.intersected(parent.mapRectToScene(parent.boundingRect()))
+                    return [str(item.property("text")) for item in descendants(obj)
+                        if item.metaObject().indexOfProperty("text") >= 0 and not visible_area(item).isEmpty()]
+                def homepage_link(home, label, target):
+                    editors = [item for item in descendants(home)
+                        if all(item.metaObject().indexOfProperty(name) >= 0 for name in ("text", "length", "readOnly"))
+                        and label in str(item.property("text")) and target in str(item.property("text"))]
+                    require(len(editors) == 1, "首页仓库链接必须来自唯一的真实 Markdown TextEdit")
+                    editor, scrolls = editors[0], []
+                    wrapper = editor.property("textDocument")
+                    require(isinstance(wrapper, QQuickTextDocument), "首页缺少真实 QQuickTextDocument")
+                    document = wrapper.textDocument()
+                    selection = document.find(label)
+                    require(not selection.isNull(), "首页实际文档没有完整仓库链接译文")
+                    start, end = selection.selectionStart(), selection.selectionEnd()
+                    for position in range(start, end):
+                        cursor = QTextCursor(document)
+                        cursor.setPosition(position)
+                        cursor.setPosition(position + 1, QTextCursor.MoveMode.KeepAnchor)
+                        require(cursor.charFormat().isAnchor() and cursor.charFormat().anchorHref() == target,
+                            "首页实际文档的逐字符锚点目标不一致")
+                    for attempt in range(3):
+                        chars = jjson("(function(){var a=[];for(var i=" + str(start) + ";i<" + str(end)
+                            + ";i++){var r=positionToRectangle(i);a.push([r.x,r.y,r.width,r.height]);}return a;})()", editor)
+                        require(bool(chars), "首页链接字符矩形缺失")
+                        rectangles = [QRectF(*char) for char in chars]
+                        if all(visible_area(editor, rect).adjusted(-0.01, -0.01, 0.01, 0.01)
+                                .contains(editor.mapRectToScene(rect)) for rect in rectangles):
+                            return {"fully_visible": True, "rendered_target": target, "character_count": len(chars),
+                                "anchor_verification": "QTextDocument per-character anchorHref",
+                                "scrolls": scrolls, "scene_rectangles": [[rect.x(), rect.y(), rect.width(), rect.height()]
+                                    for rect in map(editor.mapRectToScene, rectangles)]}
+                        require(attempt < 2, "首页链接经过有界原生滚动仍被裁剪")
+                        parent, changed = editor.parentItem(), False
+                        while parent is not None:
+                            if all(parent.metaObject().indexOfProperty(name) >= 0 for name in ("contentY", "contentHeight")):
+                                before = float(parent.property("contentY"))
+                                maximum = max(0, float(parent.property("contentHeight")) - parent.height())
+                                point = parent.mapFromScene(editor.mapToScene(rectangles[len(rectangles)//2].center()))
+                                wanted = max(0, min(maximum, before + point.y() - parent.height()/2))
+                                if abs(wanted - before) > 0.1:
+                                    require(parent.setProperty("contentY", wanted), "原生滚动位置不可写")
+                                    after = float(parent.property("contentY"))
+                                    scrolls.append({"kind": "native-flickable-contentY", "before": before,
+                                        "after": after, "maximum": maximum, "not_mouse_wheel": True})
+                                    changed = abs(after - before) > 0.1
+                                    break
                             parent = parent.parentItem()
-                        if not area.isEmpty(): values.append(str(item.property("text")))
-                    return values
+                        require(changed, "首页原生滚动区没有可用的滚动范围")
+                        yield 150
                 def reveal(item, scope=None):
                     if not exposed(item) and scope is not None:
                         # ConfigItemComp exposes its owner as a public property.
@@ -638,7 +698,10 @@ def native(args, output):
                     panel = jjson("qmlapp.globalConfigs.panelLayout.map(e=>({key:e.key,items:(e.items||[]).map(x=>({key:x.key,items:(x.items||[]).map(y=>({key:y.key,device:!!((y.origin||qmlapp.globalConfigs.originDict[y.key]||{}).deviceProvider==='nvidia-cuda')}))}))}))")
                     states = jjson("qmlapp.globalConfigs.pluginStates")
                     options = jjson("qmlapp.globalConfigs.originDict['ocr.api'] ? qmlapp.globalConfigs.originDict['ocr.api'].optionsList : []")
-                    if args.profile == "base":
+                    if args.profile == "navigation":
+                        check("model_settings", "NOT_APPLICABLE", reason="首页专用档不复验未改的模型参数和任务来源")
+                        check("task_sources", "NOT_APPLICABLE", reason="首页专用档不操作任务参数")
+                    elif args.profile == "base":
                         require(not states and not options, "Base candidate must not manufacture backend options")
                         check("model_settings", profile="base", no_backend_options=True, panel=panel)
                         check("task_sources", "NOT_APPLICABLE", reason="No OCR backend or task recognition parameters in base profile")
@@ -716,7 +779,9 @@ def native(args, output):
                     self.active = "languages"
                     from py_src.utils.i18n_configs import I18n
                     target_map = harness("translations").TARGETS
-                    language_records = []
+                    language_records, homepage_records = [], []
+                    homepage_targets = (load("stored_navigation_copy_targets", REPO / "tests/test_navigation_repository_link.py").TRANSLATIONS
+                                        if report["homepage_repository_required"] else {})
                     for code in LANGUAGES:
                         activate("GlobalConfigsPage")
                         language_options = jjson("qmlapp.globalConfigs.originDict['ui.i18n'].optionsList")
@@ -724,6 +789,19 @@ def native(args, output):
                         require(index is not None, "Candidate does not offer language: " + code)
                         yield from select("ui.i18n", index)
                         yield from wait(lambda: settled() and I18n.langCode == code, "Actual seven-language switch " + code)
+                        if report["homepage_repository_required"]:
+                            home = activate("Navigation")
+                            label = "仓库链接" if code == "zh_CN" else homepage_targets[code]
+                            target = "https://github.com/Dominic485649/UMI-OCR"
+                            link = "[" + label + "](" + target + ")"
+                            yield from wait(lambda: link in str(js("introText", home)), "首页实际译文和链接目标 " + code)
+                            yield 250
+                            visibility = yield from homepage_link(home, label, target)
+                            homepage_records.append({"code": code, "label": label, "url": target, "visible_link": visibility,
+                                "welcome": str(js("welcomeText", home)), "visible_intro": str(js("introText", home))})
+                            if code in ("zh_CN", "en_US", "ta"):
+                                capture("homepage-" + code)
+                                require((output / ("homepage-" + code + ".png")).is_file(), "首页截图预算不足")
                         about = activate("About"); yield 50
                         expected = ABOUT_KEYS if code == "zh_CN" else target_map[code]
                         actual = tuple(QCoreApplication.translate("About", source) for source in ABOUT_KEYS)
@@ -734,6 +812,9 @@ def native(args, output):
                         language_records.append({"code": code, "about_targets": actual, "copy_label": str(rendered_copy.property("text_"))})
                         no_models()
                     check("languages", switches=language_records, real_combo_events=True, seven_languages=True)
+                    if report["homepage_repository_required"]:
+                        check("navigation_repository", languages=homepage_records, real_compiled_qml=True,
+                              real_language_combo_events=True, external_link_not_opened=True)
                     provenance()
                     no_models()
                     report["scenario_completed"] = True
@@ -1015,7 +1096,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path)
     parser.add_argument("--output", type=Path, required=True, help="A new directory beneath this project's build/audit")
-    parser.add_argument("--profile", choices=("base", "combined"), default="base")
+    parser.add_argument("--profile", choices=("base", "combined", "navigation"), default="base", help="navigation只验收首页及七语，不冒称复验模型/任务参数")
+    parser.add_argument("--check-homepage", action="store_true", help="额外验证七语首页逐字锚点与原生滚动位置可见性，保留中英泰米尔语截图；不打开链接，不冒称鼠标滚轮验收")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--execute-authorized", action="store_true")
     parser.add_argument("--reuse-owned-run", type=Path, help="Explicit previous report.json for this same driver-owned, restored-empty, unchanged, idle candidate")

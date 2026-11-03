@@ -2309,6 +2309,9 @@ def public_release_allowed(gates: dict[str, dict]) -> bool:
     elif current.get("validation_scope") == release_gate_inputs.BASE_CAPTURE_SCOPE:
         if not release_gate_inputs.verified_base_capture_waiver(current):
             return False
+    elif current.get("validation_scope") == release_gate_inputs.directed.SCOPE:
+        if not release_gate_inputs.directed.verified_receipt(current):
+            return False
     elif current.get("validation_scope", "full") != "full":
         return False
     return all(

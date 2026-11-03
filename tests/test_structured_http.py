@@ -108,11 +108,11 @@ class StructuredHttpTests(unittest.TestCase):
                 stream.close()
         return status["value"], payload
 
-    def upload(self, parameters=None, raw=b"test-pdf"):
+    def upload(self, parameters=None, raw=b"test-pdf", filename="input.pdf"):
         boundary = "model-settings-boundary"
         body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"json\"\r\n\r\n" +
                 json.dumps(parameters or {}) + "\r\n" +
-                f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"input.pdf\"\r\nContent-Type: application/pdf\r\n\r\n").encode() + raw + f"\r\n--{boundary}--\r\n".encode()
+                f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{filename}\"\r\nContent-Type: application/octet-stream\r\n\r\n").encode() + raw + f"\r\n--{boundary}--\r\n".encode()
         status, payload = self.request("POST", "/api/document/upload", body=body,
                                        content_type=f"multipart/form-data; boundary={boundary}")
         self.assertEqual(status, 200, payload)
@@ -133,6 +133,21 @@ class StructuredHttpTests(unittest.TestCase):
         self.assertEqual((status, content), (200, b"PNG"))
         status, content = self.request("GET", f"/api/document/assets/{identifier}/not-owned")
         self.assertEqual(status, 404)
+
+    def test_image_suffixes_use_shared_document_contract(self):
+        from py_src.utils.image_formats import IMAGE_SUFFIXES
+        for suffix in IMAGE_SUFFIXES:
+            with self.subTest(suffix=suffix):
+                result = self.upload(filename="中文 输入" + suffix.upper())
+                self.assertEqual(result["code"], 100, result)
+        # 此处验证 HTTP 接纳，不冒充真实解码或模型推理验收。
+
+    def test_uploaded_name_is_preserved_without_client_directories(self):
+        submitted = self.upload(filename="../../目录/中文 文档:JXL.jxl")
+        job = self.server.JOBS[submitted["jobId"]]
+        self.assertEqual(job.source.name, "中文 文档_JXL.jxl")
+        self.assertEqual(job.source.parent, job.root)
+        self.assertEqual(self.server._input_name("CON.PNG", ".png"), "_CON.png")
 
     def test_external_resource_is_not_published(self):
         outside = Path(self.temp.name) / "private.png"
@@ -183,9 +198,11 @@ class StructuredHttpTests(unittest.TestCase):
         job._on_partial({"page": 2, "result": {"code": 100, "text": "second", "markdown": "# second"}})
         job._on_partial({"page": 1, "result": {"code": 100, "text": "first", "markdown": "# first"}})
         job.cancel()
-        text, _, _ = job.export("txt")
+        text, mime, filename = job.export("txt")
         markdown, _, _ = job.export("md")
-        self.assertEqual(text.decode(), "first\n\nsecond")
+        self.assertEqual(text, markdown)
+        self.assertEqual(filename, "document.md.txt")
+        self.assertTrue(mime.startswith("text/plain"))
         self.assertEqual(markdown.decode(), "# first\n\n# second")
         document, _, _ = job.export("json")
         self.assertTrue(json.loads(document)["partial"])
@@ -199,6 +216,8 @@ class StructuredHttpTests(unittest.TestCase):
             self.assertNotIn("/api/document/assets/", archive.read("document.json").decode())
             self.assertNotIn("/api/document/assets/", archive.read("document.md").decode())
             self.assertIn("assets/", archive.read("document.json").decode())
+            self.assertNotIn("document.txt", archive.namelist())
+            self.assertFalse(any(name.endswith(".md.txt") for name in archive.namelist()))
 
     def test_legacy_mixed_admission_without_ocr_backend(self):
         from py_src.server import doc_server

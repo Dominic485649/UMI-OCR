@@ -26,19 +26,9 @@ from .backend_runtime import BackendRuntime
 from ..document.api import getApiDocument, getLocalOptions
 from ..utils.utils import argdIntConvert
 
-# 合法文件后缀：图片 + PDF 。具体后端可以再收窄。
-DocumentSuf = [
-    ".pdf",
-    ".png",
-    ".jpg",
-    ".jpe",
-    ".jpeg",
-    ".jfif",
-    ".webp",
-    ".bmp",
-    ".tif",
-    ".tiff",
-]
+from ..utils.image_formats import DOCUMENT_SUFFIXES
+
+DocumentSuf = list(DOCUMENT_SUFFIXES)
 
 _UNAVAILABLE = {"state": "unavailable", "idleSeconds": 0, "error": ""}
 
@@ -132,24 +122,25 @@ class __MissionDocumentClass(ManagedMission):
 
     def setApi(self, apiKey, info):
         """设置后端。成功返回 [Success] ，失败返回 [Error] 开头的字符串。"""
-        if self.getMissionListsLength() or (self._global_manager and BackendRuntime.busy()):
+        if self.getMissionListsLength() or (self._global_manager and BackendRuntime.configuration_busy()):
             return tr('[Error] 当前任务尚未完成，请稍后切换。')
         if not apiKey:
             self.shutdown()
             self._api = None
             self._apiKey = ""
             return "[Success]"
-        self._apiKey = apiKey
-        info = self._dictShortKey(info)
-        if self._api:
-            try:
-                self._api.stop()
-            except Exception:
-                logger.error(tr('停止旧的结构化文档后端失败。'), exc_info=True)
         from ..document.api import getApiKeys
         if apiKey not in getApiKeys():
-            self._apiKey, self._api = "", None
             return f'[Error] "{apiKey}" is not a registered document capability.'
+        previous_key = self._apiKey
+        self._apiKey = apiKey
+        try:
+            info = self._dictShortKey(info)
+            if self._api:
+                self._api.stop()
+        except Exception:
+            self._apiKey = previous_key
+            raise
         if self._global_manager:
             BackendRuntime.configure("document", apiKey, info)
         res = BackendRuntime.handle("document", apiKey, info, getApiDocument)
