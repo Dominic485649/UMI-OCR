@@ -4,6 +4,8 @@ import importlib.util
 from pathlib import Path
 import sys
 import tempfile
+import unittest
+from unittest.mock import patch
 import zipfile
 
 
@@ -50,5 +52,40 @@ def main():
     print("Public payload privacy and CUDA release-document export regressions passed.")
 
 
+class UpstreamSourcePrivacyTests(unittest.TestCase):
+    def verify_fixture(self, relative, checksum, extra=()):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / relative
+            archive.parent.mkdir(parents=True)
+            archive.write_bytes(b"synthetic upstream archive fixture")
+            members = sorted(module.QT_UPSTREAM_ASSISTANT_FILES) + list(extra)
+            with patch.object(module, "inspect_archive", return_value=members), patch.object(module, "digest", return_value=checksum):
+                return module.verify(root)
+
+    def test_only_exact_locked_official_source_members_are_preserved(self):
+        for prefix in ("third_party/", "source/third_party/"):
+            result = self.verify_fixture(prefix + module.QT_SOURCE_NAME, module.QT_SOURCE_SHA256)
+            self.assertEqual(result["status"], "PASS")
+            self.assertEqual(result["violations"], [])
+            self.assertEqual(set(result["checked_archives"][0]["preserved_upstream_assistant_files"]), module.QT_UPSTREAM_ASSISTANT_FILES)
+
+    def test_modified_archive_does_not_inherit_upstream_exception(self):
+        result = self.verify_fixture("source/third_party/" + module.QT_SOURCE_NAME, "0" * 64)
+        self.assertEqual(result["status"], "BLOCK")
+        self.assertEqual(len(result["violations"]), 5)
+
+    def test_same_hash_at_another_path_does_not_inherit_exception(self):
+        result = self.verify_fixture("other/" + module.QT_SOURCE_NAME, module.QT_SOURCE_SHA256)
+        self.assertEqual(result["status"], "BLOCK")
+
+    def test_extra_private_members_still_block(self):
+        result = self.verify_fixture("source/third_party/" + module.QT_SOURCE_NAME, module.QT_SOURCE_SHA256, ("nested/.claude/private.json",))
+        self.assertEqual(result["status"], "BLOCK")
+        self.assertEqual(result["violations"], ["source/third_party/" + module.QT_SOURCE_NAME + "!nested/.claude/private.json"])
+
+
 if __name__ == "__main__":
     main()
+    result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(UpstreamSourcePrivacyTests))
+    raise SystemExit(0 if result.wasSuccessful() else 1)

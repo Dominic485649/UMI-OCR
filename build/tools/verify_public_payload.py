@@ -19,6 +19,20 @@ PRIVATE_SEGMENTS = {
 ARCHIVE_SUFFIXES = (".zip", ".whl", ".tar", ".tar.xz", ".tar.gz", ".tgz", ".tar.bz2")
 FORBIDDEN_PLUGINS = {"win32_paddleocrv6_cpu", "win32_paddleocrvl_1_6"}
 
+# 官方锁定源码中原本公开的协作说明不是本机助手状态。只接受该归档的
+# 精确路径、整包SHA256和五个成员；不得按文件名或第三方目录整体豁免。
+QT_SOURCE_NAME = "qtwebengine-everywhere-src-6.11.2.tar.xz"
+QT_SOURCE_SHA256 = "6101c1aa00ff933d1b65ee5d167f76e8d71b9ac5b378b0111277723ebda7c163"
+QT_UPSTREAM_ASSISTANT_FILES = frozenset(
+    "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/" + name for name in (
+        "agents/extensions/landmines/GEMINI.md",
+        "third_party/crossbench/GEMINI.md",
+        "third_party/harfbuzz-ng/src/AGENTS.md",
+        "third_party/harfbuzz-ng/src/CLAUDE.md",
+        "v8/GEMINI.md",
+    )
+)
+
 
 def forbidden(name):
     parts = PurePosixPath(name.replace("\\", "/")).parts
@@ -61,7 +75,16 @@ def verify(root, scan_archives=True):
         files.append(relative)
         if scan_archives and path.name.lower().endswith(ARCHIVE_SUFFIXES):
             bad_members = inspect_archive(path)
-            archives.append({"file": relative, "SHA256": digest(path), "private_members": bad_members})
+            checksum = digest(path)
+            upstream = []
+            if (relative in {"third_party/" + QT_SOURCE_NAME, "source/third_party/" + QT_SOURCE_NAME}
+                    and checksum == QT_SOURCE_SHA256):
+                upstream = sorted(set(bad_members) & QT_UPSTREAM_ASSISTANT_FILES)
+                bad_members = [name for name in bad_members if name not in QT_UPSTREAM_ASSISTANT_FILES]
+            record = {"file": relative, "SHA256": checksum, "private_members": bad_members}
+            if upstream:
+                record["preserved_upstream_assistant_files"] = upstream
+            archives.append(record)
             violations.extend(relative + "!" + member for member in bad_members)
     plugins_root = root / "UmiOCR-data/plugins"
     if plugins_root.is_dir():
