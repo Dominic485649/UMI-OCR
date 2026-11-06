@@ -10,6 +10,41 @@ class PluginsConnector(QObject):
     operationFinished = Signal(str, "QVariant")
     cudaDevicesDiscovered = Signal(str, "QVariant")
     _pending = 0
+    modelDownloadChanged = Signal(str, "QVariant")
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        from PySide6.QtCore import QCoreApplication
+        from ..utils.thread_pool import threadRun
+        from .model_downloads import DownloadManager
+        self._downloads = DownloadManager(self._modelResources, self.modelDownloadChanged.emit, threadRun)
+        app = QCoreApplication.instance()
+        if app:
+            app.aboutToQuit.connect(self._downloads.close)
+
+    @staticmethod
+    def _modelResources(pluginId):
+        from .plugins_controller import PluginsController, STATE_READY, STATE_UNHEALTHY
+        record = PluginsController.records.get(pluginId)
+        if not record or not record.manifest or record.state not in (STATE_READY, STATE_UNHEALTHY):
+            raise ValueError(tr('当前插件未加载，不能确定模型安装目录。'))
+        return record.path, record.manifest.modelDownloads
+
+    @Slot(str, str, result="QVariant")
+    def modelDownloadInfo(self, pluginId, resourceId):
+        try:
+            _root, _spec, info = self._downloads.info(pluginId, resourceId)
+            return {"ok": True, **info}
+        except Exception as exc:
+            return {"ok": False, "message": str(exc)}
+
+    @Slot(str, str, str)
+    def startModelDownload(self, requestId, pluginId, resourceId):
+        self._downloads.start(requestId, pluginId, resourceId)
+
+    @Slot(str)
+    def cancelModelDownload(self, requestId):
+        self._downloads.cancel(requestId)
 
     @Slot(str, bool)
     def discoverCudaDevices(self, requestId, force):

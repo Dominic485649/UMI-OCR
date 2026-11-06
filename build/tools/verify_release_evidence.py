@@ -166,9 +166,9 @@ def notice_files(info: Path, vendor: Path) -> list[str]:
     return sorted(names)
 
 
-def ensure_apache_license(staging: Path, errors: list[str]) -> str:
+def ensure_apache_license(staging: Path, errors: list[str], *, allow_copy=True) -> str:
     target = metadata_path(staging, "LICENSES") / "Apache-2.0.txt"
-    if not target.is_file():
+    if not target.is_file() and allow_copy:
         candidates = []
         for candidate in staging.rglob("*"):
             if not candidate.is_file() or "license" not in candidate.name.lower() or candidate.stat().st_size < 9000:
@@ -2312,6 +2312,9 @@ def public_release_allowed(gates: dict[str, dict]) -> bool:
     elif current.get("validation_scope") == release_gate_inputs.directed.SCOPE:
         if not release_gate_inputs.directed.verified_receipt(current):
             return False
+    elif current.get("validation_scope") == release_gate_inputs.directed313.SCOPE:
+        if not release_gate_inputs.directed313.verified_receipt(current):
+            return False
     elif current.get("validation_scope", "full") != "full":
         return False
     return all(
@@ -2351,13 +2354,29 @@ def requested_startup_evidence(path, staging, kind):
                 "blockers": [str(exc) if isinstance(exc, ValueError) else "Cannot verify startup-only evidence."]}
 
 
-def verify(staging: Path, repo: Path, kind: str, cache_root: Path | None, cpu_staging: Path | None = None, release_gates: Path | None = None):
+def report_directory(repo: Path, staging: Path, supplied: Path | None, default: Path) -> Path:
+    if supplied is None:
+        return default
+    supplied = supplied.absolute()
+    release_gate_inputs.no_links(supplied)
+    if ".." in supplied.parts or not supplied.is_relative_to(repo.absolute() / "build/audit"):
+        raise ValueError("外置验证记录只能写入本项目 build/audit 内的新目录")
+    if supplied == staging or supplied.is_relative_to(staging) or staging.is_relative_to(supplied):
+        raise ValueError("外置验证记录不能与产品输入重叠")
+    if supplied.exists() or not supplied.parent.is_dir():
+        raise ValueError("外置验证记录目录必须全新且父目录已存在")
+    return supplied
+
+
+def verify(staging: Path, repo: Path, kind: str, cache_root: Path | None, cpu_staging: Path | None = None,
+           release_gates: Path | None = None, *, report_root: Path | None = None):
     errors: list[str] = []
     startup_evidence = requested_startup_evidence(release_gates, staging, kind)
     metadata = release_gate_inputs.checked_metadata_root(staging, kind)
-    licenses = metadata / "LICENSES"
+    input_licenses = metadata / "LICENSES"
+    licenses = report_directory(repo, staging, report_root, input_licenses)
     previous = {}
-    previous_path = licenses / "RELEASE_EVIDENCE.json"
+    previous_path = input_licenses / "RELEASE_EVIDENCE.json"
     if previous_path.is_file():
         try:
             previous = release_gate_inputs.read_json(previous_path)
@@ -2366,7 +2385,10 @@ def verify(staging: Path, repo: Path, kind: str, cache_root: Path | None, cpu_st
         except (OSError, ValueError):
             errors.append("Existing release evidence is malformed; publication stays blocked.")
             previous = {}
-    licenses.mkdir(parents=True, exist_ok=True)
+    if report_root is None:
+        licenses.mkdir(parents=True, exist_ok=True)
+    else:
+        licenses.mkdir()
     extra_outputs = {}
     if kind == "cpu":
         cpu = verify_cpu_artifact(staging, repo, errors)
@@ -2392,7 +2414,7 @@ def verify(staging: Path, repo: Path, kind: str, cache_root: Path | None, cpu_st
             "cpu-source-mirror.json": cpu.get("source", {"status": "BLOCK"}),
         }
     else:
-        apache_path = ensure_apache_license(staging, errors)
+        apache_path = ensure_apache_license(staging, errors, allow_copy=report_root is None)
         source_lock_path = repo / "build" / "sources-windows-cu126.lock.json"
         if not source_lock_path.is_file():
             raise RuntimeError(f"Missing source lock: {source_lock_path}")
@@ -2488,7 +2510,7 @@ def verify(staging: Path, repo: Path, kind: str, cache_root: Path | None, cpu_st
         report["release_gate_input"] = {"name": release_gates.name, "sha256": sha256(release_gates)}
     write_json(licenses / "RELEASE_EVIDENCE.json", report)
     (licenses / "RELEASE_EVIDENCE.md").write_text(
-        report_markdown(kind, gates, rel(licenses, staging)), encoding="utf-8"
+        report_markdown(kind, gates, "." if report_root is not None else rel(licenses, staging)), encoding="utf-8"
     )
     return report
 
@@ -2502,6 +2524,7 @@ def main() -> int:
     parser.add_argument("--cpu-staging-root", type=Path)
     parser.add_argument("--require-public-release", action="store_true")
     parser.add_argument("--release-gates", type=Path, help="Explicit public-source, current-payload evidence and user-acceptance JSON")
+    parser.add_argument("--report-root", type=Path, help="将新报告写入独立审计目录，不改写原始产品报告")
     args = parser.parse_args()
     try:
         report = verify(
@@ -2511,6 +2534,7 @@ def main() -> int:
             args.cache_root.resolve() if args.cache_root else None,
             args.cpu_staging_root.resolve() if args.cpu_staging_root else None,
             args.release_gates.absolute() if args.release_gates else None,
+            report_root=args.report_root.absolute() if args.report_root else None,
         )
     except Exception as exc:
         print(f"release evidence verifier failed: {exc}", file=sys.stderr)

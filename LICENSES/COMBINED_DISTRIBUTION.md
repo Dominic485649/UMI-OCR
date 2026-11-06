@@ -1,43 +1,28 @@
-# Combined Distribution Licensing
+# 组合发行与许可
 
-This repository preserves the original Umi-OCR MIT license text in
-[`LICENSE`](../LICENSE) without modification, including the copyright notice
-for hiroi-sora. The original Umi-OCR portions received from that upstream
-project continue to be available under that MIT grant.
+原始 Umi-OCR 的 MIT [LICENSE](../LICENSE) 原文、hiroi-sora 版权与署名保持不变。本 fork 新增或修改的部分采用 [AGPL-3.0-or-later](../COPYING)。组合发行包含 PyMuPDF，本项目未使用 Artifex 商业许可，因此组合发行遵循 AGPL-3.0-or-later，原始 PyMuPDF 声明见 [PyMuPDF-AGPL-3.0.txt](PyMuPDF-AGPL-3.0.txt)。不能把所有第三方组件概括为一种许可。
 
-This fork's added files and modifications are licensed under the GNU Affero
-General Public License, version 3 or any later version. The complete license
-text is in [`COPYING`](../COPYING).
+## 最简运行包
 
-The Windows release is a combined work that includes PyMuPDF. PyMuPDF 1.28.0
-is supplied under AGPL-3.0 or an Artifex commercial license; this fork does
-not use an Artifex commercial license. Therefore the complete combined release
-is distributed under AGPL-3.0-or-later. Its PyMuPDF licensing notice is kept
-verbatim in [`PyMuPDF-AGPL-3.0.txt`](PyMuPDF-AGPL-3.0.txt).
+3.1.3 本地候选起，不再把完整源码树、源码 ZIP、第三方源码归档和内部审计报告安装到用户软件目录。运行包保留：
 
-The base release archive includes the following at its root:
+- 原始 MIT `LICENSE`、完整 AGPL `COPYING`。
+- 去重后的适用第三方许可与版权声明，以及确须完整保留的第三方声明集合。
+- 运行依赖自带许可证与必要证书，不裁掉 HTTPS 校验能力。
+- `SOURCE.txt`：组件版本和独立对应源码的获取方式。
 
-- `COPYING`, the full AGPL-3.0 text.
-- `LICENSE`, the original MIT license and hiroi-sora attribution.
-- `LICENSES/`, including this explanation, the PyMuPDF notice, and third-party
-  notices.
-- `source/`, a corresponding-source mirror containing the source files, build
-  scripts, dependency locks, and these license files used for the release. Its
-  `third_party/` directory also contains the locked PyMuPDF source distribution
-  used by the combined release.
+插件声明保留在各自 `UmiOCR-data/plugins/<插件ID>/` 命名空间，不覆盖主程序的许可。完整许可、来源与派生证据仍在构建材料中保存，不代表这些材料失去审计价值。
 
-The CUDA install overlay carries its complete license and corresponding-source
-bundle under `LICENSES/plugins/win32_PaddleOCRv6_CUDA/`, including `COPYING`,
-`LICENSE`, `LICENSES/`, `source/`, and the source-snapshot files. Only the runtime
-payload overlays `UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/`. This prevents
-plugin installation from replacing the host's own notices or source provenance.
+## 独立对应源码
 
-Charging for source delivery, build artifacts, updates, or support is allowed.
-Those commercial terms must not remove or restrict any recipient's AGPL rights
-to run, copy, modify, or redistribute the covered work.
+按 AGPL 第 6(d) 条，正式网络分发在运行包旁清晰提供匹配的对应源码及必要构建、锁定第三方源码/补丁与安装材料，不另收费；接收者无需同时下载源码。具体来源、归档、哈希与公开可取得状态需要按实际交付核验，不能只凭版本号或一个仓库首页断言满足义务。[源码交付说明](../SOURCE-CODE.md)
 
-The CUDA/cuDNN GPU OCR plugin is a separate worker-based aggregate: the
-AGPL-covered host communicates with `worker.py` using simple JSON-lines IPC and
-does not load the NVIDIA SDK into its address space. The worker's proprietary
-runtime and its own vendor manifest remain subject to the NVIDIA agreements;
-this note does not claim that CUDA or cuDNN is AGPL-covered or a system library.
+收费交付源码、构建物、更新和支持均不限制接收者复制、修改、再分发 AGPL 覆盖内容的权利。
+
+## 第三方边界
+
+CUDA/cuDNN、模型和其它第三方库分别受其适用条款约束。CUDA 独立 worker 通过 JSON-lines 与宿主通信，不把 NVIDIA 组件加载到宿主地址空间；进程边界本身不授予 NVIDIA 再分发或模型/商标权利，也不将其自动变为 AGPL 或系统库。
+
+默认归档不包含可选 UI 解锁 DLL。私有 DLL 与 AGPL 组合公开分发的许可判断仍是单独门禁，本地运行通过不等于该问题已审定。
+
+旧版归档与历史验收保留原文和原摘要，不按此布局重写历史。3.1.3 候选尚未取得公开发布批准。

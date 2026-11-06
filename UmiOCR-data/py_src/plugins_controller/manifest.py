@@ -199,6 +199,7 @@ class PluginManifest:
         "closureLock",
         "health",
         "i18nFile",
+        "modelDownloads",
         "legacy",
     )
 
@@ -226,6 +227,7 @@ class PluginManifest:
         self.closureLock = ""
         self.health = None
         self.i18nFile = ""
+        self.modelDownloads = {}
         self.legacy = False
 
     def capabilityTypes(self):
@@ -345,6 +347,13 @@ def loadManifest(pluginId, pluginDir, translator=None):
     manifest.homepage = str(raw.get("homepage") or "")
     manifest.conflicts = [str(v) for v in _asList(raw.get("conflicts"))]
     manifest.i18nFile = str(raw.get("i18n") or "")
+    try:
+        from .model_downloads import validate_resources
+        resources = validate_resources(raw.get("model_downloads", {}))
+        manifest.modelDownloads = {key: {**spec, "title": plugin_tr(spec.get("title", key))}
+                                   for key, spec in resources.items()}
+    except (TypeError, ValueError) as exc:
+        return None, tr('模型下载声明无效：{error}', error=exc)
 
     runtime = raw.get("runtime") or {}
     if not isinstance(runtime, dict):

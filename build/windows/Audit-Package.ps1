@@ -29,7 +29,8 @@ param(
     [string]$CpuStagingRoot = "",
     [switch]$RequirePublicRelease,
     [switch]$LocalCandidate,
-    [string]$ReleaseGates = ""
+    [string]$ReleaseGates = "",
+    [string]$ReportRoot = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -134,6 +135,7 @@ if ($evidenceKind) {
             )
             $evidenceArgs += $cpuEvidenceArgs
             if ($ReleaseGates) { $evidenceArgs += @("--release-gates", $ReleaseGates) }
+            if ($ReportRoot) { $evidenceArgs += @("--report-root", $ReportRoot) }
             if ($RequirePublicRelease) { $evidenceArgs += "--require-public-release" }
             & $evidencePython -I -B -S -X utf8 @evidenceArgs
             if ($LASTEXITCODE -ne 0) { Fail "artifact evidence verifier 未通过（kind=$evidenceKind）" }
@@ -208,6 +210,10 @@ if ($Kind -eq "base") {
             $contents = ($contents -split "`r?`n" | Where-Object {
                 $_ -notmatch '^\s*["'']win32_PaddleOCRVL_1_6["''],?\s*$'
             }) -join "`n"
+        }
+        if ($relative -eq "UmiOCR-data/py_src/plugins_controller/model_downloads.py") {
+            # 与容器审计一致：只允许通用格式检查的精确字面量，不豁免该文件的其它内容。
+            $contents = $contents.Replace('".gguf"', '""').Replace('b"GGUF"', '""').Replace('"下载内容不是 GGUF 模型。"', '""')
         }
         foreach ($term in $forbiddenText) {
             if (([string]$contents).IndexOf($term, [StringComparison]::OrdinalIgnoreCase) -ge 0) {

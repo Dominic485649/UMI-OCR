@@ -246,6 +246,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--complete-root", type=Path, default=None)
     parser.add_argument("--products-root", type=Path, default=None)
     parser.add_argument("--label", default="local-candidate")
+    parser.add_argument("--distribution-layout", choices=("minimal", "complete"), default="minimal")
     parser.add_argument(
         "--product", action="append", choices=("base", "cuda"),
         help="public products to create; repeat --product (default: base and cuda)",
@@ -320,7 +321,14 @@ def main(argv: list[str] | None = None) -> int:
                 "files": len(actual),
                 "sha256": hashlib.sha256(json.dumps(actual, sort_keys=True).encode("utf-8")).hexdigest(),
             }
-            print(f"Independent product verified: {target.name}", flush=True)
+            if args.distribution_layout == "minimal":
+                import prepare_minimal_distribution as minimal
+                runtime_target = target.with_name(target.name + "-runtime")
+                distribution_record = products_root / (target.name + "-distribution.json")
+                minimal.prepare(target, runtime_target, product, distribution_record)
+                result["products"][product].update(path=str(runtime_target), complete_path=str(target),
+                                                  distribution_record=str(distribution_record))
+            print(f"Independent product verified: {result['products'][product]['path']}", flush=True)
 
         for plugin_id, source in optional:
             target = ensure_new(products_root / product_name(version, label, "optional", plugin_id), description=f"optional plugin {plugin_id} product")

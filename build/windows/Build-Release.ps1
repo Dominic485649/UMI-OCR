@@ -15,6 +15,9 @@ param(
     [string]$CpuStagingRoot = "",
     [string]$ReleaseGates = "",
     [ValidateSet("loose", "stored")][string]$RuntimeLayout = "loose",
+    [ValidateSet("minimal", "complete")][string]$DistributionLayout = "minimal",
+    [string]$MinimalRoot = "",
+    [string]$DistributionRecord = "",
     [switch]$ReuseDependencies,
     [switch]$SkipTests,
     [switch]$Offline,
@@ -410,7 +413,7 @@ if ($LocalCandidate) {
     # source notice, so public-source availability remains an explicit BLOCK.
     Mark-LocalCandidateEvidence
     Write-LocalCandidateSourceNotice $StagingRoot
-    Remove-BuildTree (Join-Path $StagingRoot "source")
+    if ($DistributionLayout -eq "complete") { Remove-BuildTree (Join-Path $StagingRoot "source") }
 }
 else {
     Copy-Item -LiteralPath (Join-Path $RepoRoot "SOURCE-CODE.md") -Destination $StagingRoot
@@ -431,12 +434,27 @@ if ($RuntimeLayout -eq "stored") {
     if ($LASTEXITCODE -ne 0) { throw "Host Stored-ZIP source verification failed." }
 }
 Remove-BuildTree (Join-Path $StagingRoot ".build")
+$distributionArgs = @{}
+$archiveRoot = $StagingRoot
+function Initialize-MinimalBase {
+    if ($DistributionLayout -ne "minimal") { return }
+    if (-not $MinimalRoot) { $MinimalRoot = "$StagingRoot-runtime" }
+    $MinimalRoot = Resolve-BuildPath $MinimalRoot
+    if (-not $DistributionRecord) { $DistributionRecord = Join-Path $BuildRoot "audit/minimal-base-$([guid]::NewGuid().ToString('N')).json" }
+    $DistributionRecord = Resolve-BuildPath $DistributionRecord
+    & $python -I -B (Join-Path $RepoRoot "build/tools/prepare_minimal_distribution.py") prepare --component base --root $StagingRoot --output $MinimalRoot --report $DistributionRecord
+    if ($LASTEXITCODE -ne 0) { throw "最简运行包及外置源码绑定失败。" }
+    $script:archiveRoot = $MinimalRoot
+    $script:distributionArgs.DistributionRecord = $DistributionRecord
+    Write-Host "最简运行目录：$MinimalRoot；源码与证据保留在：$StagingRoot；清单：$DistributionRecord"
+}
 if ($LocalCandidate) {
     & (Join-Path $RepoRoot "build\windows\Audit-Package.ps1") -PackageRoot $StagingRoot -Kind base -CpuStagingRoot $CpuStagingRoot -LocalCandidate
     if ($LASTEXITCODE -ne 0) { throw "Package audit failed." }
+    Initialize-MinimalBase
     if (-not $SkipArchive) {
         $archive = Join-Path $OutputRoot "Umi-OCR_v${VersionLabel}-local-candidate_Windows_x64.tar.xz"
-        & $python -I -S (Join-Path $RepoRoot "build/tools/package_tar_xz.py") create --root $StagingRoot --output $archive --integrity-output "$archive.integrity.json"
+        & $python -I -S (Join-Path $RepoRoot "build/tools/package_tar_xz.py") create --root $archiveRoot --output $archive --integrity-output "$archive.integrity.json"
         if ($LASTEXITCODE -ne 0) { throw "tar.xz candidate packaging or integrity verification failed." }
         Write-Host "Local-candidate archive (not a public release): $archive"
     }
@@ -448,6 +466,7 @@ elseif ($SkipArchive) {
     if ($ReleaseGates) { $auditArgs.ReleaseGates = $ReleaseGates }
     & (Join-Path $RepoRoot "build/windows/Audit-Package.ps1") @auditArgs
     if ($LASTEXITCODE -ne 0) { throw "Prepared base package audit failed." }
+    Initialize-MinimalBase
     Write-Host "Noncandidate base prepared without a formal archive; source/current gates may remain BLOCK."
     Write-Host "Freeze the same product after real evidence/payload is fixed; do not rerun the Builder over it."
 }
@@ -455,10 +474,11 @@ else {
     # The shared restricted entry forwards ReleaseGates to Audit-Package
     # -RequirePublicRelease and verify_release_evidence --release-gates
     # --require-public-release, and preserves this exact source/payload tree.
+    Initialize-MinimalBase
     $frozen = Join-Path $BuildRoot "audit/frozen-base-$([guid]::NewGuid().ToString('N')).json"
     $finalizer = Join-Path $RepoRoot "build/windows/Finalize-Release.ps1"
     & $finalizer -PackageRoot $StagingRoot -Kind base -PythonExe $python -FrozenManifest $frozen -Freeze
-    & $finalizer -PackageRoot $StagingRoot -Kind base -PythonExe $python -FrozenManifest $frozen -ReleaseGates $ReleaseGates -OutputRoot $OutputRoot
+    & $finalizer -PackageRoot $StagingRoot -Kind base -PythonExe $python -FrozenManifest $frozen -ReleaseGates $ReleaseGates -OutputRoot $OutputRoot @distributionArgs
 }
 
 Write-Host "Release staging ready: $StagingRoot"

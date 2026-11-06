@@ -19,10 +19,12 @@ def main():
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--tools", type=Path, required=True)
     parser.add_argument("--audit", type=Path, required=True)
+    parser.add_argument("--tool-record", type=Path, help="显式复用已核验工具记录，不搬迁或改写历史记录")
     parser.add_argument("--languages", nargs="+", choices=LANGUAGES, default=LANGUAGES)
     args = parser.parse_args()
     exe = args.tools / ("lupdate.exe" if args.command == "update" else "lrelease.exe")
-    provenance = json.loads((args.audit.parent / "qt-tools.json").read_text(encoding="utf-8"))
+    tool_record = args.tool_record or args.audit.parent / "qt-tools.json"
+    provenance = json.loads(tool_record.read_text(encoding="utf-8"))
     expected = next(item["sha256"] for item in provenance["files"] if item["name"] == exe.name)
     if digest(exe) != expected:
         raise SystemExit("Qt tool changed since wheel verification")
@@ -49,7 +51,7 @@ def main():
         if completed.returncode:
             args.audit.write_text(json.dumps({"version": version, "results": results}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             raise SystemExit("Qt command failed; see " + str(args.audit))
-    args.audit.write_text(json.dumps({"versionCommand": version_cmd, "version": version, "results": results}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    args.audit.write_text(json.dumps({"versionCommand": version_cmd, "version": version, "toolRecord": str(tool_record), "toolRecordSha256": digest(tool_record), "results": results}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"command": args.command, "version": version, "catalogs": len(results), "returncodes": [item["returncode"] for item in results]}, ensure_ascii=False))
 
 

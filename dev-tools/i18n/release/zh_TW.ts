@@ -1100,6 +1100,10 @@
         <source>无法录制快捷键</source>
         <translation>無法錄制快速鍵</translation>
     </message>
+
+    <message><source>下载</source><translation>下載</translation></message>
+
+    <message><source>取消 %1%</source><translation>取消 %1%</translation></message>
 </context>
 <context>
     <name>DocumentManager</name>
@@ -1778,6 +1782,20 @@
     <message><source>模型配置应用失败</source><translation>模型設定套用失敗</translation></message>
 
     <message><source>正在等待并应用模型设置…</source><translation>正在等待並套用模型設定…</translation></message>
+
+    <message><source>下载模型</source><translation>下載模型</translation></message>
+
+    <message><source>从官方直链下载 %1（%2 MiB），保存到：
+%3
+
+不会覆盖已有模型，校验成功后回填此项。</source><translation>從官方直連下載 %1（%2 MiB），儲存至：
+%3
+
+不會覆寫既有模型，驗證成功後填入此項。</translation></message>
+
+    <message><source>模型下载失败</source><translation>模型下載失敗</translation></message>
+
+    <message><source>模型下载完成</source><translation>模型下載完成</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>

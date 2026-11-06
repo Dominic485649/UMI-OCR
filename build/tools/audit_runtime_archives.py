@@ -38,6 +38,10 @@ def public_content(name, data, terms):
     if name in {"py_src/plugins_controller/manifest.py", "py_src/utils/ui_unlock.py"}:
         # 仅允许这两个宿主模块声明精确插件ID；不是插件实现、导入或模型路径的例外。
         text = "\n".join(line for line in text.splitlines() if not LEGACY_REJECTION_LINE.fullmatch(line))
+    if name == "py_src/plugins_controller/model_downloads.py":
+        # 通用文件格式检查不是模型/推理实现；仅去掉三个精确字面量，剩余内容仍完整扫描。
+        for literal in ('".gguf"', 'b"GGUF"', '"下载内容不是 GGUF 模型。"'):
+            text = text.replace(literal, '""')
     folded = text.casefold()
     for term in terms:
         if term.casefold() in folded:

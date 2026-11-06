@@ -75,7 +75,7 @@ class FinalizeFixtures(unittest.TestCase):
             "build/tools/prepare_cuda_overlay.py", "build/tools/verify_public_payload.py",
             "build/tools/audit_runtime_archives.py", "build/tools/runtime_archive_layout.py",
             "build/tools/merge_runtime.py", "build/tools/chunked_files.py",
-            "build/tools/release312_directed_evidence.py",
+            "build/tools/release312_directed_evidence.py", "build/tools/release313_directed_evidence.py",
         )
         for name in trusted:
             target = self.repo / name
@@ -227,7 +227,9 @@ class FinalizeFixtures(unittest.TestCase):
             self.assertEqual(repo, self.repo)
             self.assertEqual(environment["PATH"].split(os.pathsep)[0], str(Path(sys.executable).parent))
             receipt = command[command.index("-ReleaseGates" if len(self.commands) == 1 else "--release-gates") + 1]
-            report = verifier.verify(root, self.repo, kind, None, release_gates=Path(receipt))
+            report_flag = "-ReportRoot" if len(self.commands) == 1 else "--report-root"
+            report_root = Path(command[command.index(report_flag) + 1]) if report_flag in command else None
+            report = verifier.verify(root, self.repo, kind, None, release_gates=Path(receipt), report_root=report_root)
             if not report["public_prerelease_allowed"]:
                 raise finalizer.FinalizationError("Synthetic fixture required verifier gate was BLOCK")
             if hook is not None:
@@ -265,6 +267,135 @@ class FinalizeFixtures(unittest.TestCase):
 
 
 class FreezeFinalizeTests(FinalizeFixtures):
+    def minimal_candidate(self):
+        minimal = finalizer.adjacent("prepare_minimal_distribution")
+        root = self.base()
+        runtime = self.repo / "build/staging/minimal-runtime"
+        distribution = self.repo / "build/audit/minimal.json"
+        minimal.prepare(root, runtime, "base", distribution, source_url="https://example.com/exact-source.tar.xz")
+        frozen, receipt = self.freeze(root), self.receipt(root, "base")
+        document = json.loads(receipt.read_bytes())
+        document["minimal_distribution_record_sha256"] = finalizer.gates.digest(distribution)
+        write(receipt, document)
+        archive = self.repo / "release" / f"Umi-OCR_v{self.version}_Windows_x64.tar.xz"
+        finalizer.packaging.create_archive(runtime, archive, streaming=True)
+        return root, runtime, distribution, frozen, receipt, archive
+
+    def test_register_existing_candidate_preserves_encoding_and_all_original_inputs(self):
+        root, runtime, distribution, frozen, receipt, archive = self.minimal_candidate()
+        before, archive_before = file_bytes(root), archive.read_bytes()
+        reports = self.repo / "build/audit/external-r1"
+        with self.permitted_commands(root), patch.object(finalizer.packaging, "create_archive", side_effect=AssertionError("登记模式不得重新压缩")):
+            result = finalizer.finalize(self.repo, root, "base", frozen, receipt, self.repo / "release",
+                                        distribution_record=distribution, report_root=reports, existing_archive=archive)
+        self.assertTrue(result["registered_existing_archive"])
+        self.assertEqual(archive.read_bytes(), archive_before)
+        self.assertEqual(file_bytes(root), before)
+        self.assertTrue((reports / "audit/RELEASE_EVIDENCE.json").is_file())
+        self.assertTrue((reports / "verification/RELEASE_EVIDENCE.json").is_file())
+        self.assertTrue(archive.with_name(archive.name + ".integrity.json").is_file())
+
+    def test_register_existing_candidate_does_not_waive_member_byte_comparison(self):
+        root, runtime, distribution, frozen, receipt, archive = self.minimal_candidate()
+        # 只构造自有错误归档，不修改待验证程序或原始源材料。
+        archive.unlink()
+        wrong = self.repo / "build/staging/wrong-runtime"
+        write(wrong / "Umi-OCR.exe", b"different fixture executable")
+        finalizer.packaging.create_archive(wrong, archive, streaming=True)
+        before = archive.read_bytes()
+        with self.permitted_commands(root), self.assertRaisesRegex(finalizer.FinalizationError, "Archive bytes/member set"):
+            finalizer.finalize(self.repo, root, "base", frozen, receipt, self.repo / "release",
+                               distribution_record=distribution, existing_archive=archive)
+        self.assertEqual(archive.read_bytes(), before)
+        self.assertFalse(archive.with_name(archive.name + ".integrity.json").exists())
+
+    def test_register_existing_candidate_cannot_skip_authorization_or_clobber_integrity(self):
+        root, runtime, distribution, frozen, receipt, archive = self.minimal_candidate()
+        document = json.loads(receipt.read_bytes())
+        document["publication_authorized"] = False
+        write(receipt, document)
+        before = archive.read_bytes()
+        with self.assertRaisesRegex(finalizer.FinalizationError, "authorization"):
+            finalizer.finalize(self.repo, root, "base", frozen, receipt, self.repo / "release",
+                               distribution_record=distribution, existing_archive=archive)
+        self.assertEqual(archive.read_bytes(), before)
+        write(archive.with_name(archive.name + ".integrity.json"), "owned existing receipt")
+        document["publication_authorized"] = True
+        write(receipt, document)
+        with self.assertRaisesRegex(finalizer.FinalizationError, "overwrite"):
+            finalizer.finalize(self.repo, root, "base", frozen, receipt, self.repo / "release",
+                               distribution_record=distribution, existing_archive=archive)
+
+    def test_existing_archive_cannot_switch_to_a_different_minimal_mapping_after_review(self):
+        root, runtime, distribution, frozen, receipt, archive = self.minimal_candidate()
+        document = json.loads(receipt.read_bytes())
+        document["current_source_e2e"]["validation_scope"] = finalizer.gates.directed313.SCOPE
+        document["current_source_e2e"]["minimal_distribution"] = {"path": str(distribution), "sha256": "f" * 64}
+        write(receipt, document)
+        with self.assertRaisesRegex(finalizer.FinalizationError, "批准引用"):
+            finalizer.finalize(self.repo, root, "base", frozen, receipt, self.repo / "release",
+                               distribution_record=distribution, existing_archive=archive)
+        self.assertFalse(archive.with_name(archive.name + ".integrity.json").exists())
+
+    def test_external_report_paths_and_read_only_apache_boundary(self):
+        root = self.base()
+        for supplied in (root / "reports", self.repo / "build/audit", self.repo / "release/report", self.repo / "build/audit/../escape"):
+            with self.subTest(path=supplied), self.assertRaises(ValueError):
+                verifier.report_directory(self.repo, root, supplied, root / "LICENSES")
+        missing = self.repo / "build/staging/missing-apache"
+        write(missing / "other-LICENSE.txt", "TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION" + "x" * 10000)
+        errors = []
+        verifier.ensure_apache_license(missing, errors, allow_copy=False)
+        self.assertTrue(errors)
+        self.assertFalse((missing / "LICENSES/Apache-2.0.txt").exists())
+
+    def test_minimal_finalizer_checks_actual_runtime_and_separate_materials(self):
+        minimal = finalizer.adjacent("prepare_minimal_distribution")
+        root = self.base()
+        runtime = self.repo / "build/staging/minimal-runtime"
+        distribution = self.repo / "build/audit/minimal.json"
+        minimal.prepare(root, runtime, "base", distribution, source_url="https://example.com/exact-source.tar.xz")
+        frozen, receipt = self.freeze(root), self.receipt(root, "base")
+        document = json.loads(receipt.read_bytes())
+        document["minimal_distribution_record_sha256"] = finalizer.gates.digest(distribution)
+        write(receipt, document)
+        with self.permitted_commands(root):
+            result = finalizer.finalize(self.repo, root, "base", frozen, receipt, self.repo / "release", distribution_record=distribution)
+        import tarfile
+        with tarfile.open(result["archive"], "r:xz") as archive:
+            names = archive.getnames()
+        self.assertIn("SOURCE.txt", names)
+        self.assertNotIn("source-snapshot.zip", names)
+        self.assertFalse(any(name.startswith("source/") for name in names))
+        self.assertTrue((root / "source-snapshot.zip").exists())
+        self.assertEqual(result["runtime_root"], str(runtime))
+
+    def test_minimal_cuda_archive_uses_independent_standard_name(self):
+        minimal = finalizer.adjacent("prepare_minimal_distribution")
+        root, _standalone = self.gpu()
+        runtime = self.repo / "build/staging/minimal-cuda"
+        distribution = self.repo / "build/audit/minimal-cuda.json"
+        minimal.prepare(root, runtime, "cuda", distribution, source_url="https://example.com/cuda-source.tar.xz")
+        frozen, receipt = self.freeze(root, "gpu"), self.receipt(root, "gpu")
+        document = json.loads(receipt.read_bytes())
+        document["minimal_distribution_record_sha256"] = finalizer.gates.digest(distribution)
+        write(receipt, document)
+        with self.permitted_commands(root, "gpu"):
+            result = finalizer.finalize(self.repo, root, "gpu", frozen, receipt, self.repo / "release", distribution_record=distribution)
+        self.assertEqual(Path(result["archive"]).name, "Umi-OCR-Plugin_v3.0.3_Windows_x64_CUDA.tar.xz")
+        self.assertTrue((runtime / "UmiOCR-data/plugins" / finalizer.gates.PLUGIN_ID / "SOURCE.txt").is_file())
+
+    def test_minimal_finalizer_rejects_missing_current_mapping_approval(self):
+        minimal = finalizer.adjacent("prepare_minimal_distribution")
+        root = self.base()
+        distribution = self.repo / "build/audit/minimal.json"
+        minimal.prepare(root, self.repo / "build/staging/minimal-runtime", "base", distribution,
+                        source_url="https://example.com/exact-source.tar.xz")
+        frozen, receipt = self.freeze(root), self.receipt(root, "base")
+        with self.assertRaisesRegex(finalizer.FinalizationError, "绑定不匹配"):
+            finalizer.finalize(self.repo, root, "base", frozen, receipt, self.repo / "release", distribution_record=distribution)
+        self.no_archive()
+
     def test_pre_freeze_main_mismatch_is_rejected_even_with_fresh_independent_receipts(self):
         root = self.base()
         write(root / "UmiOCR-data/main.py", "# payload changed before review\n")

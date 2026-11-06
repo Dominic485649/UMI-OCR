@@ -1100,6 +1100,10 @@
         <source>无法录制快捷键</source>
         <translation>Не удается записать сочетания клавиш</translation>
     </message>
+
+    <message><source>下载</source><translation>Скачать</translation></message>
+
+    <message><source>取消 %1%</source><translation>Отмена %1%</translation></message>
 </context>
 <context>
     <name>DocumentManager</name>
@@ -1778,6 +1782,20 @@
     <message><source>模型配置应用失败</source><translation>Не удалось применить настройки модели</translation></message>
 
     <message><source>正在等待并应用模型设置…</source><translation>Ожидание применения настроек модели…</translation></message>
+
+    <message><source>下载模型</source><translation>Скачать модель</translation></message>
+
+    <message><source>从官方直链下载 %1（%2 MiB），保存到：
+%3
+
+不会覆盖已有模型，校验成功后回填此项。</source><translation>Скачать %1 (%2 MiB) по официальной прямой ссылке в:
+%3
+
+Существующие модели не перезаписываются. Путь будет заполнен после проверки.</translation></message>
+
+    <message><source>模型下载失败</source><translation>Не удалось скачать модель</translation></message>
+
+    <message><source>模型下载完成</source><translation>Модель скачана</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>

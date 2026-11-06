@@ -1094,6 +1094,10 @@ Por favor, modifique as opções avançadas com cuidado.</translation>
         <source>无法录制快捷键</source>
         <translation>Não é possível gravar atalhos</translation>
     </message>
+
+    <message><source>下载</source><translation>Baixar</translation></message>
+
+    <message><source>取消 %1%</source><translation>Cancelar %1%</translation></message>
 </context>
 <context>
     <name>DocumentManager</name>
@@ -1772,6 +1776,20 @@ Se não quiser ver esta notificação, desative o modo avançado nas definiçõe
     <message><source>模型配置应用失败</source><translation>Falha ao aplicar as configurações do modelo</translation></message>
 
     <message><source>正在等待并应用模型设置…</source><translation>Aguardando para aplicar as configurações do modelo…</translation></message>
+
+    <message><source>下载模型</source><translation>Baixar modelo</translation></message>
+
+    <message><source>从官方直链下载 %1（%2 MiB），保存到：
+%3
+
+不会覆盖已有模型，校验成功后回填此项。</source><translation>Baixar %1 (%2 MiB) do link direto oficial para:
+%3
+
+Modelos existentes não serão sobrescritos. O campo será preenchido após a verificação.</translation></message>
+
+    <message><source>模型下载失败</source><translation>Falha ao baixar o modelo</translation></message>
+
+    <message><source>模型下载完成</source><translation>Modelo baixado</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>

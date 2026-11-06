@@ -1100,6 +1100,10 @@
         <source>无法录制快捷键</source>
         <translation>குறுக்குவழி விசைகளை பதிவு செய்ய முடியாது</translation>
     </message>
+
+    <message><source>下载</source><translation>பதிவிறக்கு</translation></message>
+
+    <message><source>取消 %1%</source><translation>ரத்துசெய் %1%</translation></message>
 </context>
 <context>
     <name>DocumentManager</name>
@@ -1778,6 +1782,20 @@
     <message><source>模型配置应用失败</source><translation>மாதிரி அமைப்புகளைப் பயன்படுத்த முடியவில்லை</translation></message>
 
     <message><source>正在等待并应用模型设置…</source><translation>மாதிரி அமைப்புகளைப் பயன்படுத்தக் காத்திருக்கிறது…</translation></message>
+
+    <message><source>下载模型</source><translation>மாதிரியைப் பதிவிறக்கு</translation></message>
+
+    <message><source>从官方直链下载 %1（%2 MiB），保存到：
+%3
+
+不会覆盖已有模型，校验成功后回填此项。</source><translation>அதிகாரப்பூர்வ நேரடி இணைப்பிலிருந்து %1 (%2 MiB) பதிவிறக்கப்படும் இடம்:
+%3
+
+இருக்கும் மாதிரிகள் மேலெழுதப்படாது. சரிபார்ப்புக்குப் பிறகு இந்த அமைப்பு நிரப்பப்படும்.</translation></message>
+
+    <message><source>模型下载失败</source><translation>மாதிரிப் பதிவிறக்கம் தோல்வியடைந்தது</translation></message>
+
+    <message><source>模型下载完成</source><translation>மாதிரிப் பதிவிறக்கம் முடிந்தது</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>

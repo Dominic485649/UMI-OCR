@@ -112,6 +112,20 @@ class RuntimeArchiveAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(LayoutError, "容器源码内容"):
             audit(self.data, forbidden_text=["PaddleOCRVL"])
 
+    def test_generic_downloader_only_exempts_exact_format_literals(self):
+        self.host('SUFFIX = ".gguf"\nMAGIC = b"GGUF"\nERROR = "下载内容不是 GGUF 模型。"\n'.encode("utf-8"),
+                  "py_src/plugins_controller/model_downloads.py")
+        self.assertEqual(audit(self.data, forbidden_text=["gguf"])["status"], "PASS")
+
+    def test_downloader_does_not_exempt_active_plugin_import_or_model_url(self):
+        from audit_runtime_archives import public_content
+        for data in (b'from win32_PaddleOCRVL_1_6 import runtime\n',
+                     b'URL = "https://example.com/private-model.gguf"\n'):
+            with self.subTest(data=data), self.assertRaises(LayoutError):
+                public_content("py_src/plugins_controller/model_downloads.py", data, ["PaddleOCRVL", "gguf"])
+        with self.assertRaises(LayoutError):
+            public_content("py_src/other.py", b'SUFFIX = ".gguf"\n', ["gguf"])
+
     def test_external_source_mismatch_is_rejected(self):
         plugin, unused = self.plugin()
         with self.assertRaises(LayoutError):

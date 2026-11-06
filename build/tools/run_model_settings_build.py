@@ -71,7 +71,7 @@ def main():
     environment.update({"TEMP": str(temporary), "TMP": str(temporary), "PYTHONDONTWRITEBYTECODE": "1", "PIP_NO_INDEX": "1"})
     command = ["pwsh", "-NoProfile", "-File", str(ROOT / "build/windows" / ("Build-Release.ps1" if args.component == "base" else "Build-GpuPlugin.ps1")),
                "-StagingRoot", str(args.stage), "-OutputRoot", str(args.output), "-ReuseDependencies", "-Offline", "-SkipArchive",
-               "-RuntimeLayout", args.runtime_layout]
+               "-RuntimeLayout", args.runtime_layout, "-DistributionRecord", str(args.audit / "distribution.json")]
     if args.local_candidate:
         command.append("-LocalCandidate")
     if args.component == "base":

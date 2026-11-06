@@ -1,146 +1,39 @@
-# Umi-OCR Corresponding Source and Delivery Contract
+# 对应源码与分发方式
 
-## 本次 3.1.2 交付与大源码归档
+## 最简运行包
 
-本次已授权公开主程序 3.1.2、CUDA 插件 3.0.5 和 PaddleVL 插件 3.1.2，各自保留完整对应源码、构建脚本、锁定依赖及许可材料。下文 3.0.3 的范围与日期记录只描述当时状态，不代替本次实际门禁与批准。
+从 3.1.3 本地候选起，本体与插件采用“最简运行包 + 独立对应源码”方式。运行归档不再额外附送顶层 `source/`、`source-records/`、`source-snapshot.zip`、构建/测试文档或内部审计报告。运行必需代码与资源、第三方运行包自带许可、最小必要的版权/许可文本及 `SOURCE.txt` 获取指引继续保留。
 
-程序归档内的 `source/` 和源码 ZIP 始终包含完整原始第三方源码归档。公开 Git 中超过普通 Git 单文件上限的第三方归档可使用 `.source-chunks.json` 与逐块原始字节表示；索引列出逻辑路径、顺序、大小及每块/总文件 SHA256。源码门禁从指定 commit 的实际 Git blobs 重组校验，与包内完整文件逐字节相符；不是省略源码、Git LFS 指针或仅校验一个版本号。
+当前 PaddleVL 内置原生运行时逐项校验整个闭包，其中约 106.4 MiB 的 `resources/llama.cpp/source/` 原始来源材料也在其清单内，直接删除会导致 `BUNDLED_RUNTIME_INVALID`。本轮不改该运行时契约，保留这一例外；完整对应源码包另行包含相同来源及实际适用的 MPL 材料。不将“移出额外附送材料”宣传为运行包中完全没有源文件。
 
-如公开源码目录含该索引，可在该目录运行 `python -I build/tools/chunked_files.py restore --root . --purpose source` 恢复原始归档。工具验证每块和总哈希，只创建新目标，不覆盖现存文件。二进制发行包内的对应源码已经完整，无需恢复分块。
+这不是取消开源义务，也不是改为闭源发行。原 Umi-OCR 的 MIT `LICENSE` 与 hiroi-sora 署名不变；本 fork 新增或修改部分及 PyMuPDF 组合发行遵循 `COPYING` 的 AGPL-3.0-or-later。模型和 NVIDIA 等组件分别适用其条款。
 
-## 历史 3.0.3 契约
+## 取得匹配源码
 
-## Product and source scope
+正式网络分发必须在取得运行包的同一交付位置，清晰提供与其匹配的独立对应源码，不另收费、不要求用户必须同时下载。运行包的 `SOURCE.txt` 与 Release 文案指出具体组件、版本、源码归档名称/位置。
 
-Product 3.0.3 combines the 3.0.2 batch-queue, ordering/removal, document re-OCR,
-ignore-region and hot-settings fixes with retirement of the unsafe in-place
-source-refresh tool and isolation of CUDA plugin source in combined candidates.
-See [the application draft](docs/RELEASE_3.0.3_DRAFT.md),
-[the CUDA draft](docs/RELEASE_CUDA_3.0.3_DRAFT.md),
-[acceptance boundaries](docs/RELEASE_3.0.3_ACCEPTANCE.md) and
-[the review contract](docs/RELEASE_3.0.3_REVIEW.md).
+- 本体及 CUDA 源码材料：[主仓库](https://github.com/Dominic485649/UMI-OCR)。
+- 独立插件源码材料：[插件仓库](https://github.com/Dominic485649/UMI-OCR_plugins)。
+- 原项目与版权来源：[hiroi-sora/Umi-OCR](https://github.com/hiroi-sora/Umi-OCR)。
 
-Corresponding source is maintained in these repositories:
+通用仓库首页或相同版本号本身不是源码完整性的证明。独立源码产物须包含实际适配器、必要构建脚本、锁文件、修改/补丁、原始许可、锁定对应第三方源码及适用的安装信息。用实际 SHA-256、源码快照与运行载荷绑定核对。超过 Git 单文件限制的源码可通过 `.source-chunks.json` 和原始分块交付；其恢复方式见 `build/tools/chunked_files.py`，不把缺失大文件或仅有指针当成完整源码。
 
-- Application and base distribution: https://github.com/Dominic485649/UMI-OCR
-- CUDA plugin: https://github.com/Dominic485649/UMI-OCR_plugins
-- Original project and attribution: https://github.com/hiroi-sora/Umi-OCR
+当前 3.1.3 为本地候选，尚未公开发布。候选完整源码和材料保留在本次构建输入/独立源码归档；正式源访问未核验的状态不能记录为 PASS。
 
-The public product scope is the base application and CUDA plugin only. CPU and
-PaddleOCR-VL plugins are not public assets. This exclusion does not waive source
-obligations for separately distributed covered binaries, including paid delivery.
-Assistant configuration, instructions, sessions, user settings, caches and
-historical runtime binaries are not release-source inputs.
+## 构建和审计
 
-## Frozen source and artifact evidence
+`build/tools/prepare_minimal_distribution.py` 从完整组件生成新的最简运行目录，不改原件；外置分包清单绑定完整材料、保留运行载荷、移出项和最小许可。所有运行文件保持原字节，新增功能则与新源码逐项对应。
 
-Each formal product must retain its own corresponding source, build scripts,
-dependency locks, patches, notices and applicable locked third-party source
-materials. Its `source/` mirror and `source-snapshot.zip` must agree;
-`source-snapshot.json` records member hashes and `source-provenance.json` records
-the parent revision, local-change inclusion, version and source archive hash.
-A parent revision is provenance, not a claim that uncommitted inputs were already
-in that commit. The public source export must match the actual frozen source and
-its matching public commit/tag, not merely share a version string.
+正式 finalize 对完整外置材料运行原有来源和许可门禁，同时核对实际最简包的文件集合与摘要，并要求当次批准输入绑定分包清单。不能用完整包通过后无记录删文件，也不能使用 `LocalCandidate` 或本地 PASS 绕过公开发布门禁。冻结后新生成的验收结果不回写原始源码快照。
 
-A CUDA overlay generated from a combined tree must use the plugin's explicitly
-identified corresponding source, version, snapshot and provenance. It must not
-fall back to the host root. An older combined tree without an explicit plugin
-source must be rejected and reassembled, not assigned a guessed source.
+`--report-root` 可将两轮新审计写入本项目独立目录，原件包括旧派生报告均保持不变；`--existing-archive` 只登记目标位置的同名已审归档，仍执行全部正式门禁、完整 XZ 校验和逐成员 SHA-256 比对，不重新压缩、不修改归档、不覆盖既有完整性回执。PaddleVL 的外置完整材料根同样按逐文件摘要绑定，不以仅有适配器代码代替原生/MPL 对应源码。
 
-Once the actual base and CUDA overlay source and payload have been frozen for
-review, do not refresh or replace their contents. Final artifact-derived reports
-belong in the product's `LICENSES/` metadata, with CUDA overlay metadata under
-`LICENSES/plugins/win32_PaddleOCRv6_CUDA/`. These include `source-delivery.json`,
-`current-source-e2e.json` and `RELEASE_EVIDENCE.json` / `RELEASE_EVIDENCE.md`.
-Do not copy a later PASS back into canonical `source/`, change the frozen source
-or regenerate its snapshot to make a result appear to belong to that source.
-A verification output is not a replacement for explicit, current gate inputs.
+本地固定安装在验收后更新，保留用户配置、任务数据、下载模型和私有本地组件。源码/审计材料不再安装到运行目录，仍在项目构建和独立源码产物中保留。
 
-## Delivery sequence and review gate
+## 许可与历史边界
 
-1. Prepare the base and CUDA products in new directories and run real local
-   acceptance. The 2026-10-22 rebuild plan uses non-`LocalCandidate` preparation
-   with `-SkipArchive`; this step is not a formal archive or publication PASS.
-2. Freeze the actual base and CUDA overlay source and payload, their identities
-   and bindings. Review and later gates must refer to these same files.
-3. Give the user the actual prepared program, both Release texts, evidence,
-   unverified limitations and a project-scoped cleanup preview. Obtain explicit
-   approval of this round's program and texts before updating public main/tags.
-   Permission to replace an existing tag is not approval of an unreviewed program.
-4. Only after that review approval, update the matching public source and tags.
-   A formal fresh source-delivery gate must wait until the public tags match.
-5. Run fresh gates against those frozen products and matching public source, with
-   explicit inputs bound separately to the base and GPU artifact kinds. Historical
-   reports, a version match or user approval alone cannot supply a missing PASS.
-6. Only after the applicable gates succeed, use restricted finalization to derive
-   artifact metadata, create formal archives, reinstall them into a new directory
-   and verify the installed products before publication. Finalization must not
-   rebuild or refresh the reviewed source/payload. A failed or incomplete required
-   gate remains blocking.
+AGPL 第 6(d) 条允许二进制与对应源码分开获取，但要求等价、清晰且持续有效的源码访问方式。收费交付、升级或支持不限制接收者复制、修改和再分发 AGPL 覆盖内容的权利。必要第三方许可/声明不能作为普通缓存删除。
 
-The final local delivery consists of an application directory reinstalled from
-the final archives with the matching CUDA plugin, a base-only archive without an
-OCR inference plugin, and the CUDA plugin archive. External audit/work files stay
-under `build/audit`, not at the release root. Product and Host API versions are
-different fields: product 3.0.3 retains CUDA Host API compatibility `>=2.7,<3.0`.
+默认归档不包含 UI 解锁 DLL；其私有源码和构建材料不属于公开源码集，也不因此声称组合公开分发许可问题已经解决。相关门禁继续保留。
 
-## Dated state: 2026-10-22, before this round's fresh rebuild
-
-This is a source-document freeze point, not a live assertion about every later
-artifact. Subsequent review, gate and publication results must be recorded in
-newly identified review/audit records and the actual artifact metadata, not
-backfilled as PASS into this canonical source document.
-
-- Internal starting HEAD: `b0518fff09d0c0dc730c2bd629a1e1415b354094`.
-- The maintainer's public host `main` and `v3.0.3` point to
-  `fa5613d4d184c46a4e212ce589f19caa96a3f7d6`.
-- The public CUDA `v3.0.3` points to
-  `f9235da667bf87dbc070029169aa0c228701b9a0`.
-- Both `v3.0.3` source tags already exist publicly. Neither 3.0.3 binary Release
-  has been created, uploaded or published. The retained formal binary download
-  links at this cutoff are for `v3.0.1`; a source tag is not a binary release.
-- This round is to repair the formal gate wiring and perform a fresh
-  non-`LocalCandidate`, `-SkipArchive` rebuild. That new build has not yet run at
-  this freeze point; no new hashes, PASS or user acceptance are asserted.
-- The user has permitted replacement of the two public `v3.0.3` tags, subject to
-  renewed review of this round's actual program and texts before main/tag updates.
-  The 3.0.2 tags and drafts remain historical and unchanged.
-
-## Historical evidence, not this round's acceptance
-
-The 2026-10-21 R2 products built from internal `b0518fff` did complete base and
-combined regressions, real hot GUI/plugin switching, Windows tray and HTTP
-readiness/normal exit, GPU workflows, archive reinstallation, corresponding-source
-checks and model-byte checks. The original records are under
-`build/audit/3.0.3/review-20261021-r2/`, including `REVIEW_REQUEST.md`,
-`automated-local-candidates.json`, the install-integrity reports and
-`local-source-products-verified.json`. R2 must not be described as never built or
-never tested. The R2 program and texts were subsequently delivered for review,
-and the user authorized the main/tag push that followed; a review JSON's earlier
-creation-time status does not negate that later authorization. That approval does
-not carry forward to this round's new program. Historical R2 results are not PASS
-for the 2026-10-22 rebuild.
-
-R2 did not complete the full manual/HDR checklist, native Explorer/mouse input,
-the entire GUI single-document re-OCR/old-output protection sequence, or mixed
-HDR/SDR and multi-display coverage. Old HDR feedback is not a new capture receipt
-or acceptance of this round. R1 (`2394ea5d`) remains an earlier automated-test
-record which did not cover the later combined-CUDA source-isolation fix.
-
-The 3.0.2 local archives were frozen from internal revision
-`2a038a48a443140ee3b7f90757e29d72830c094b`. They retain their original source,
-hashes, provenance, notices and historical publication status; see
-[the local delivery notes](docs/RELEASE_3.0.2_LOCAL.md). Do not rename them as
-3.0.3, refresh their source or reuse their hashes/results for new files. The
-retired refresh entry point only reports that it is disabled; it must not patch
-frozen products or access sibling plugin projects.
-
-## Licenses and unchanged inputs
-
-The original Umi-OCR MIT `LICENSE`, hiroi-sora copyright notices and attribution
-remain in place. Fork-added or modified code and the combined PyMuPDF host retain
-AGPL-3.0-or-later terms. NVIDIA runtime and model terms are identified separately;
-preserve all applicable third-party notices and source/license materials.
-This update changes neither the recognition engine, dependency locks nor model
-URLs, bytes or precision, and makes no new model or trademark authorization claim.
+3.1.2 及更早已冻结的源码、归档和验收保持原始记录；其包内源码约定不追溯改写。[历史索引](docs/HISTORY.md)保留对应文档。截图/HDR/混屏测试继续 NOT_RUN，不用其它结果替代。

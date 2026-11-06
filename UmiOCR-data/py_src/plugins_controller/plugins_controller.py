@@ -90,7 +90,7 @@ class PluginRecord:
 
     def __init__(self, id_, path):
         self.id = id_
-        self.path = path
+        self.path = os.path.abspath(path)
         self.manifest = None
         self.state = STATE_INVALID
         self.message = ""

@@ -29,6 +29,9 @@ param(
     [string]$ReleaseGates = "",
     [string]$OverlayRoot = "",
     [ValidateSet("loose", "stored")][string]$RuntimeLayout = "loose",
+    [ValidateSet("minimal", "complete")][string]$DistributionLayout = "minimal",
+    [string]$MinimalRoot = "",
+    [string]$DistributionRecord = "",
     [switch]$ReuseDependencies,
     [switch]$SkipModels,
     [switch]$ReuseModels,
@@ -458,7 +461,7 @@ foreach ($name in $evidenceNames) {
 if ($LocalCandidate) {
     Mark-LocalCandidateEvidence
     Write-LocalCandidateSourceNotice $StagingRoot
-    Remove-BuildTree (Join-Path $StagingRoot "source")
+    if ($DistributionLayout -eq "complete") { Remove-BuildTree (Join-Path $StagingRoot "source") }
     Remove-BuildTree (Join-Path $StagingRoot ".build")
 }
 else {
@@ -493,12 +496,26 @@ try {
     if ($PrepareOverlay) {
         & $basePython -B -I -S (Join-Path $RepoRoot "build/tools/prepare_cuda_overlay.py") --staging-root $StagingRoot --output-dir $OverlayRoot
         if ($LASTEXITCODE -ne 0) { throw "CUDA install overlay preparation failed." }
+        $distributionArgs = @{}
+        $archiveOverlay = $OverlayRoot
+        function Initialize-MinimalCuda {
+            if ($DistributionLayout -ne "minimal") { return }
+            if (-not $MinimalRoot) { $MinimalRoot = "$OverlayRoot-runtime" }
+            $MinimalRoot = Resolve-BuildPath $MinimalRoot
+            if (-not $DistributionRecord) { $DistributionRecord = Join-Path $BuildRoot "audit/minimal-cuda-$([guid]::NewGuid().ToString('N')).json" }
+            $DistributionRecord = Resolve-BuildPath $DistributionRecord
+            & $basePython -I -B (Join-Path $RepoRoot "build/tools/prepare_minimal_distribution.py") prepare --component cuda --root $OverlayRoot --output $MinimalRoot --report $DistributionRecord
+            if ($LASTEXITCODE -ne 0) { throw "CUDA 最简覆盖层或外置材料绑定失败。" }
+            $script:archiveOverlay = $MinimalRoot
+            $script:distributionArgs.DistributionRecord = $DistributionRecord
+        }
         if (-not $LocalCandidate) {
             if ($SkipArchive) {
                 $auditArgs = @{ PackageRoot = $OverlayRoot; Kind = "plugin"; CpuStagingRoot = $CpuStagingRoot }
                 if ($ReleaseGates) { $auditArgs.ReleaseGates = $ReleaseGates }
                 & (Join-Path $RepoRoot "build/windows/Audit-Package.ps1") @auditArgs
                 if ($LASTEXITCODE -ne 0) { throw "Prepared CUDA overlay audit failed." }
+                Initialize-MinimalCuda
                 Write-Host "Noncandidate CUDA overlay prepared without a formal archive; source/current gates may remain BLOCK: $OverlayRoot"
                 Write-Host "Freeze this actual overlay only after its real evidence/payload is fixed; do not rerun the Builder over it."
             }
@@ -507,15 +524,17 @@ try {
                 # It forwards ReleaseGates to Audit-Package -RequirePublicRelease
                 # and verify_release_evidence --release-gates --require-public-release
                 # for this SAME overlay; it never refreshes source or runtime.
+                Initialize-MinimalCuda
                 $frozen = Join-Path $BuildRoot "audit/frozen-gpu-$([guid]::NewGuid().ToString('N')).json"
                 $finalizer = Join-Path $RepoRoot "build/windows/Finalize-Release.ps1"
                 & $finalizer -PackageRoot $OverlayRoot -Kind gpu -PythonExe $basePython -FrozenManifest $frozen -Freeze
-                & $finalizer -PackageRoot $OverlayRoot -Kind gpu -PythonExe $basePython -FrozenManifest $frozen -ReleaseGates $ReleaseGates -OutputRoot $OutputRoot
+                & $finalizer -PackageRoot $OverlayRoot -Kind gpu -PythonExe $basePython -FrozenManifest $frozen -ReleaseGates $ReleaseGates -OutputRoot $OutputRoot @distributionArgs
             }
         }
         else {
+            Initialize-MinimalCuda
             $archive = Join-Path $OutputRoot "Umi-OCR-Plugin_GPU-OCR_v${Version}-local-candidate_Windows_x64_CUDA12.6.tar.xz"
-            & $basePython -I -S (Join-Path $RepoRoot "build/tools/package_tar_xz.py") create --root $OverlayRoot --output $archive --integrity-output "$archive.integrity.json"
+            & $basePython -I -S (Join-Path $RepoRoot "build/tools/package_tar_xz.py") create --root $archiveOverlay --output $archive --integrity-output "$archive.integrity.json"
             if ($LASTEXITCODE -ne 0) { throw "tar.xz candidate packaging or integrity verification failed." }
             Write-Host "Local-candidate archive (not a public release): $archive"
         }

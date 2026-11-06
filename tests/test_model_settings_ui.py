@@ -247,8 +247,41 @@ def run(data_root, source_root):
         assert commits == before_commits and settings.writes == before_writes
         passed.append("稍后真正展开及重建全局panel会建立控件映射，不额外提交或破坏现有共享入口")
 
+        # 实例化真实文件控件：下载按钮位于文件选择左侧，普通文件不出现该入口。
+        file_component = QQmlComponent(engine)
+        file_component.setData(b'''import QtQuick 2.15
+import "."
+Configs {
+    autoLoad: false
+    property var modelDownloadStates: ({})
+    property string requested: ""
+    function startModelDownload(key) { requested = key }
+    function cancelModelDownload(key) { requested = "cancel:" + key }
+}''', QUrl.fromLocalFile(str(configs_path.with_name("DownloadFixture.qml"))))
+        file_root = file_component.createWithInitialProperties({"width": 1000, "height": 400, "category_": "DownloadFixture"})
+        assert file_root is not None, file_component.errorString()
+        roots.append(file_root)
+        engine.globalObject().setProperty("downloadFixture", engine.newQObject(file_root))
+        evaluate('downloadFixture.configDict={model:{title:"模型",type:"file",default:"",download:"main"},other:{title:"普通文件",type:"file",default:""}};downloadFixture.reload()')
+        checkpoint()
+        QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
+        buttons = file_root.findChildren(QObject, "modelDownloadButton")
+        assert len(buttons) == 2
+        button = next(item for item in buttons if item.property("visible"))
+        ordinary = next(item for item in buttons if not item.property("visible"))
+        assert button.property("visible") and not ordinary.property("visible")
+        button.clicked.emit()
+        assert file_root.property("requested") == "model"
+        evaluate('downloadFixture.modelDownloadStates={model:{state:"running",received:50,total:100}}')
+        assert "50%" in button.property("text_")
+        button.clicked.emit()
+        assert file_root.property("requested") == "cancel:model"
+        checkpoint()
+        passed.append("真实文件控件的下载入口、普通文件隐藏、进度与取消可用")
+
         # 执行真实 QML 函数验证布局、模型候选、任务门禁、预热参数及服务映射。
         js = QJSEngine()
+        js.installExtensions(QJSEngine.TranslationExtension)
         functions = [helper.qml_function(manager_path, name) for name in
                      ("modelDisplayName", "makeGlobalOptions", "orderedModelKeys", "init1", "buildWarmupInfo", "modelPanelLayout")]
         functions += [helper.qml_function(global_path, name) for name in ("getPluginServiceValues", "publishBackendSnapshots", "backendsBusy", "orderedPluginStates", "modelSettingsLayout", "withoutDeviceItems", "buildPanelLayout", "maintainPluginServices")]
@@ -257,6 +290,7 @@ def run(data_root, source_root):
         var apiKey="win32_PaddleOCRv6_CUDA", localOptions={}, serviceRefs={}, globalOptions={};
         var ocrManager={taskSourcesRevision:0,taskSources:{},usesSharedService:function(){return false}};
         var definitionRevision=1, configDict={}, originDict={}, busy=false, applying=false;
+        var documentUiEnabled=false, documentUiBackendIds=[], documentManager={localOptions:{}};
         var stored={"ocr.longSide":6333,"ocr.nested.limit":7}, values={
           "ocr.lifecycle.cleanupPolicy":"idle","ocr.lifecycle.idleCleanupMinutes":17,
           "pluginServices.vl.model.modelPath":"keep.gguf","pluginServices.vl.model.lifecycle.autoStopMode":"never"};
@@ -279,6 +313,29 @@ def run(data_root, source_root):
             assert not result.isError(), result.toString() + "\n" + result.property("stack").toString()
             return result
         js_eval(setup + "\n" + "\n".join(functions))
+        downloads = [helper.qml_function(global_path, name) for name in ("updateModelDownloadState", "startModelDownload", "cancelModelDownload", "onModelDownloadChanged")]
+        js_eval('''var modelDownloadStates={}, modelDownloadRequests={}, modelDownloadSequence=0;
+          var confirmation, downloadCalls=[], downloadWrites=[];
+          var pluginsConnector={modelDownloadInfo:function(){return {ok:true,title:"官方模型",bytes:100,path:"user/plugin/model/main.gguf"}},
+            startModelDownload:function(request,plugin,resource){downloadCalls.push([request,plugin,resource])},
+            cancelModelDownload:function(request){downloadCalls.push(["cancel",request])}};
+          function setValue(key,value,save){values[key]=value;downloadWrites.push([key,value,save])}
+          qmlapp.popup.dialog=function(title,message,callback){confirmation=callback};
+          qmlapp.popup.message=function(){};
+          var downloadKey="pluginServices.vl.model.main";
+          originDict[downloadKey]={download:"main"}; values[downloadKey]="old.gguf";
+        ''' + "\n".join(downloads))
+        js_eval('startModelDownload(downloadKey);confirmation(true)')
+        assert js_eval('downloadCalls[0][1]').toString() == "vl"
+        js_eval('onModelDownloadChanged(downloadCalls[0][0],{state:"running",received:50,total:100})')
+        assert js_eval('modelDownloadStates[downloadKey].received').toInt() == 50
+        js_eval('values[downloadKey]="user-choice.gguf";onModelDownloadChanged(downloadCalls[0][0],{state:"completed",path:"downloaded.gguf"})')
+        assert js_eval('values[downloadKey]').toString() == "user-choice.gguf"
+        assert js_eval('downloadWrites.length').toInt() == 0
+        js_eval('startModelDownload(downloadKey);confirmation(true);onModelDownloadChanged(downloadCalls[1][0],{state:"completed",path:"user/plugin/model/main.gguf"})')
+        assert js_eval('downloadWrites.length').toInt() == 1
+        assert js_eval('values[downloadKey]').toString() == "user/plugin/model/main.gguf"
+        passed.append("真实下载回调只提交匹配请求，用户手改路径后旧下载不覆盖新选择")
         assert js_eval('modelDisplayName({meta:{modelName:"模型元数据"}},"任意插件")').toString() == "模型元数据"
         assert js_eval('modelDisplayName({local_options:{detModel:{optionsList:[["真实模型键","显示标签"]]}}},"任意插件")').toString() == "真实模型键"
         assert js_eval('modelDisplayName({global_options:{title:"通用插件标题"}},"任意插件")').toString() == "通用插件标题"

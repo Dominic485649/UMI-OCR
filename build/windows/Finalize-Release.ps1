@@ -16,7 +16,10 @@ param(
     [Parameter(Mandatory = $true, ParameterSetName = "Freeze")][switch]$Freeze,
     [Parameter(Mandatory = $true, ParameterSetName = "Finalize")][string]$ReleaseGates,
     [Parameter(ParameterSetName = "Finalize")][string]$OutputRoot = "",
-    [string]$PythonExe = ""
+    [string]$PythonExe = "",
+    [Parameter(ParameterSetName = "Finalize")][string]$DistributionRecord = "",
+    [Parameter(ParameterSetName = "Finalize")][string]$ReportRoot = "",
+    [Parameter(ParameterSetName = "Finalize")][string]$ExistingArchive = ""
 )
 $ErrorActionPreference = "Stop"
 if ($PSVersionTable.PSVersion.Major -lt 7) { throw "PowerShell 7 is required." }
@@ -62,6 +65,11 @@ if (-not $Freeze) {
     if (-not $OutputRoot) { $OutputRoot = Join-Path $RepoRoot "release" }
     $OutputRoot = Resolve-PlainPath $OutputRoot
     $helperArgs += @("--release-gates", $ReleaseGates, "--output-root", $OutputRoot)
+    if ($DistributionRecord) {
+        $helperArgs += @("--distribution-record", (Resolve-PlainPath $DistributionRecord))
+    }
+    if ($ReportRoot) { $helperArgs += @("--report-root", (Resolve-PlainPath $ReportRoot)) }
+    if ($ExistingArchive) { $helperArgs += @("--existing-archive", (Resolve-PlainPath $ExistingArchive)) }
 }
 & $PythonExe -I -B -S -X utf8 (Join-Path $RepoRoot "build/tools/finalize_release.py") @helperArgs
 if ($LASTEXITCODE -ne 0) { throw "Release freeze/finalization failed; no formal archive was authorized." }

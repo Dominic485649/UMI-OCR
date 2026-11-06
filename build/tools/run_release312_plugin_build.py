@@ -35,7 +35,7 @@ def main():
         "-RuntimeLock", str(PLUGIN / "requirements.lock"), "-LlamaRuntimeBundle", str(bundle),
         "-PaddleOCRWheel", str(ROOT / "build/cache/vl-wheels/paddleocr-3.7.0-py3-none-any.whl"),
         "-PaddleXWheel", str(ROOT / "build/cache/vl-wheels/paddlex-3.7.2-py3-none-any.whl"),
-        "-RuntimeLayout", "stored", "-SkipTests", "-SkipArchive"]
+        "-RuntimeLayout", "stored", "-SkipTests", "-SkipArchive", "-DistributionRecord", str(args.audit / "distribution.json")]
     environment = {**os.environ, "TEMP": str(temporary), "TMP": str(temporary), "PYTHONDONTWRITEBYTECODE": "1",
         "PIP_NO_INDEX": "1", "PIP_FIND_LINKS": " ".join(path.as_uri() for path in (
             PLUGIN / "build/cache/paddlevl-locked-wheels-cp313",

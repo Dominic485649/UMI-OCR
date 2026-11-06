@@ -1,113 +1,65 @@
-# Windows CUDA 构建文档
+# Windows 构建与最简分发
 
-本文档说明 Umi-OCR 独立 Windows x64 基础包和 CUDA 12.6 插件的构建契约。本体版本从 `UmiOCR-data/about.json` 读取，CUDA 插件版本从其 `umi-plugin.json` 读取，两者不要求同版；兼容性按 Host API 范围判断。展示名、窗口标题、`Umi-OCR.exe` 和便携设置目录 `.settings` 保持为 `Umi-OCR`。
+目标为 Windows x64。主程序版本读取 `UmiOCR-data/about.json`，CUDA 读取插件清单，PaddleVL 读取授权插件工程中的 `VERSION` 与清单；不要求同版。兼容性依据 Host API、Python ABI、平台和实际联合运行。
 
-**当前准备范围（2026-10-24）**：CUDA 插件 `3.0.4` 配套已发布的本体 `3.0.3`，不重编或改写本体。插件源码构建的 `UmiOCR-CudaWorker.exe` 内嵌 `activeCodePage=UTF-8`，在实际加载 Python/Paddle 的进程启用原生 UTF-8，不修改原版 Python EXE、Windows 全局编码或模型路径。本轮真实回归仅限启动、CUDA/模型初始化与正常退出；未重新执行图片/PDF OCR，不将历史 E2E PASS 写成本轮结果。当前准备不代表验收或发行通过，正式门禁继续保留原规则与 BLOCK，详见 [3.0.4 CUDA 文案](RELEASE_CUDA_3.0.4_DRAFT.md)和[本轮审查范围](RELEASE_CUDA_3.0.4_REVIEW.md)。
+## 环境与输入
 
-**日期冻结状态（2026-10-22，本轮 fresh 重建开始前）**：3.0.3 的历史 R2 已完成基础/组合、热 GUI、托盘/HTTP/退出、GPU、归档重装和源码/模型核验；两个公开 `v3.0.3` 源码标签已存在，但 binary Release 尚未创建、上传或公开。本轮计划修正正式门禁接线并 fresh noncandidate `-SkipArchive` prepare，此截点尚未构建，不继承 R2 PASS、哈希或审查同意。实际程序及两份文案须再次交审，同意后才更新 main/tag；正式 source gate 等标签匹配后运行，再受限 finalize。详见 [3.0.3 验收契约](RELEASE_3.0.3_ACCEPTANCE.md)、[审查要求](RELEASE_3.0.3_REVIEW.md)和[源码交付契约](../SOURCE-CODE.md)。
+- PowerShell 7（`pwsh`）、Git、CMake、Visual Studio C++ 工具链和 Windows SDK。
+- 锁定的 Python 3.13.16、Qt/PySide6 6.11.2、CUDA 12.6 依赖与对应源码。
+- `build/requirements-base-windows.lock`、`build/requirements-gpu-plugin-windows-cu126.lock`、`build/sources-windows-cu126.lock.json` 和 Qt 白名单。
+- 离线模式只复用已核验的完整 runtime、wheel、模型和来源材料；缺失即失败，不回退联网。不重新解析依赖锁、不下载或量化模型来完成普通分包。
 
-## 构建环境
+用户不需要安装系统 Python、pip 或 CUDA Toolkit；运行仍需要兼容的 NVIDIA GPU 和驱动。
 
-- Windows 10/11 x64；CUDA 3.0.4 的原生 UTF-8 worker 入口要求 Windows 10 1903+ 或 Windows 11。
-- NVIDIA GPU，Windows 驱动 `560.76` 或更高版本。无需预装 CUDA Toolkit；锁定的 CUDA 12.6/cuDNN DLL 随便携包提供。Scoop 等位置中的系统 CUDA 不参与构建产物运行时解析，也不能替代包内 DLL。
-- Visual Studio 2026、MSVC 14.51、Windows SDK 10.0.28000.0，安装“使用 C++ 的桌面开发”。脚本使用 `vswhere` 查找，不依赖机器绝对路径。
-- CMake、Git、PowerShell 7、`7z.exe` 和 Windows 自带 `tar.exe`、`curl.exe` 可从 `PATH` 调用。
-- Qt/PySide6 6.11.2。离线构建只使用已存在的 runtime、wheel 闭包、模型和对应源码缓存；`-Offline` 缺锁定输入即失败，禁止联网。首次准备依赖或升级锁须单独获得批准。
+## 构建边界
 
-最终用户不需要安装 Python、pip、CUDA Toolkit 或执行任何安装命令。
+`build/windows/Build-Release.ps1` 和 `Build-GpuPlugin.ps1` 在全新 `-StagingRoot` 内构建完整输入。只有变动组件需要重建；重新分包未变 CUDA 不需要重编译。PaddleVL 使用授权独立工程的 `Build-Plugin.ps1`，不把兄弟工程作为主程序的隐式源码来源。
 
-### 为什么仍使用 CUDA 12.6
+两个主构建入口与 PaddleVL 默认 `-DistributionLayout minimal`：
 
-当前仍锁定 cu126 组合；没有当前同模型、同机器的验收证据支持切换 cu130/cu133。系统 CUDA Toolkit 不替代便携运行 DLL。本地构建和复制完整性检查不代表当前成品已经通过 GPU E2E。
+- `-StagingRoot` 保留完整源码、锁定依赖来源和审计所需材料。
+- `-MinimalRoot` 指定新的运行目录，默认 `<StagingRoot>-runtime`。
+- `-DistributionRecord` 指定新的外置分包 JSON；默认在相应 `build/audit/` 具名生成。
+- `-DistributionLayout complete` 仅供旧布局兼容，不用于本轮最简交付。
+- `-RuntimeLayout stored` 按原策略聚合 Stored-ZIP；不压缩/混淆原始 Python，不裁掉需要落地的原生扩展与资源。
+- `-SkipArchive` 只准备输入与运行目录，不等于验收或正式发布通过。`LocalCandidate` 不是公开发行授权。
 
-## 锁定与来源
+构建命令的种子、工作根和输出路径应来自本轮实际记录，不能复制历史文档中的机器目录当作当前有效输入。`-ReuseDependencies -Offline` 保持依赖锁；CUDA 的 `-SkipModels` 仅禁止下载/派生，新的构建须同时提供已核验的 `-ReuseModels` 输入。
 
-- `build/requirements-windows-cu126.in`：直接运行时依赖。
-- `build/constraints-windows-cu126.in`：已实测的传递依赖约束。
-- `build/requirements-base-windows.lock`：基础包 wheel 版本与 SHA256。
-- `build/requirements-gpu-plugin-windows-cu126.lock`：GPU 插件 wheel 版本与 SHA256。
-- `build/sources-windows-cu126.lock.json`：Python 与 PP-OCRv6 官方模型的 URL、大小和 SHA256。
-- `UmiOCR-data/native-dlls.lock.json`：构建时生成并进入发布包，记录所有原生 DLL 的相对路径、文件版本与 SHA256。
+## 分包与源码
 
-重新解析 wheel 锁（只在升级依赖时执行）：
+共用工具 `build/tools/prepare_minimal_distribution.py` 支持 `prepare`、`verify`、`package`：
 
-```powershell
-pwsh -File .\build\windows\Resolve-Lock.ps1
-```
+- `prepare` 从完整输入创建全新运行覆盖层，逐项记录保留、移出、来源和摘要，未知根文件拒绝丢弃。
+- `verify` 同时核验实际运行树和外置完整材料，不将本地完整性 PASS 当成公开来源 PASS。
+- `package` 产生真正的 `.tar.xz` 运行归档和独立对应源码归档，并保存本地打包记录；不接受 CLI 参数绕过公开门禁。
 
-## 离线构建示例与分版本准备
+本体解压后直接出现 `Umi-OCR.exe`、`UmiOCR-data/`；插件解压后直接进入 `UmiOCR-data/plugins/<插件ID>/`，没有多余产品目录前缀。最简许可与 `SOURCE.txt` 在本体根/插件命名空间；不安装源码和审计树。运行所需 CA 证书、Qt/Chromium 资源、编解码器、模型与已有依赖许可不误删。
 
-仅更新 CUDA 3.0.4 时，`-BaseStagingRoot` 指向已校验的本体3.0.3展开目录，`-ReuseVendorFromStagingRoot` 指向完整、已校验的CUDA3.0.3展开目录；使用新的 `-StagingRoot`，配合 `-ReuseDependencies -ReuseModels -SkipModels -Offline -SkipArchive`。此时只执行 `Build-GpuPlugin.ps1`，无需调用 `Build-Release.ps1`，插件版本取3.0.4，宿主字节保持3.0.3原样；不得使用曾被清理成不完整状态的旧 staging 作为种子。
+独立对应源码与运行包按实际版本/哈希对应，正式分发时放在同一交付位置清晰提供。完整原件、源码镜像与原始证据继续保留在构建工作区。[源码交付](../SOURCE-CODE.md)
 
-从仓库根目录执行；构建编译本地原生组件、复制和静态审计，不启动产品或 GPU，不下载包或模型。所有输出路径必须全新，seed 只读。构建入口不扫描、删除或重建旧 staging。
+## 审计、冻结和正式归档
 
-下面保留带 `-LocalCandidate` 的开发候选示例，路径名沿用 3.0.2 阶段示例，**不是本轮 3.0.3 正式 prepare/finalize 命令**，也不证明这些旧 seed 仍可用。本轮按已批准方案在新目录走 non-`LocalCandidate`、`-SkipArchive` prepare，实际路径、只读 seed、base 与 CUDA overlay 输出须以本轮具名构建记录为准。独立 GPU staging 不自动等同正式 overlay；应在真实 GPU 回执及材料固定后一次性生成实际 overlay，再冻结该 overlay。完成真实本地验收并冻结实际 source/payload 后先交审；获同意及公开标签匹配后才 fresh gate 和受限 finalize。不能直接省略 `-SkipArchive` 绕过此顺序，下面的开发组装/拆分同样不能替代正式 finalize。
+完整输入仍走既有 `Audit-Package.ps1` / `verify_release_evidence.py` 来源、许可与运行门禁。`Finalize-Release.ps1 -DistributionRecord` 在这些门禁通过后核对最简运行树，公开批准输入还须绑定 `minimal_distribution_record_sha256`；最终归档按实际最简文件集合和字节校验，不是事后无记录删包。
 
-```powershell
-$repo = (Get-Location).Path
-$run = Get-Date -Format 'yyyyMMdd-HHmmss'
-$base = Join-Path $repo "build/staging/302-base-$run"
-$gpu = Join-Path $repo "build/staging/302-gpu-$run"
-# 首次升级示例；清理旧版本后，改为当版验收记录中的有效只读 seed。
-$baseSeed = "$repo/build/staging/301-base-20261018"
-$gpuSeed = "$repo/build/staging/301-gpu-20261018"
-pwsh -File ./build/windows/Build-Release.ps1 -StagingRoot $base `
-  -ReuseDependencies -ReuseFromStagingRoot $baseSeed `
-  -Offline -SkipTests -SkipArchive -LocalCandidate
-pwsh -File ./build/windows/Build-GpuPlugin.ps1 -StagingRoot $gpu -BaseStagingRoot $base `
-  -ReuseDependencies -ReuseVendorFromStagingRoot $gpuSeed `
-  -ReuseModels -SkipModels -Offline -SkipArchive -LocalCandidate
-$python = "$base/UmiOCR-data/runtime/python.exe"
-```
+正式源/许可仍有 BLOCK 时，不得据“运行包不含额外源码”忽略门禁。冻结后不刷新来源、重算快照或把新 PASS 写回旧源码。PaddleVL 的正式发行同样需要自己的源码与依赖许可核验，不能由主程序 PASS 代替。
 
-Base 只复制 runtime/site-packages 和 Qt manifest，再复制包含未 tracked 文件的当前公开宿主源码，并重新编译启动器/HDR DLL。GPU 复制 vendor 和已派生模型；`-SkipModels` 只禁止模型下载/派生，必须配合 `-ReuseModels`。缺 seed、源码缓存或哈希/大小不符会失败，不回退联网。
+- `Finalize-Release.ps1 -ReportRoot` 将结构审计与直接验证的新结果分别写入独立 `audit/`、`verification/` 子目录；不得覆盖已冻结/历史原件中的报告。
+- `-ExistingArchive` 明确登记目标目录中的同名候选归档，保留原编码参数，但不绕过来源、许可、当次程序/文案批准或逐成员比对。仅成功后生成新的完整性回执，不改归档，也不覆盖既有回执。
+- `prepare_minimal_distribution.py prepare --metadata-root` 仅供 PaddleVL 已独立核验的完整外置来源/许可根使用；版本、原始许可证及全部材料均须匹配，运行载荷仍来自实际完整组件输入。
+- `prepare_webengine_sources.py --source-archive` 可从本项目锁定官方源码缓存重新只读收集法律文件，核对完整大小/SHA-256，不重复下载；不会按 `measurement_notice.ts` 等名称误收界面源码。
+- 3.1.3 的有限验收范围独立于 3.1.2，保留截图/HDR/混屏 NOT_RUN，并明确未重跑 PDF 全矩阵、未完整网络下载大权重；一般发布意图不是当次程序和文案审查批准。
 
-可选组装和拆分公开产品，不隐式读取兄弟 CPU/VL 仓库：
+## 定向验收与本地更新
 
-```powershell
-$complete = "$repo/build/artifacts/3.0.2-$run/complete"
-pwsh -File ./build/windows/Assemble-Candidate.ps1 -Destination $complete `
-  -BaseStagingRoot $base -GpuStagingRoot $gpu
-& $python -B ./build/tools/prepare_products.py --complete-root $complete `
-  --products-root "$repo/build/artifacts/3.0.2-products-$run"
-& $python -B ./build/tools/export_cuda_source.py `
-  --output-dir "$repo/build/artifacts/302-plugin-repository-$run"
-```
+按影响面选择测试：新布局的分类/来源绑定、下载流式/取消/失败/冲突/路径安全、QML 按钮与配置回填、真实归档重装、实际程序启动、插件发现与代表性 OCR/文档链。纯分包的未变依赖和模型用逐文件哈希复核，并说明复用证据边界，不例行全仓回归。
 
-源码导出仅包含公开 CUDA 适配器、所需公开构建工具、docs、锁、许可证和锁定对应源码材料，保留相对路径，不创建远端、Git 历史或发布。目标存在即失败；不要清理已有导出以重试。显式 `-CpuStagingRoot`、`-VlStagingRoot` 和 `--optional-plugin ID=PATH` 仅用于可选开发工作流；公开默认不选择它们。`source_snapshot.py` 默认为 `public`，包含未 tracked 公开源码，排除 vendor/models/cache/artifacts/临时数据；直接生成快照也要求已有锁定对应源码缓存。
+截图捕获、HDR、混屏/多屏后续不再主动测试，保持 NOT_RUN，不要求人工补验。新增下载的网络 E2E 与本地已有模型推理分别记录；元数据可用不能算完整权重下载成功。
 
-## tar.xz 与安装路径
+验收后从新归档组合更新固定安装 `release/Umi-OCR`，保留用户配置、日志、任务资源、`model/` 及本地私有 DLL；不覆盖运行中目录，不终止用户进程。发布前必须交审实际程序、文案、验收限制和清理预演；本地安装更新不等待公开发布批准，也不构成该批准。
 
-两个 Build 脚本都调用 `build/tools/package_tar_xz.py`。归档是真正的内层 POSIX tar、外层 xz，默认探测已安装 7-Zip 的标准 LZMA2；若现有 7z-FLZMA2 没有 xz 输出能力，则回退到便携 Python 已有的标准 LZMA2，不下载新工具。同时验证内外层及 SHA256。已有归档和完整性报告均不覆盖。省略 `-SkipArchive` 可生成本地候选归档；独立调用也可使用新路径。
+## 清理与历史
 
-Base 解压到选择的应用根目录，根下直接出现 `Umi-OCR.exe` 和 `UmiOCR-data/`。CUDA tar.xz 解压到同一应用根目录，直接覆盖到 `UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/`，没有额外产品目录前缀。CUDA 的许可证与对应源码材料放在 `LICENSES/plugins/win32_PaddleOCRv6_CUDA/`，保留主程序根目录的许可证、版本与源码记录。图形归档工具需解开 xz 和 tar 两层；Windows `tar.exe -xf archive.tar.xz -C <应用根目录>` 可一次完成。
+只处理本项目本轮列明且已核对的目标，删除前检查占用、链接、原件归属和引用。保留模型、源码、依赖缓存和历史证据，不清理兄弟插件工程。release 顶层只保留固定安装和各组件最新/上一版本运行归档；独立源码与审计放构建目录。
 
-## 验证
-
-CUDA 3.0.4 本轮只执行启动、CUDA/模型初始化与正常退出，使用 `record_gpu_startup.py` 记录；其结果不授权发布，不替代以下既有全量门禁。不要为本轮调用包含图片/PDF OCR 的完整联合回归；未复测项目与正式 BLOCK 必须如实保留。
-
-### 既有全量验证路径（不属于本轮启动限定范围）
-
-prepare 与 `-SkipArchive` 不代表 public-release 或当前源码 E2E 已通过，旧 R2 的 hash/PASS 也不是本轮证据。按已批准的本轮范围对实际组装目录执行 `Test-Release.ps1 -StagingRoot $complete -Kind combined -Device gpu:0`，另行记录热 GUI、真实 Windows 托盘/退出前 HTTP 就绪、正常退出、GPU 原始回执、源码/模型及人工限制。GPU 正式门禁须绑定实际 CUDA overlay，不以独立 GPU staging 代替。
-
-先固定本轮实际 base/GPU overlay 的 source/payload 并交审；明确同意后才更新 main/tag。标签匹配后运行 fresh 正式 source/运行门禁，再受限 finalize、生成正式归档、全新重装复验与发布。不能在公开标签匹配前预填正式 PASS；`LocalCandidate` 仅是开发候选路径，不能替代本轮正式流程。
-
-该入口覆盖首屏懒加载与后台预热复用、Qt/QML D3D11 和图像多边形/鼠标锚点缩放、图片解码、UVDoc、截图/批量/PDF、二维码、HTTP/CLI、便携设置、HDR shader、DPI 坐标和自动截图捕获。CUDA 缺失测试会隔离 Paddle GPU wheel或请求不存在的 `gpu:N`，并验证 OCR 明确失败且未出现 CPU fallback。不要在正式 staging 中安装 CPU Paddle wheel来模拟失败。
-
-自动截图捕获不等同于人工选区和 HDR 观感验收。发布前还必须按 [HDR 截图测试与校准](https://github.com/Dominic485649/UMI-OCR/blob/v3.0.1/docs/HDR_TEST_WINDOWS.md) 完成人工步骤。
-
-若当前桌面内容不应由自动测试读取，构建时可传 `-SkipScreenshotCapture`；它只跳过自动全屏捕获，其他回归、干净构建、包审计和归档仍执行。必须由人工截图验收补足该项。
-
-## Qt 裁剪
-
-`Build-Release.ps1` 调用 `qmlimportscanner` 扫描仓库 QML，并结合 `build/qt-runtime-whitelist.json` 保留实际需要的 QML 模块、插件、Python 扩展和递归 DLL 依赖。修改 QML import、Qt 插件或 PySide6 扩展后必须执行干净构建；复用已裁剪 staging 不能证明新模块完整。
-
-## 许可证与对应源码
-
-本 fork 的新增和修改部分以及含 PyMuPDF 的组合发行物按 AGPL-3.0-or-later 发布；原 MIT `LICENSE`、hiroi-sora 版权和署名保留。源码镜像使用同一公开源码选择器，包含未 tracked 的当前 required files，保留 GPL/AGPL/MPL 对应源码材料。实际 `source/`、`source-snapshot.zip`、成员哈希和 provenance 须与被冻结产品及公开 commit/tag 一致；`LocalCandidate` 的开发记录不替代正式来源门禁。
-
-最终派生 `source-delivery.json`、`current-source-e2e.json` 和 `RELEASE_EVIDENCE.*` 保存在产物 `LICENSES/`，CUDA overlay 使用 `LICENSES/plugins/win32_PaddleOCRv6_CUDA/`。源码冻结后不得将这些新 PASS 回拷进 canonical source、修改镜像或重算快照冒充冻结源码内容；实际是否满足以当轮 fresh gate 为准，不宣称脚本接线已自动通过。见 [组合发行说明](../LICENSES/COMBINED_DISTRIBUTION.md)。
-
-## 发布约束
-
-基础包审计会拒绝旧 PP-OCR V2-V5、PP-OCRv6 small/tiny、CPU Paddle、ONNX Runtime、DirectML 和不属于基础 OCR 包的模型资产。Windows 7 不受支持，也不作兼容性声明。
+[历史记录](HISTORY.md) · [组合许可](../LICENSES/COMBINED_DISTRIBUTION.md) · [插件接口](PLUGIN_API.md)

@@ -451,6 +451,62 @@ Configs {
         }
     }
 
+    property var modelDownloadStates: ({})
+    property var modelDownloadRequests: ({})
+    property int modelDownloadSequence: 0
+
+    function updateModelDownloadState(key, state) {
+        const states = Object.assign({}, modelDownloadStates)
+        states[key] = Object.assign({}, states[key] || {}, state)
+        modelDownloadStates = states
+    }
+    function startModelDownload(key) {
+        const definition = originDict[key]
+        const parts = key.split(".")
+        if(!definition || !definition.download || parts.length < 3) return
+        const pluginId = parts[1]
+        const info = pluginsConnector.modelDownloadInfo(pluginId, definition.download)
+        if(!info.ok) {
+            qmlapp.popup.message(qsTr("模型下载失败"), info.message || "", "error")
+            return
+        }
+        const previous = getValue(key)
+        const message = qsTr("从官方直链下载 %1（%2 MiB），保存到：\n%3\n\n不会覆盖已有模型，校验成功后回填此项。")
+            .arg(info.title).arg((info.bytes / 1048576).toFixed(1)).arg(info.path)
+        qmlapp.popup.dialog(qsTr("下载模型"), message, (confirmed)=>{
+            if(!confirmed || getValue(key) !== previous) return
+            const active = modelDownloadStates[key] || ({})
+            if(active.state === "running" || active.state === "cancelling") return
+            const requestId = "model-" + Date.now() + "-" + (++modelDownloadSequence)
+            modelDownloadRequests[requestId] = {key: key, previous: previous, resource: definition.download}
+            updateModelDownloadState(key, {state: "running", requestId: requestId, received: 0, total: info.bytes})
+            pluginsConnector.startModelDownload(requestId, pluginId, definition.download)
+        })
+    }
+    function cancelModelDownload(key) {
+        const state = modelDownloadStates[key]
+        if(!state || state.state !== "running") return
+        updateModelDownloadState(key, {state: "cancelling"})
+        pluginsConnector.cancelModelDownload(state.requestId)
+    }
+    Connections {
+        target: pluginsConnector
+        function onModelDownloadChanged(requestId, result) {
+            const request = modelDownloadRequests[requestId]
+            if(!request) return
+            updateModelDownloadState(request.key, result)
+            if(result.state === "completed") {
+                if(originDict[request.key] && originDict[request.key].download === request.resource
+                    && getValue(request.key) === request.previous)
+                    setValue(request.key, result.path, true)
+                qmlapp.popup.simple(qsTr("模型下载完成"), result.path || "")
+            } else if(result.state === "failed") {
+                qmlapp.popup.message(qsTr("模型下载失败"), (result.message || "") + "\n" + (result.path || ""), "error")
+            }
+            if(result.state !== "running") delete modelDownloadRequests[requestId]
+        }
+    }
+
     function getPluginServiceValues(pluginId, serviceIds) {
         const values = {}
         if(!serviceIds || serviceIds.length === 0) return values

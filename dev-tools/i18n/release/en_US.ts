@@ -1100,6 +1100,10 @@ Please be cautious when modifying advanced options.</translation>
         <source>无法录制快捷键</source>
         <translation>Cannot record hotkey</translation>
     </message>
+
+    <message><source>下载</source><translation>Download</translation></message>
+
+    <message><source>取消 %1%</source><translation>Cancel %1%</translation></message>
 </context>
 <context>
     <name>DocumentManager</name>
@@ -1778,6 +1782,20 @@ If you don&apos;t want to see this notification, disable advanced mode in global
     <message><source>模型配置应用失败</source><translation>Failed to apply model settings</translation></message>
 
     <message><source>正在等待并应用模型设置…</source><translation>Waiting to apply model settings…</translation></message>
+
+    <message><source>下载模型</source><translation>Download model</translation></message>
+
+    <message><source>从官方直链下载 %1（%2 MiB），保存到：
+%3
+
+不会覆盖已有模型，校验成功后回填此项。</source><translation>Download %1 (%2 MiB) from the official direct URL to:
+%3
+
+Existing models are not overwritten. This setting is filled after verification.</translation></message>
+
+    <message><source>模型下载失败</source><translation>Model download failed</translation></message>
+
+    <message><source>模型下载完成</source><translation>Model download complete</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>

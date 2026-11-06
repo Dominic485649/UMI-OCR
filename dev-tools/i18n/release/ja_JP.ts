@@ -1100,6 +1100,10 @@
         <source>无法录制快捷键</source>
         <translation>キーボードショートカットを記録できません</translation>
     </message>
+
+    <message><source>下载</source><translation>ダウンロード</translation></message>
+
+    <message><source>取消 %1%</source><translation>中止 %1%</translation></message>
 </context>
 <context>
     <name>DocumentManager</name>
@@ -1778,6 +1782,20 @@
     <message><source>模型配置应用失败</source><translation>モデル設定の適用に失敗</translation></message>
 
     <message><source>正在等待并应用模型设置…</source><translation>モデル設定の適用を待機中…</translation></message>
+
+    <message><source>下载模型</source><translation>モデルをダウンロード</translation></message>
+
+    <message><source>从官方直链下载 %1（%2 MiB），保存到：
+%3
+
+不会覆盖已有模型，校验成功后回填此项。</source><translation>公式直リンクから %1（%2 MiB）を次の場所へ取得します：
+%3
+
+既存モデルは上書きしません。検証後に設定へ反映します。</translation></message>
+
+    <message><source>模型下载失败</source><translation>モデルのダウンロードに失敗</translation></message>
+
+    <message><source>模型下载完成</source><translation>モデルのダウンロード完了</translation></message>
 </context>
 <context>
     <name>GlobalConfigsPage</name>

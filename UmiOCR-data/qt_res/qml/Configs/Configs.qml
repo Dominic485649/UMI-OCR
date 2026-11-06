@@ -1135,6 +1135,10 @@ Item {
             function set(path) {
                 value(path) // 设置值
             }
+            property var downloadState: sourceConfigs.modelDownloadStates
+                ? (sourceConfigs.modelDownloadStates[sourceKey] || ({})) : ({})
+            property bool downloading: downloadState.state === "running" || downloadState.state === "cancelling"
+            property bool canDownload: !!origin && !!origin.download && !!sourceConfigs.startModelDownload
 
             Rectangle {
                 anchors.top: parent.top
@@ -1170,12 +1174,30 @@ Item {
                     }
                 }
 
+                Button_ {
+                    id: downloadButton
+                    objectName: "modelDownloadButton"
+                    visible: rootFile.canDownload
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right: iconButton.left
+                    anchors.rightMargin: visible ? size_.smallSpacing : 0
+                    width: visible ? Math.max(implicitWidth, size_.line * 2.8) : 0
+                    enabled: rootFile.downloadState.state !== "cancelling"
+                    text_: rootFile.downloading
+                        ? qsTr("取消 %1%").arg(Math.floor(100 * (rootFile.downloadState.received || 0) / Math.max(1, rootFile.downloadState.total || 1)))
+                        : qsTr("下载")
+                    onClicked: {
+                        if(rootFile.downloading) sourceConfigs.cancelModelDownload(sourceKey)
+                        else sourceConfigs.startModelDownload(sourceKey)
+                    }
+                }
                 // 文本输入框
                 Rectangle {
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
-                    anchors.right: iconButton.left
+                    anchors.right: rootFile.canDownload ? downloadButton.left : iconButton.left
                     anchors.rightMargin: 2
                     color: theme.bgColor
                     border.width: 2

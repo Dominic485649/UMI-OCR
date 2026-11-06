@@ -1,21 +1,12 @@
 # Third-Party Notices
 
-The Windows release is split into a base package and a CUDA OCR plugin. The
-base archive contains its generated evidence in `LICENSES/`. The CUDA install
-overlay preserves the host's notices and places its own evidence and source
-bundle under `LICENSES/plugins/win32_PaddleOCRv6_CUDA/`. Each product has a
-`LICENSES/RELEASE_EVIDENCE.md` and JSON manifests within its own notice bundle.
-Those manifests are generated from the actual artifact, not from package names
-alone. A `BLOCK` status means the artifact is not eligible for a public release.
+Windows 分为本体、CUDA 与 PaddleVL 独立组件。最简运行包保留适用许可与版权声明，但不附送源码或内部审计树；完整对应源码和第三方来源材料独立提供。下文 `LICENSES/`、`source/` 及审计报告的相对路径均指完整构建/源码材料，不保证这些材料位于用户运行目录。每个运行包与其材料逐项绑定；BLOCK 仍表示不具备正式公开发行资格，不能因精简而忽略。
 
 The repository has mixed license facts: root `LICENSE` is MIT, root `COPYING`
 contains the AGPLv3 text, and `UmiOCR-data/about.json` plus
 `COMBINED_DISTRIBUTION.md` declare the fork additions and combined release
 `AGPL-3.0-or-later`. Do not collapse those files into a single SPDX assertion.
-The distributed source
-mirror and the application source notices remain required for AGPL-covered
-code, including the network-interaction source-offer obligation where it
-applies.
+AGPL 覆盖内容的对应源码和来源指引仍须交付，包括适用的网络交互源码提供义务；对应源码可在运行包旁独立取得，不要求嵌入同一个运行归档。
 
 ## Offline Markdown Preview (3.1.2)
 

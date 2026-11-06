@@ -336,8 +336,8 @@ def checked_command(command, repo, environment):
         raise FinalizationError("Required release audit/verifier failed; no formal archive was created")
 
 
-def check_report(metadata, kind, binding, release_gates, receipt_hash):
-    report = gates.read_json(metadata / "LICENSES/RELEASE_EVIDENCE.json")
+def check_report(metadata, kind, binding, release_gates, receipt_hash, *, report_root=None):
+    report = gates.read_json((report_root or metadata / "LICENSES") / "RELEASE_EVIDENCE.json")
     if (not isinstance(report, dict) or report.get("artifact_kind") != kind or
             report.get("public_prerelease_allowed") is not True or report.get("local_candidate") is not False or
             report.get("validation_errors") != [] or
@@ -368,6 +368,9 @@ def check_report(metadata, kind, binding, release_gates, receipt_hash):
     elif current.get("validation_scope") == gates.directed.SCOPE:
         if current.get("artifact_kind") != kind or not gates.directed.verified_receipt(current):
             raise FinalizationError("The current directed scope is invalid or belongs to another reviewed product")
+    elif current.get("validation_scope") == gates.directed313.SCOPE:
+        if current.get("artifact_kind") != kind or not gates.directed313.verified_receipt(current):
+            raise FinalizationError("3.1.3定向验收缺少本次精确程序/文案批准或属于其它组件")
     elif current.get("validation_scope", "full") != "full":
         raise FinalizationError("Unknown finalization validation scope")
     if (not isinstance(statuses, dict) or set(statuses) != required or
@@ -401,13 +404,14 @@ def archive_matches(path, files, directories):
         raise FinalizationError("Archive bytes/member set differ from the audited immutable product")
 
 
-def finalize(repo, root, kind, manifest, release_gates, output):
+def finalize(repo, root, kind, manifest, release_gates, output, *, distribution_record=None,
+             report_root=None, existing_archive=None):
     repo = repository(repo)
     manifest = audit_input(repo, manifest, "freeze manifest")
     release_gates = audit_input(repo, release_gates, "release-gates input")
     if manifest == release_gates:
         raise FinalizationError("The freeze manifest is not a publication receipt")
-    root, metadata, summary, _, _ = inspect_product(repo, root, kind, validate_source=True)
+    root, metadata, summary, initial_files, initial_directories = inspect_product(repo, root, kind, validate_source=True)
     expected = gates.read_json(manifest)
     if not gates._same_binding(expected, summary):
         raise FinalizationError("Product root/source/payload differs from the reviewed freeze manifest")
@@ -421,6 +425,21 @@ def finalize(repo, root, kind, manifest, release_gates, output):
             not isinstance(receipt.get("current_source_e2e"), dict) or
             not gates._same_binding(receipt["current_source_e2e"].get("binding"), summary["binding"])):
         raise FinalizationError("Release-gates identity/authorization/product binding is invalid")
+    minimal = None
+    if distribution_record is not None:
+        distribution_record = audit_input(repo, distribution_record, "minimal distribution record")
+        minimal = adjacent("prepare_minimal_distribution")
+        distribution = minimal.verify(distribution_record)
+        if (plain(distribution["completeRoot"]) != root
+                or distribution["component"] != ("base" if kind == "base" else "cuda")
+                or distribution["version"] != summary["release_version"]
+                or not distribution.get("sourceUrl")
+                or receipt.get("minimal_distribution_record_sha256") != gates.digest(distribution_record)):
+            raise FinalizationError("最简包、完整外置材料或当次批准绑定不匹配")
+        current_scope = receipt["current_source_e2e"]
+        if (current_scope.get("validation_scope") == gates.directed313.SCOPE
+                and current_scope.get("minimal_distribution", {}).get("sha256") != gates.digest(distribution_record)):
+            raise FinalizationError("最简包与3.1.3批准引用的分包清单不一致")
     output = plain(output)
     allowed = (repo / "release", repo / "build/artifacts")
     if not any(output == directory or directory in output.parents for directory in allowed):
@@ -431,10 +450,22 @@ def finalize(repo, root, kind, manifest, release_gates, output):
         raise FinalizationError("Archive output root is not a directory")
     name = (f"Umi-OCR_v{summary['version_label']}_Windows_x64.tar.xz" if kind == "base" else
             f"Umi-OCR-Plugin_GPU-OCR_v{summary['release_version']}_Windows_x64_CUDA12.6.tar.xz")
+    if minimal is not None and kind == "gpu":
+        name = f"Umi-OCR-Plugin_v{summary['release_version']}_Windows_x64_CUDA.tar.xz"
     archive = plain(output / name)
     integrity = plain(output / (name + ".integrity.json"))
-    if archive.exists() or integrity.exists():
+    if existing_archive is not None:
+        existing_archive = plain(existing_archive)
+        if existing_archive != archive or not archive.is_file():
+            raise FinalizationError("待登记归档必须正是目标目录中已审的同名候选，不接受其它路径")
+    if integrity.exists() or (archive.exists() and existing_archive is None):
         raise FinalizationError("Refusing to overwrite an archive or its integrity report")
+    existing_hash = gates.digest(existing_archive) if existing_archive is not None else None
+    if report_root is not None:
+        report_root = below(report_root, repo / "build/audit", "external report root")
+        if report_root.exists() or not report_root.parent.is_dir() or root in report_root.parents or report_root in root.parents:
+            raise FinalizationError("外置审计目录必须全新，且不能与输入产品重叠")
+        report_root.mkdir()
     frozen_hash, receipt_hash = gates.digest(manifest), gates.digest(release_gates)
 
     def unchanged():
@@ -445,6 +476,10 @@ def finalize(repo, root, kind, manifest, release_gates, output):
         current = inspect_product(repo, root, kind)
         if not gates._same_binding(current[2], summary):
             raise FinalizationError("Source/source records/provenance/payload/static notices changed during finalization")
+        if report_root is not None and (current[3] != initial_files or current[4] != initial_directories):
+            raise FinalizationError("外置报告模式不得改写完整输入中的任何文件或目录")
+        if existing_archive is not None and gates.digest(existing_archive) != existing_hash:
+            raise FinalizationError("已审候选归档在正式核验期间发生变化")
         return current
 
     audit = plain(repo / "build/windows/Audit-Package.ps1")
@@ -458,16 +493,17 @@ def finalize(repo, root, kind, manifest, release_gates, output):
         powershell, "-NoProfile", "-NonInteractive", "-File", str(audit),
         "-PackageRoot", str(root), "-Kind", "base" if kind == "base" else "plugin",
         "-ReleaseGates", str(release_gates), "-RequirePublicRelease",
-    ], repo, environment)
+    ] + (["-ReportRoot", str(report_root / "audit")] if report_root is not None else []), repo, environment)
     unchanged()
     checked_command([
         sys.executable, "-I", "-B", "-S", "-X", "utf8", str(verifier),
         "--repo-root", str(repo), "--staging-root", str(root), "--kind", kind,
         "--cache-root", str(repo / "build/cache"), "--release-gates", str(release_gates),
         "--require-public-release",
-    ], repo, environment)
+    ] + (["--report-root", str(report_root / "verification")] if report_root is not None else []), repo, environment)
     _, _, _, files, directories = unchanged()
-    check_report(metadata, kind, summary["binding"], release_gates, receipt_hash)
+    check_report(metadata, kind, summary["binding"], release_gates, receipt_hash,
+                 report_root=report_root / "verification" if report_root is not None else None)
 
     # Write only to a new private workspace until audit, verifier, immutable
     # checks, and actual archive-byte comparison ALL succeed. Publication uses
@@ -480,12 +516,31 @@ def finalize(repo, root, kind, manifest, release_gates, output):
     temporary = Path(tempfile.mkdtemp(prefix="finalize-", dir=work_parent))
     published = False
     try:
-        packed = temporary / "verified.tar.xz"
-        result = packaging.create_archive(root, packed)
+        packed = existing_archive if existing_archive is not None else temporary / "verified.tar.xz"
+        archive_root = root
+        archive_files, archive_directories = files, directories
+        if minimal is not None:
+            prefix = metadata.relative_to(root).as_posix()
+            prefix = "" if prefix == "." else prefix + "/"
+            mutable = {prefix + "LICENSES/" + name for name in DERIVED_REPORTS}
+            distribution = minimal.verify(distribution_record, mutable=mutable)
+            archive_root = plain(distribution["runtimeRoot"])
+            archive_files = distribution["runtimePayload"]
+            archive_directories = {path.relative_to(archive_root).as_posix() for path in archive_root.rglob("*") if path.is_dir()}
+        result = packaging.verify_archive(packed) if existing_archive is not None else packaging.create_archive(archive_root, packed)
+        if existing_archive is not None:
+            result["registered_existing_archive"] = True
+            result["existing_archive_sha256"] = existing_hash
+        if report_root is not None:
+            result["external_report_root"] = str(report_root)
         current = unchanged()
         if current[3] != files or current[4] != directories:
             raise FinalizationError("Derived reports changed while archiving")
-        archive_matches(packed, files, directories)
+        archive_matches(packed, archive_files, archive_directories)
+        if minimal is not None:
+            minimal.verify(distribution_record, mutable=mutable)
+            result["minimal_distribution_record_sha256"] = gates.digest(distribution_record)
+            result["runtime_root"] = str(archive_root)
         result.update({"archive": str(archive), "root": str(root),
                        "frozen_manifest_sha256": frozen_hash, "release_gate_input_sha256": receipt_hash})
         staged_integrity = temporary / "integrity.json"
@@ -496,14 +551,15 @@ def finalize(repo, root, kind, manifest, release_gates, output):
         plain(output)
         plain(archive)
         plain(integrity)
-        if archive.exists() or integrity.exists():
+        if integrity.exists() or (archive.exists() and existing_archive is None):
             raise FinalizationError("Archive/integrity output appeared during finalization")
         output.mkdir(parents=True, exist_ok=True)
         os.link(staged_integrity, integrity)
         try:
-            # The formal archive is the LAST publication action; every fallible
-            # verification has already finished. link() refuses an existing name.
-            os.link(packed, archive)
+            # 新归档最后无覆盖发布；已有候选模式只登记新的完整性回执，
+            # 仍执行全部门禁和逐成员字节核对，不重编码或改写原归档。
+            if existing_archive is None:
+                os.link(packed, archive)
         except OSError:
             overlay.reject_link(integrity)
             if integrity.samefile(staged_integrity):
@@ -534,8 +590,11 @@ def main(argv=None):
     parser.add_argument("--frozen-manifest", type=Path, required=True)
     parser.add_argument("--release-gates", type=Path)
     parser.add_argument("--output-root", type=Path)
+    parser.add_argument("--distribution-record", type=Path)
+    parser.add_argument("--report-root", type=Path, help="将两轮新审计写入独立目录，保持完整输入只读")
+    parser.add_argument("--existing-archive", type=Path, help="逐成员复核并登记已审同名归档；不跳过任何正式门禁")
     args = parser.parse_args(argv)
-    if args.command == "freeze" and (args.release_gates is not None or args.output_root is not None):
+    if args.command == "freeze" and any(value is not None for value in (args.release_gates, args.output_root, args.report_root, args.existing_archive)):
         parser.error("freeze does not accept publication gates or an archive output")
     if args.command == "finalize" and args.release_gates is None:
         parser.error("finalize requires an explicit --release-gates input")
@@ -544,7 +603,9 @@ def main(argv=None):
             result = freeze(args.repo_root, args.package_root, args.kind, args.frozen_manifest)
         else:
             result = finalize(args.repo_root, args.package_root, args.kind, args.frozen_manifest,
-                              args.release_gates, args.output_root or args.repo_root / "release")
+                              args.release_gates, args.output_root or args.repo_root / "release",
+                              distribution_record=args.distribution_record,
+                              report_root=args.report_root, existing_archive=args.existing_archive)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     except (OSError, ValueError, TypeError, KeyError, RuntimeError, zipfile.BadZipFile, tarfile.TarError) as exc:

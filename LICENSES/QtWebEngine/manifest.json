@@ -11,7 +11,10 @@
     "license": "LGPL-3.0-or-later OR GPL-2.0-or-later OR commercial; Chromium third-party terms",
     "checksum_evidence": "SHA-256 Digest header from the official download.qt.io response, checked 2026-11-03"
   },
-  "resolvedDownload": "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/6.11/6.11.2/submodules/qtwebengine-everywhere-src-6.11.2.tar.xz",
+  "resolvedDownload": null,
+  "sourceInput": "D:\\Code\\Python\\Umi-OCR\\build\\cache\\sources\\qtwebengine-everywhere-src-6.11.2.tar.xz",
+  "reusedLockedArchive": true,
+  "selectionPolicy": "legal-file-names-v3-locked-legal-wrappers",
   "archiveSha256": "6101c1aa00ff933d1b65ee5d167f76e8d71b9ac5b378b0111277723ebda7c163",
   "noticeFiles": [
     {
@@ -85,9 +88,9 @@
       "sha256": "3f7571004f0adfff26e9cfc1ac072a5ebbd76b18b1756a321a053b77c2f70b31"
     },
     {
-      "path": "qtwebengine-everywhere-src-6.11.2/licenseRule.json",
-      "bytes": 7023,
-      "sha256": "052ed9ac0b339845e0e70274e80e7712b749fe270db76532f860a9a48ea5eeef"
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/AUTHORS",
+      "bytes": 68770,
+      "sha256": "4acbc8ee091583e4aeb9dce54a17bb5e4a23ecde0859b73fcf02ce7eb48d20d8"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/LICENSE",
@@ -155,819 +158,14 @@
       "sha256": "ff11d445fb41a1087c7630e120ab15f1a2cb67c1b707173cb494141805fca35e"
     },
     {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/app/theme/default_100_percent/common/save_drivers_license.png",
-      "bytes": 8515,
-      "sha256": "dba999cf1bd8872191e8b84463ef37f3c5c63b5be3df4eb1d154b5d5b695528c"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/app/theme/default_100_percent/common/save_drivers_license_dark.png",
-      "bytes": 8693,
-      "sha256": "d8249176c57fe2801c112273c2021114ade91c22a6c4386235e439d74ba5ab37"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/app/theme/default_200_percent/common/save_drivers_license.png",
-      "bytes": 22014,
-      "sha256": "a2af56d54e465e6704f100f48bd1b9e9fef688286482598e26b5222cdc0a29b0"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/app/theme/default_200_percent/common/save_drivers_license_dark.png",
-      "bytes": 23334,
-      "sha256": "1fdb973e96917753a74676dd0c684e812e51a7aae038152377467f7c1dce9af1"
-    },
-    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/privacy_sandbox/notice/notice.mojom",
       "bytes": 1047,
       "sha256": "bba9e7d7504e0261400db5e97f27ba953a985077df37416204cd0b80f8a74784"
     },
     {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/autofill/autofill_save_drivers_license.json",
-      "bytes": 146233,
-      "sha256": "f876d9a6ab86cce25b0d21c0ea45c48c18a24a101e64a22ddc6c49ac3206c42a"
-    },
-    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/glic/glic_api/LICENSE",
       "bytes": 1536,
       "sha256": "368cca1106be99d39ecd32a38d8305585d802a475effb66380b91ffc9bcf709b"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/measurement_notice.html.ts",
-      "bytes": 646,
-      "sha256": "f6bd4478b2b21e1a952bd8208838d061d7c88772fd87872c2ef3c9f8e1738057"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/measurement_notice.ts",
-      "bytes": 1018,
-      "sha256": "97115028d9af807e1e6f4971d06b0ef3fcb6fbc36df595d456ba388a6d42e549"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/privacy_sandbox_dialog_notice_step.html",
-      "bytes": 4876,
-      "sha256": "0b09a6cfc098057db559375b618ae79cb5c3da90695ed6457820f6b604529945"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/privacy_sandbox_dialog_notice_step.ts",
-      "bytes": 2799,
-      "sha256": "672520e973c0ac785798ba3c57276b669d17c049f46dd57f3b56da6f1a820bb7"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/privacy_sandbox_notice_dialog.html",
-      "bytes": 790,
-      "sha256": "3b0b59c3c3392fedb24ca5b2096d98d862eeb3484abd69b8ab028b76717de9a5"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/privacy_sandbox_notice_dialog_app.html",
-      "bytes": 4536,
-      "sha256": "7003a20f1576ca2371d0a16c2bbe6c7ba085ef4f6300624d16fa9336b2f6b249"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/privacy_sandbox_notice_dialog_app.ts",
-      "bytes": 3028,
-      "sha256": "0a68fd03a0ae05e4f8ca7c0d1b15d1a773a00e17a73a0e26310712a7ff2ca5b6"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/privacy_sandbox_notice_restricted_dialog.html",
-      "bytes": 819,
-      "sha256": "f4c724c1b9ed426259cd6b49f925ccb24b415bfe1760f74cca73bb283d418d9a"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/privacy_sandbox_notice_restricted_dialog_app.html",
-      "bytes": 1316,
-      "sha256": "aa157bb8455cb5e15c7c5c9d6e845cf6bd1e2dfc39d1c0ccefc87ec724414152"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/privacy_sandbox_notice_restricted_dialog_app.ts",
-      "bytes": 2363,
-      "sha256": "bfb3f77b5a44a1a9206c78c28d0f7cf109e7d209f25034afc480cec13100a949"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/protected_audience_measurement_notice.html.ts",
-      "bytes": 718,
-      "sha256": "675202e3db792ff8d156b1844515f9d5da30e2ad884dc962121f76797620f972"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/protected_audience_measurement_notice.ts",
-      "bytes": 1204,
-      "sha256": "3c8993ca8a5beac26ff21d665acfa27853a43939e3ec97c117e81ea5fa6936bf"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/three_ads_apis_notice.html.ts",
-      "bytes": 654,
-      "sha256": "72e1df4a5b5417434929d0d02f75268143c2dcb4aa5383ea1ccd76697402d5cc"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/three_ads_apis_notice.ts",
-      "bytes": 1034,
-      "sha256": "81bc7ef7fe0e2ed6293205170e401cc7c1ce16b20e52427ef22e23d63dceb902"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/topics_consent_notice.html.ts",
-      "bytes": 660,
-      "sha256": "5bce7e0a85a04d186cc49de5c7c3132799f4ed05d68f683d70fecb02db6c7151"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/privacy_sandbox/topics_consent_notice.ts",
-      "bytes": 1041,
-      "sha256": "a236bafec6a2bcc53cb08711bd036b1cd7d6c182ea989687104fd93f8ca2c158"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice.html",
-      "bytes": 833,
-      "sha256": "0fa2f25feff2a665bfd47a387eaa09d5820fac36004bbdba9a003fb04ef3da31"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_app.css",
-      "bytes": 2667,
-      "sha256": "9a152299ad5d364a7f84d6c1c9a1951112f17c61a5819524ddabbd333a64a7e0"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_app.html.ts",
-      "bytes": 3883,
-      "sha256": "55d733e7385f5547b7cc0f576e464cc8191f8a8b89e65a7b2688592459c41de4"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_app.ts",
-      "bytes": 11977,
-      "sha256": "a73b973d204685b365367425606e3f7d03ac77c2230fbd176700800d30171707"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_browser_proxy.ts",
-      "bytes": 1987,
-      "sha256": "53144262f37b3cc162f3f1e71da3ec8bda1884ef8210020b5120ba6f5690171f"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_data_handling.css",
-      "bytes": 1701,
-      "sha256": "5a3044fcebb19061669923462a42663089988428d274fc61ad76424b658d0d2d"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_data_handling.html.ts",
-      "bytes": 1196,
-      "sha256": "ec6a6a482ed5cc5a11a6c7962f5fe0634404551d6e0dd2a4930f763408673d77"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_data_handling.ts",
-      "bytes": 2275,
-      "sha256": "dc709536cd52f50abc714caf65a7ca3c4141202e94d93dfdc8185a3a14c827af"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_disclosure.css",
-      "bytes": 2722,
-      "sha256": "f4bd306010673c2700dd6a29b0eaa61047c4aca1f87e2bd98456afd85b272fed"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_disclosure.html.ts",
-      "bytes": 1426,
-      "sha256": "45c46de721afd82916e47327e7a8b234745c6f55af05038b111f8a5dfed54579"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_disclosure.ts",
-      "bytes": 1999,
-      "sha256": "b9e1f225c0c32a10db5ceff39d6b6349782f1b42244cd2400139df02ebd05063"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_state.css",
-      "bytes": 1074,
-      "sha256": "4eb1bde3510cc9fd1160d117ab96724cbaed89a5b87b727cac9797c83ad6b0db"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_state.html.ts",
-      "bytes": 725,
-      "sha256": "29f702278c0fcea24f71d46148a9b568c0d2a0eed4f3ed5bd40c3173d3f7b12e"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_state.ts",
-      "bytes": 1094,
-      "sha256": "a5842f64768f8fc2f7b94ee1488eb405177000368c0026a952fac2eea4bc2ba5"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_value_prop.css",
-      "bytes": 1684,
-      "sha256": "f16f3088cda520866209ebf155aa10813815cefe207657a48a98be4edb3aef73"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_value_prop.html.ts",
-      "bytes": 1084,
-      "sha256": "3316143c38ced79a584c480cb39221a6beafe5eeb09b74e8c6f240726c0d6699"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/resources/signin/managed_user_profile_notice/managed_user_profile_notice_value_prop.ts",
-      "bytes": 1807,
-      "sha256": "7bd705bb32b9179c450e3d0459d282e044470b9a77b3796f645f82398997a82e"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/ash/login/family_link_notice_screen_handler.cc",
-      "bytes": 2107,
-      "sha256": "f3e8eaece5f818d8a60aa5db4add76fe405c8269914c261c6bf91d2be8fc28c8"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/ash/login/family_link_notice_screen_handler.h",
-      "bytes": 2220,
-      "sha256": "00a61ebc9a7ea92a29f3195ab624c402ea9554015fcf7254288701a2c779bd9f"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/ash/login/packaged_license_screen_handler.cc",
-      "bytes": 1407,
-      "sha256": "efc0cb4ab5c2175532c630980d1892eea08ee5fdeaa85d35f32af6c935dc9531"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/ash/login/packaged_license_screen_handler.h",
-      "bytes": 1892,
-      "sha256": "d51d13b3f6aef579a7b3bd58fbb935445aa1ea99251ae35f1ca0e2ef04ead240"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/ash/settings/pages/search/magic_boost_notice_handler.cc",
-      "bytes": 1656,
-      "sha256": "90db164df615ed55d9a049f18ece9e45e195fb0cf745c7804d854f99cf54eecb"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/ash/settings/pages/search/magic_boost_notice_handler.h",
-      "bytes": 1458,
-      "sha256": "fe488cff34dbc6bb3bef566b7c84b9186bc2215569d4c1eb2e5831c3b396706b"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/ash/settings/pages/search/magic_boost_notice_page_handler_factory.cc",
-      "bytes": 1063,
-      "sha256": "d565ef1d3876fdd964973ed64d1c4c7e654c0f1e338c136e22a65cc1c913cb3b"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/ash/settings/pages/search/magic_boost_notice_page_handler_factory.h",
-      "bytes": 1825,
-      "sha256": "c740e21a860606a7608450a92c54f6bc17267425ac67da024e7feacf5faf0623"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/signin/managed_user_profile_notice_handler.cc",
-      "bytes": 23515,
-      "sha256": "7333b2b1cae17476226d7bbf3031a8e1b64fbac1f319c6633223449ce3030735"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/signin/managed_user_profile_notice_handler.h",
-      "bytes": 6095,
-      "sha256": "f2b0f3ff64b2dd43d2694ce234de3824dd0e7f7e5a5bb9961186e3f82e587472"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/signin/managed_user_profile_notice_handler_unittest.cc",
-      "bytes": 26250,
-      "sha256": "f0115f197dc91655d024e872d833bdfa6b166b17014af2ef70c38591078ea9c1"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/signin/managed_user_profile_notice_ui.cc",
-      "bytes": 21596,
-      "sha256": "6a49defc3a8f0f8541213f3bfaeae08f2f4f00b7d0f6d6db2dad864bb48efbd7"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/chrome/browser/ui/webui/signin/managed_user_profile_notice_ui.h",
-      "bytes": 3528,
-      "sha256": "3981c07d158c6f6bfa6cd2a51f3c5e41f089f3cfc2ecf629a2cf53bf73c9c5a3"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_ADDRESS_ALREADY_SAVED_IN_ACCOUNT_RECORD_TYPE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "52cd044ee3fbbb93e72a88e76a180ece13069279edaf059d80579e84943783d8"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_ADDRESS_HOME_AND_WORK_RECORD_TYPE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "22fb4635cf7a311c6720f8cca3233d4c1102f99d38cdc7899071a7fc7c5c18aa"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_ADDRESS_WILL_BE_SAVED_IN_ACCOUNT_RECORD_TYPE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "980e80b8df472da81e70fed8f8451f956a0efbb95432d2bbe92757f143703968"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_ADD_DRIVERS_LICENSE_ENTITY.png.sha1",
-      "bytes": 40,
-      "sha256": "410a6bc806b7fe123bb424df0c81437dd06cce6722043635faf78df40320b322"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_DELETE_DRIVERS_LICENSE_ENTITY.png.sha1",
-      "bytes": 40,
-      "sha256": "60c0af059e496e64a2613c1cf04938286700cb815b2c69feb180a1259422b3a5"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_DRIVERS_LICENSE_ENTITY_NAME.png.sha1",
-      "bytes": 40,
-      "sha256": "2e9c3a8570d6ecad9dac498aa5c8af3058768bd75b1607b42876795848ddf45e"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_DRIVERS_LICENSE_EXPIRATION_DATE_ATTRIBUTE_NAME.png.sha1",
-      "bytes": 40,
-      "sha256": "80a5b58b37005ab4ea4c6b89e68540f4ab78522d75c734a5148ed7597e81c553"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_DRIVERS_LICENSE_ISSUE_DATE_ATTRIBUTE_NAME.png.sha1",
-      "bytes": 40,
-      "sha256": "0dc836fe9737bef7135e388f51d3fcd4188d3809c881d1150d73ec1a32080657"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_DRIVERS_LICENSE_NAME_ATTRIBUTE_NAME.png.sha1",
-      "bytes": 40,
-      "sha256": "1fa18e9a817b4368dc54ae86dfc91746a5e550b23567a55988ff2669561de640"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_DRIVERS_LICENSE_NUMBER_ATTRIBUTE_NAME.png.sha1",
-      "bytes": 40,
-      "sha256": "3bf5313686130e12d919d8e8497387c36d0a7721709fb65358b33bfe1490c0fa"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_DRIVERS_LICENSE_STATE_ATTRIBUTE_NAME.png.sha1",
-      "bytes": 40,
-      "sha256": "f6c03a41cb72ee251ec3ab0a0b0190aeedaa9c84eb961d8e2c03cd990b0172ec"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_EDIT_DRIVERS_LICENSE_ENTITY.png.sha1",
-      "bytes": 40,
-      "sha256": "0d11eb7a9adf11ccc3764052d926ef52f8ba8e25dadce113a6d7c403bf9b2142"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_SAVE_DRIVERS_LICENSE_ENTITY_DIALOG_TITLE.png.sha1",
-      "bytes": 40,
-      "sha256": "5f503c8ae7562d200e807a21b9c999a4aa3b76e14bc967115973e9bc393615f0"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_AI_UPDATE_DRIVERS_LICENSE_ENTITY_DIALOG_TITLE.png.sha1",
-      "bytes": 40,
-      "sha256": "462d45ce2d2ce89fee393a322c6df08fffebd2e976ea59c5b000fef3cd05b444"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_DELETE_ACCOUNT_ADDRESS_RECORD_TYPE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "499e23761c109edeb85243b2d5ff5d0f69d5cd8af911366776d35af70daa20bd"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_DELETE_LOCAL_ADDRESS_RECORD_TYPE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "9660540d49cf65ad181e27b8586268432b50b67fdf20faf58b08e2cd08a9ac03"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_DELETE_SYNC_ADDRESS_RECORD_TYPE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "5e60d838af1aa79039e04d83a7cc45cb37c4410409331bcea82f2b5304167a9b"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_LOCAL_PROFILE_MIGRATION_PROMPT_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "8388c12cdda6a72ea38925aeadbe4e6885509a70b983576b99e5bc37128723ae"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_SAVE_IN_ACCOUNT_MESSAGE_ADDRESS_MIGRATION_RECORD_TYPE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "5ce248e3997d6dc7f6e295e737674e535589704f1bdc3e427a2f594e6f618f5f"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_SAVE_IN_ACCOUNT_MESSAGE_ADDRESS_RECORD_TYPE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "21789ee98de7178b16b1cd66701214e8aa20d9e604259a89228c6a7b3ea6857d"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_SAVE_IN_ACCOUNT_PROMPT_ADDRESS_RECORD_TYPE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "58eb2264fd2d4ac4112baa94bf588e0bc53bf70d7a13502a481f0ac7cc7196c7"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_SYNCABLE_PROFILE_MIGRATION_PROMPT_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "6bfdfb1fc0d8c27ab13a0946aba0205b6fc482b17419c5fde155627117f4f16c"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/autofill_strings_grdp/IDS_AUTOFILL_UPDATE_PROMPT_ACCOUNT_ADDRESS_RECORD_TYPE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "cd3b03110ea2e10bb6ed8af741cf293197bec900bb14995f7229ad2ae750b09f"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/browsing_data/core/history_notice_utils.cc",
-      "bytes": 5932,
-      "sha256": "1c58e1422ff2cb823111ea1573574abe503a3361ead36d4ba8139b5b0f202747"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/browsing_data/core/history_notice_utils.h",
-      "bytes": 1601,
-      "sha256": "6cf4e42e600f4ed3bb1ac94fdebb74e90ea08f2c6b72f820f846f12b4d8028dd"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/browsing_data/core/history_notice_utils_unittest.cc",
-      "bytes": 4687,
-      "sha256": "ddc02d9e7604f95a32bd19e76b2ce288c10f9c77948ba3ab477cc79b631aa9b9"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/components_chromium_strings_grd/IDS_FLAGS_UI_RELAUNCH_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "142b34c044dc0fcd2543942228d3ee45bd72a78acce1621986e36c6c53c69b85"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/components_chromium_strings_grd/IDS_VERSION_UI_LICENSE.png.sha1",
-      "bytes": 40,
-      "sha256": "c5e02ecd6eba9a34b95e98a23ce8da4da2a8bcb0f4d710659518a3f132bbac11"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/components_google_chrome_strings_grd/IDS_FLAGS_UI_RELAUNCH_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "142b34c044dc0fcd2543942228d3ee45bd72a78acce1621986e36c6c53c69b85"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/components_google_chrome_strings_grd/IDS_VERSION_UI_LICENSE.png.sha1",
-      "bytes": 40,
-      "sha256": "a823e5dbb92fd067838fb40eab7e0a0bc84603aa4495e6be73cd505cb08d85ef"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/components_google_chrome_strings_grd/IDS_VERSION_UI_LICENSE_CHROMIUM.png.sha1",
-      "bytes": 40,
-      "sha256": "020c60dd967ffbe7e7a8370a3e00b946841709c57eaca92defe41b853121d4b7"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/components_google_chrome_strings_grd/IDS_VERSION_UI_LICENSE_OTHER.png.sha1",
-      "bytes": 40,
-      "sha256": "020c60dd967ffbe7e7a8370a3e00b946841709c57eaca92defe41b853121d4b7"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/feed/core/v2/api_test/feed_api_notice_card_unittest.cc",
-      "bytes": 3754,
-      "sha256": "0fcf62889ac308c8ba14adf927f99b6e10c454b80ab3d5ccb5c3a97a25b786be"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/feed/core/v2/public/ios/notice_card_tracker.cc",
-      "bytes": 2208,
-      "sha256": "b1f25a1cf8010973177927249ccfb5f7195f8a4a46a566aed3afdecacb7ae3a3"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/feed/core/v2/public/ios/notice_card_tracker.h",
-      "bytes": 1790,
-      "sha256": "59c8be5083d88f81fd4c638d3ad608e2b2e5e9ce723ebfdd46d9c02ea8ab6789"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/feed/core/v2/public/ios/notice_card_tracker_unittest.cc",
-      "bytes": 3063,
-      "sha256": "914bd7c658f228c5be013e6c47d469b709c3f70a4bb5046e50c806d65aa99d2f"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/feed/core/v2/stream/privacy_notice_card_tracker.cc",
-      "bytes": 2302,
-      "sha256": "d84b598b87245202acbe3d4eef8ca8b98a8321eb773ab532032b414093019d3d"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/feed/core/v2/stream/privacy_notice_card_tracker.h",
-      "bytes": 1725,
-      "sha256": "35886ab5986d04b18cd934caf7314a6ffc3a239f0bc7161602a75e5540480e2c"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/feed/core/v2/stream/privacy_notice_card_tracker_unittest.cc",
-      "bytes": 3563,
-      "sha256": "ea6e83da61e239cfb69c3370746a5a33efc478b567f389551b010760f60ba589"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/management_strings_grdp/IDS_MANAGEMENT_BROWSER_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "a8ff79f219d76438e5cd56bc716191a09739122ddb083c402093380b201244a4"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/management_strings_grdp/IDS_MANAGEMENT_DESK_SYNC_COOKIES_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "597ef420dc6625203fdcc428be1280087648a79452f596e531b92a2808f4bdea"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/management_strings_grdp/IDS_MANAGEMENT_DESK_SYNC_WINDOWS_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "597ef420dc6625203fdcc428be1280087648a79452f596e531b92a2808f4bdea"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/management_strings_grdp/IDS_MANAGEMENT_NOT_MANAGED_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "de9dcc9a0db6ea2a85462dfb68867e547ef8c637899c04b77176745e8a0ef214"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/management_strings_grdp/IDS_MANAGEMENT_PROFILE_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "50cc0af09d8ae60f2d287d4cacb4f9f694725598d47dbbdc32f12632fc7e9dcb"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_ACK_BUTTON.png.sha1",
-      "bytes": 40,
-      "sha256": "47918ab3efe1d8d2224a6bdeeae2b56b03ceb943c7cb0c0ad8726c7366259faa"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_BULLET_1.png.sha1",
-      "bytes": 40,
-      "sha256": "47918ab3efe1d8d2224a6bdeeae2b56b03ceb943c7cb0c0ad8726c7366259faa"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_BULLET_2.png.sha1",
-      "bytes": 40,
-      "sha256": "d95662e76c30c48f495cdf47b537e6d835cfff2fa96e1bb4323cde68f41a7d27"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_DESCRIPTION_1.png.sha1",
-      "bytes": 40,
-      "sha256": "47918ab3efe1d8d2224a6bdeeae2b56b03ceb943c7cb0c0ad8726c7366259faa"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_DESCRIPTION_2.png.sha1",
-      "bytes": 40,
-      "sha256": "94f8e3fb05725e1cfcbc93700fa6335643f1eea5868894a934543ff5bc92f949"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_LEARN_MORE_BULLET_1.png.sha1",
-      "bytes": 40,
-      "sha256": "f24e44ac45919e93b59b965cb7e4f7634da72362f40f52de942fc2cc7dfd2157"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_LEARN_MORE_BULLET_2.png.sha1",
-      "bytes": 40,
-      "sha256": "f24e44ac45919e93b59b965cb7e4f7634da72362f40f52de942fc2cc7dfd2157"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_LEARN_MORE_BULLET_3.png.sha1",
-      "bytes": 40,
-      "sha256": "ddd95f0293a5dcfb5fa12dd3757607f1ca8397bf20be241195b038d27c2a094e"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_LEARN_MORE_DESCRIPTION.png.sha1",
-      "bytes": 40,
-      "sha256": "f24e44ac45919e93b59b965cb7e4f7634da72362f40f52de942fc2cc7dfd2157"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_LEARN_MORE_EXPAND_LABEL.png.sha1",
-      "bytes": 40,
-      "sha256": "47918ab3efe1d8d2224a6bdeeae2b56b03ceb943c7cb0c0ad8726c7366259faa"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_LEARN_MORE_HEADING_1.png.sha1",
-      "bytes": 40,
-      "sha256": "f24e44ac45919e93b59b965cb7e4f7634da72362f40f52de942fc2cc7dfd2157"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_LEARN_MORE_HEADING_2.png.sha1",
-      "bytes": 40,
-      "sha256": "f24e44ac45919e93b59b965cb7e4f7634da72362f40f52de942fc2cc7dfd2157"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_SETTINGS_BUTTON.png.sha1",
-      "bytes": 40,
-      "sha256": "47918ab3efe1d8d2224a6bdeeae2b56b03ceb943c7cb0c0ad8726c7366259faa"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_TITLE.png.sha1",
-      "bytes": 40,
-      "sha256": "635451329c90a0b3d48f40bd57501a7f59203ca5392477915f462fee77c4eed3"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_RESTRICTED_ACK_BUTTON.png.sha1",
-      "bytes": 40,
-      "sha256": "c0074bc7b52c1030f0631ba99c8a143e7153900aedc033418a04726afa720d80"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_RESTRICTED_DESCRIPTION_1.png.sha1",
-      "bytes": 40,
-      "sha256": "adbc11da13a9bec69ac46b82544beb34657ca9e237645859920ac89b990ac060"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_RESTRICTED_DESCRIPTION_2.png.sha1",
-      "bytes": 40,
-      "sha256": "c0074bc7b52c1030f0631ba99c8a143e7153900aedc033418a04726afa720d80"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_RESTRICTED_DESCRIPTION_3.png.sha1",
-      "bytes": 40,
-      "sha256": "c0074bc7b52c1030f0631ba99c8a143e7153900aedc033418a04726afa720d80"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_RESTRICTED_SETTINGS_BUTTON.png.sha1",
-      "bytes": 40,
-      "sha256": "c0074bc7b52c1030f0631ba99c8a143e7153900aedc033418a04726afa720d80"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_RESTRICTED_TITLE.png.sha1",
-      "bytes": 40,
-      "sha256": "a9919d38fefe0db4958e445d3365012822d0b6c6668dede668740a55372c186c"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_ACK_BUTTON.png.sha1",
-      "bytes": 40,
-      "sha256": "ee359a3d84f8316d1fcac8832a534d38e79759773e9adf51b1d087a64e23e309"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_DESCRIPTION_1.png.sha1",
-      "bytes": 40,
-      "sha256": "ee359a3d84f8316d1fcac8832a534d38e79759773e9adf51b1d087a64e23e309"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_DESCRIPTION_2.png.sha1",
-      "bytes": 40,
-      "sha256": "ee359a3d84f8316d1fcac8832a534d38e79759773e9adf51b1d087a64e23e309"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_DESCRIPTION_3.png.sha1",
-      "bytes": 40,
-      "sha256": "630e983487556a2c9efa9f6b04be8bba727dd1f6e596acea370763ed5d6d51e4"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_DESCRIPTION_4.png.sha1",
-      "bytes": 40,
-      "sha256": "f1f6bce92392ddd17ad57d36ad1bfd592fb56c70f600cdaa82f835af5ba8d40e"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_BULLET_1.png.sha1",
-      "bytes": 40,
-      "sha256": "57407005a20a1575909b6ddea06e41cb039500a57f458202e47b2da321b96152"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_BULLET_2.png.sha1",
-      "bytes": 40,
-      "sha256": "57407005a20a1575909b6ddea06e41cb039500a57f458202e47b2da321b96152"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_DESCRIPTION_1.png.sha1",
-      "bytes": 40,
-      "sha256": "57407005a20a1575909b6ddea06e41cb039500a57f458202e47b2da321b96152"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_DESCRIPTION_2.png.sha1",
-      "bytes": 40,
-      "sha256": "57407005a20a1575909b6ddea06e41cb039500a57f458202e47b2da321b96152"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_DESCRIPTION_3.png.sha1",
-      "bytes": 40,
-      "sha256": "d15479729fb695de943f307cb9ba9ac3383fc59a61a3b7b3cf2e914196fd5e01"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_DESCRIPTION_4.png.sha1",
-      "bytes": 40,
-      "sha256": "e77cd104357e6351f36dd6e8edaa641a914bd754f2c585fb1f3d2676d85977c1"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_DESCRIPTION_5.png.sha1",
-      "bytes": 40,
-      "sha256": "57407005a20a1575909b6ddea06e41cb039500a57f458202e47b2da321b96152"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_EXPAND_LABEL.png.sha1",
-      "bytes": 40,
-      "sha256": "ee359a3d84f8316d1fcac8832a534d38e79759773e9adf51b1d087a64e23e309"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_HEADING_1.png.sha1",
-      "bytes": 40,
-      "sha256": "57407005a20a1575909b6ddea06e41cb039500a57f458202e47b2da321b96152"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_HEADING_2.png.sha1",
-      "bytes": 40,
-      "sha256": "57407005a20a1575909b6ddea06e41cb039500a57f458202e47b2da321b96152"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_SETTINGS_BUTTON.png.sha1",
-      "bytes": 40,
-      "sha256": "ee359a3d84f8316d1fcac8832a534d38e79759773e9adf51b1d087a64e23e309"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_chrome_strings_grdp/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_TITLE.png.sha1",
-      "bytes": 40,
-      "sha256": "ee359a3d84f8316d1fcac8832a534d38e79759773e9adf51b1d087a64e23e309"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_AD_MEASUREMENT_DESCRIPTION.png.sha1",
-      "bytes": 40,
-      "sha256": "730b99d96a9f4be07e0afdb03936658bb91e47894cfcc69f39e65b646beee37e"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_AD_MEASUREMENT_LEARN_MORE_BULLET_1.png.sha1",
-      "bytes": 40,
-      "sha256": "9cbedb6c917ca3fe5fef56e0e3c9a2e5fa97874b1d26676566a6ad6e24230b6f"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_AD_MEASUREMENT_LEARN_MORE_LABEL.png.sha1",
-      "bytes": 40,
-      "sha256": "e045a54e12740afaefd6c84d7a73271234ed547b8c76a7ac09cddc2a491c27f8"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_AD_MEASUREMENT_TITLE.png.sha1",
-      "bytes": 40,
-      "sha256": "9c91d240b5aaa9595733501b5de7ec6caca0f717bb5c474ff0d5f7ada71abd61"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_DESCRIPTION_1_V2.png.sha1",
-      "bytes": 40,
-      "sha256": "9d8586437a354900bd5576d7cd2df00076e67f8142e944d11c7869139f66e758"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_LAST_TEXT.png.sha1",
-      "bytes": 40,
-      "sha256": "95e325f92d7bc6859eb5a285ffa7d1d411df7c955c80698297582e97b33e565e"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_SITE_SUGGESTED_ADS_DESCRIPTION.png.sha1",
-      "bytes": 40,
-      "sha256": "0ead872e879778e6991d5f4d4e799fb352640fe23ba32b04509b42e011a7fdc7"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_SITE_SUGGESTED_ADS_LEARN_MORE_BULLET_1.png.sha1",
-      "bytes": 40,
-      "sha256": "bba36d39f25ed6edde226e14250db4ac126f6ccf03caf31ee8a4c8531a334cb8"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_SITE_SUGGESTED_ADS_LEARN_MORE_BULLET_1_DESCRIPTION.png.sha1",
-      "bytes": 40,
-      "sha256": "8e35dc8e8ee96497c94f11240ac82c27c171198ff263db448ffa5cbeb0b858ae"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_SITE_SUGGESTED_ADS_LEARN_MORE_BULLET_1_DESCRIPTION_CLANK.png.sha1",
-      "bytes": 40,
-      "sha256": "0ca5f629d65b9102a948132bb896d90e72d4e54a408555de0aeff8b2e1c58dc4"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_SITE_SUGGESTED_ADS_LEARN_MORE_BULLET_2.png.sha1",
-      "bytes": 40,
-      "sha256": "c44e588ae6d4f210067f0b963e036a516280196e2dafce828078cf4a7c467c2c"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_SITE_SUGGESTED_ADS_LEARN_MORE_LABEL.png.sha1",
-      "bytes": 40,
-      "sha256": "28ca93cd35a79c18378b9f3f3562ea3974d0faab6ff21532568f1b374c2f01b3"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_EEA_SITE_SUGGESTED_ADS_TITLE.png.sha1",
-      "bytes": 40,
-      "sha256": "3cb2a8966d2f2d91faef394f17b5dd5ab4b2ad98a6123848aeb496b2a5fc2a96"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_LEARN_MORE_V2_CLANK.png.sha1",
-      "bytes": 40,
-      "sha256": "21cd4ced13235aff099f4c9bfe04a45b628ed7ac739db25481b293cb8aad21d3"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_LEARN_MORE_V2_DESKTOP.png.sha1",
-      "bytes": 40,
-      "sha256": "14615ed30f52649df54e60cd416f1101db9d4da9160b8786b6056eb49348bb11"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_LEARN_MORE_V2_DESKTOP_ARIA_DESCRIPTION.png.sha1",
-      "bytes": 40,
-      "sha256": "14615ed30f52649df54e60cd416f1101db9d4da9160b8786b6056eb49348bb11"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LAST_TEXT.png.sha1",
-      "bytes": 40,
-      "sha256": "cc63cb4f9bc807b30f9d6a1e28d914bc77c65f59b079c8bd46a61e8191c29780"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_BULLET_2_V2.png.sha1",
-      "bytes": 40,
-      "sha256": "4471f3c1712aa1ba717e4d2510ae2434402501c60eac8e9c7ba3691dd40a0c8c"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_DESCRIPTION_2_V2.png.sha1",
-      "bytes": 40,
-      "sha256": "d63d918f8ce5653dc9c53f90f226ed0dfe98d1f451228b79ff89845a273547ad"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_DESCRIPTION_5_V2.png.sha1",
-      "bytes": 40,
-      "sha256": "4f878cb9bc2264dea3a510cadd398a6d3cf9f0587d07809a763b012872369249"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_DESCRIPTION_5_V2_CLANK.png.sha1",
-      "bytes": 40,
-      "sha256": "1992032de865a1892ebfa88aa8c457a8e004cd066f808e5c01ed8ad3c78114dc"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/privacy_sandbox_strings_grd/IDS_PRIVACY_SANDBOX_M1_NOTICE_ROW_LEARN_MORE_HEADING_3.png.sha1",
-      "bytes": 40,
-      "sha256": "b49ec514771f601912906646f522973622e5ebddeac7feb9a4073877effa0e7d"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/subresource_filter/core/common/copying_file_stream.cc",
-      "bytes": 1375,
-      "sha256": "43bab780b3f23a2a076cb4644d473aff1fba9fcb691e5d4111981db9fd227077"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/subresource_filter/core/common/copying_file_stream.h",
-      "bytes": 1874,
-      "sha256": "27c9d255407e769544b8b2a7718f3bf6b8de125bc39684e9754369a48b623e76"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/version_ui_strings_grdp/IDS_VERSION_UI_COPY_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "1b4ac696311b5a697f45655639f840c336889e6f709d83bac3414e6a94feb92f"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/components/version_ui_strings_grdp/IDS_VERSION_UI_COPY_VARIATIONS_NOTICE.png.sha1",
-      "bytes": 40,
-      "sha256": "850c01bd1690e007169ec23062bf5bad3184c995ad6e12e1362bb59c09854ec8"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/media/gpu/windows/d3d11_copying_texture_wrapper.cc",
-      "bytes": 4181,
-      "sha256": "0ce6f2106f0777cc9fd0b010fe36da48566ae307cbfd35c2e9fa099e92c12109"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/media/gpu/windows/d3d11_copying_texture_wrapper.h",
-      "bytes": 2564,
-      "sha256": "901ba5fb46fe03e584e5e696a80b58ecae52dcf208a182ff52b50b3a79d6609d"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/media/gpu/windows/d3d11_copying_texture_wrapper_unittest.cc",
-      "bytes": 8791,
-      "sha256": "a0e1ed727bbdc8cf4cb0d784e67195273e4c5feaf60d12889101dfbe3df3d8e5"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/mojo/public/LICENSE",
@@ -1000,9 +198,9 @@
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     },
     {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/testing/scripts/checklicenses.py",
-      "bytes": 1028,
-      "sha256": "16c62a404b6e895238bcd1c3d2a34c1e228567f85e2d86c1a50f4dc048cab60b"
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/abseil-cpp/AUTHORS",
+      "bytes": 295,
+      "sha256": "1fd39030c119b4c97014f59e0ad0ed65f23475bbdf55a52740f31eb82b34b4ee"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/abseil-cpp/LICENSE",
@@ -1013,6 +211,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/alsa/LICENSE",
       "bytes": 26428,
       "sha256": "521ae436fa7fb714f74763142acd4cd82e37f88bda9f64c14a387e9e0ec6a1f3"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/angle/AUTHORS",
+      "bytes": 1655,
+      "sha256": "40badee5ee563bb52300038fb96c900605632ba38c6d599f4ab9e5ecafafcc1f"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/angle/LICENSE",
@@ -1185,11 +388,6 @@
       "sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1"
     },
     {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/bidimapper/append_notices.py",
-      "bytes": 8514,
-      "sha256": "1dd61f180d102e4371ecb457c60062d93688a0fcfc202a78c73b75cfad20f952"
-    },
-    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/bidimapper/licenses/LICENSE.mitt",
       "bytes": 1069,
       "sha256": "1cab22f196264195a4caec8ca5630170fdde76ee8f43346e47021d087332d3b0"
@@ -1203,11 +401,6 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/blink/LICENSE_FOR_ABOUT_CREDITS",
       "bytes": 51483,
       "sha256": "a661d10f8f194b1963a75bb4d308f17b078cc064624313a556902d89705f6876"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/blink/renderer/build/scripts/license.py",
-      "bytes": 1850,
-      "sha256": "592ef53e1769d8950802638c771afa6540e56047fa972fc27ff9012d123c327e"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/blink/renderer/core/LICENSE-APPLE",
@@ -1235,9 +428,19 @@
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/boringssl/src/AUTHORS",
+      "bytes": 1208,
+      "sha256": "6e5283f25977ae2fbbf5fd8a840b7184b2b48915279c10bf01107263d3f26936"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/boringssl/src/LICENSE",
       "bytes": 13115,
       "sha256": "827c8d8fc207c2392794eef9e00fe246f9f61fdcc132556c275be3dd8c3cd97f"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/boringssl/src/third_party/fiat/AUTHORS",
+      "bytes": 648,
+      "sha256": "ad74c036a6afaedc418fed65f171c877c2f74a4c70938a03930aa11c98a20508"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/boringssl/src/third_party/fiat/LICENSE",
@@ -1260,6 +463,11 @@
       "sha256": "015b2d5cedb3024339446a63963d073fa831544cf253c5ddd713fccc8d83e939"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/breakpad/breakpad/AUTHORS",
+      "bytes": 22,
+      "sha256": "710c0a3a4681c8c40f5a59eb794f61093fa142935c647c92f46ea595f0591833"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/breakpad/breakpad/LICENSE",
       "bytes": 64880,
       "sha256": "69b3d80c19a460e09716910d54d1ada5d800716e2b73751bebac44352590f646"
@@ -1273,6 +481,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/breakpad/breakpad/src/third_party/libdisasm/LICENSE",
       "bytes": 6359,
       "sha256": "d8eaba95b8d03c5912da9b5823de2c920e84a993133039a22fc8100f9edb33a1"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/breakpad/breakpad/src/third_party/musl/COPYRIGHT",
+      "bytes": 5927,
+      "sha256": "70ca142d257e2690a1f8eda8a296e64a6d1b16d8aee6784f8ddcf67f3163635d"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/brotli/LICENSE",
@@ -1318,6 +531,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/catapult/common/py_vulcanize/third_party/rjsmin/LICENSE",
       "bytes": 11357,
       "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/catapult/third_party/beautifulsoup4/AUTHORS.txt",
+      "bytes": 1749,
+      "sha256": "a1d9f16837abebff9c52542f402de61ca21f2b7a1f3ec92c610a1751ba4bc2a9"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/catapult/third_party/beautifulsoup4/COPYING.txt",
@@ -1525,6 +743,11 @@
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/crashpad/crashpad/AUTHORS",
+      "bytes": 475,
+      "sha256": "16c59c464566405d929ac9db55db5b11c1b29ab88b3762deee47e4f254b988a2"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/crashpad/crashpad/LICENSE",
       "bytes": 11358,
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
@@ -1543,6 +766,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/crashpad/crashpad/third_party/xnu/APPLE_LICENSE",
       "bytes": 19829,
       "sha256": "e5881019d8766c1e88a5fe1dbca4ba40c78011d41fcb18f6e9f50df60182685b"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/crc32c/src/AUTHORS",
+      "bytes": 439,
+      "sha256": "6c96b5e2a101ab9a629d8623be73f69e2346ef02e8ddd7096abe030c452252d2"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/crc32c/src/LICENSE",
@@ -1595,6 +823,16 @@
       "sha256": "b327887de263238deaa80c34cdd2ff3e0ba1d35db585ce14a37ce3e74ee389e9"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/dav1d/libdav1d/doc/PATENTS",
+      "bytes": 5730,
+      "sha256": "335eca574598bf4ca181b12f708d6669e5a5e78c8e1513e5b35fa1f03901484b"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/dawn/AUTHORS",
+      "bytes": 329,
+      "sha256": "10992e19043d8833bf1f439622b18d9f6d797496881e6b348f3f3ce8c8412f53"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/dawn/LICENSE",
       "bytes": 1561,
       "sha256": "e2908f7576fb12be5bdb8480cddb0be62badb498cadb821d043aeaf01b0b0899"
@@ -1633,6 +871,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/dawn/third_party/glslang/LICENSE",
       "bytes": 1309,
       "sha256": "23353f4505b1c8ce4f8f72fc3b11dc74b4a8a7bf95921d93ff77f227c171a710"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/dawn/third_party/khronos/EGL-Registry/sdk/docs/man/xhtml/copyright.inc.xsl",
+      "bytes": 747,
+      "sha256": "609ae74144cd07a61653f733a0e11abf241a10c7dff4acd07dacda9fbffae22e"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/dawn/third_party/khronos/LICENSE",
@@ -1675,14 +918,9 @@
       "sha256": "5a2ed53cc5975569e9fa146c4245eaf53377dc1a88bdcb923da6487e53cba55e"
     },
     {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devscripts/licensecheck.pl",
-      "bytes": 26458,
-      "sha256": "cb8298b32a56525c5d3a8e224602254c21939a0b53558c0ea5222c877e988c40"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devscripts/licensecheck.pl.vanilla",
-      "bytes": 20165,
-      "sha256": "154fb0c327e5b708b0759147a9350edd071a03643116c338823261f9749cb12e"
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/AUTHORS",
+      "bytes": 4214,
+      "sha256": "324c30ada8e1b3b044d7300159a21a66d65f7f5f9ebddd82fceef9c122266259"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/LICENSE",
@@ -1705,6 +943,11 @@
       "sha256": "af175b9d96ee93c21a036152e1b905b0b95304d4ae8c2c921c7609100ba8df7e"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/front_end/third_party/codemirror/package/AUTHORS",
+      "bytes": 12101,
+      "sha256": "59cd7d8493542c761b6115f51d7ed1a98197ca5cbf39e1a63827ba537658a49e"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/front_end/third_party/codemirror/package/LICENSE",
       "bytes": 1107,
       "sha256": "a3f2fe2ac6b471aa80c737c5d283dd049bdc903a73835ee6d4d2cac02fdd53bf"
@@ -1713,6 +956,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/front_end/third_party/codemirror.next/LICENSE",
       "bytes": 1112,
       "sha256": "aa8f65819a471c1a25fb3c0816c5a75e45f009b7899d292ee3cc70d9dbdd8f7e"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/front_end/third_party/csp_evaluator/package/AUTHORS",
+      "bytes": 380,
+      "sha256": "2d94a089663ebfc7878ced8380bad4f6e07f7b0312b32f3365ee43804e47fbac"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/front_end/third_party/csp_evaluator/package/LICENSE",
@@ -2610,6 +1858,11 @@
       "sha256": "f25bf9bf3ae8984bcd43bf7fb8f78e7eec8d577081fb8d0989cfa7c67ecebb8e"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/buffer/AUTHORS.md",
+      "bytes": 2788,
+      "sha256": "ca3d96437f69ceb38df1972db017fcd6303b02f57ea1f838ab9f9c3db3e789e0"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/buffer/LICENSE",
       "bytes": 1106,
       "sha256": "06bafa45fdad2579ba0e43b0c9b2c6290287c99c4203c300254a462b38a307f6"
@@ -3238,6 +2491,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/eslint-plugin-jsdoc/node_modules/escape-string-regexp/license",
       "bytes": 1117,
       "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/eslint-plugin-jsdoc/node_modules/spdx-expression-parse/AUTHORS",
+      "bytes": 203,
+      "sha256": "44ba6c2bc625f3b99bce248a62b29b088538f4f337f9e04679547c1195e634a4"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/eslint-plugin-jsdoc/node_modules/spdx-expression-parse/LICENSE",
@@ -4055,16 +3313,6 @@
       "sha256": "150d7707d4532d57bdb5718637ff62fff1f075921c5ffaa084df27f900bfea76"
     },
     {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/license-checker/lib/license-files.js",
-      "bytes": 784,
-      "sha256": "455629980585dfdadbdcbaf846659b65da3dd092ac9bfd10b07717a0e2f84ef5"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/license-checker/lib/license.js",
-      "bytes": 3195,
-      "sha256": "37932d5f93a7f9e762346358ae427e703d69fdaae6e7cd67158b35eea91c9eec"
-    },
-    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/license-checker/node_modules/debug/LICENSE",
       "bytes": 1107,
       "sha256": "98c970de440dcfc77471610aec2377c9d9b0db2b3be6d1add524a586e1d7f422"
@@ -4343,6 +3591,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/nopt/LICENSE",
       "bytes": 765,
       "sha256": "4ec3d4c66cd87f5c8d8ad911b10f99bf27cb00cdfcff82621956e379186b016b"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/normalize-package-data/AUTHORS",
+      "bytes": 152,
+      "sha256": "d97931c9bea18ad710bd6045c4eb02fbde66116f117715745ce8032aa1368e0e"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/normalize-package-data/LICENSE",
@@ -5140,6 +4393,11 @@
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/spdx-expression-parse/AUTHORS",
+      "bytes": 203,
+      "sha256": "44ba6c2bc625f3b99bce248a62b29b088538f4f337f9e04679547c1195e634a4"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/spdx-expression-parse/LICENSE",
       "bytes": 1111,
       "sha256": "7edb57f7065309027de249642341292a5b21410d5773cc55bba73ff9cf01060e"
@@ -5835,11 +5093,6 @@
       "sha256": "3f1189b28e3866e0d979968d466b78f813f76827cfdca1fbb124cc0a5c8841f8"
     },
     {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/eslint_rules/lib/check-license-header.ts",
-      "bytes": 7426,
-      "sha256": "213cefa66cc82dc5028e54131cbe16c7dd70a9a3b47442c92a0c7ff7d7e10cb7"
-    },
-    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/devtools-frontend/src/third_party/i18n/LICENSE",
       "bytes": 11342,
       "sha256": "7ec9661a8afafab1eee3523d6f1a193eff76314a5ab10b4ce96aefd87621b0c3"
@@ -5945,6 +5198,11 @@
       "sha256": "73cc92f80889ab23c7287b1a11dd50fdec190c3f26ebe5938c579043817d651e"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/expat/src/expat/AUTHORS",
+      "bytes": 142,
+      "sha256": "59f14371c6b75912cfebb46e6247ee5146766e803a0365b124e5d3011e7d0877"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/expat/src/expat/COPYING",
       "bytes": 1144,
       "sha256": "31b15de82aa19a845156169a17a5488bf597e561b2c318d159ed583139b25e87"
@@ -5958,6 +5216,16 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/farmhash/src/COPYING",
       "bytes": 1110,
       "sha256": "4162dd091caae234f72d3b57e138174f733e736b2430a4c51b098b17d866fcb6"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/farmhash/src/dev/fix-copyright",
+      "bytes": 284,
+      "sha256": "b7727d1c5775de14b244686119efbc192656205e481f07d3da2057aff0b15a32"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/fast_float/src/AUTHORS",
+      "bytes": 36,
+      "sha256": "ed249424bce4e318fa190dd6d8becf60cfc37287132ad3f89e16e0f28d878dcf"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/fast_float/src/LICENSE-APACHE",
@@ -6005,9 +5273,19 @@
       "sha256": "2e1d16c72fd74e12063776371da757322f8b77589386532f4fd8634bde7de1af"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/ffmpeg/doc/authors.texi",
+      "bytes": 403,
+      "sha256": "fb5fac6dd8f7474033e933814491a8297d8723c52be4dcbcc82eef9c4f008dd2"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/fft2d/LICENSE",
       "bytes": 185,
       "sha256": "64a68ebd98d10064bfd8f6c8dc4fa094747bd33af191f694183ce163cba5c9b5"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/flac/AUTHORS",
+      "bytes": 2459,
+      "sha256": "195407de2759edfd405b0f855711b63f3c8911bf3034c55ec3175bb3a2c6e589"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/flac/COPYING.FDL",
@@ -6060,6 +5338,11 @@
       "sha256": "fa4cd9ab005185e10cd8f7504518856c7dd36c01e766c2bac87f4fc638e9f886"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/fontconfig/src/AUTHORS",
+      "bytes": 62,
+      "sha256": "db6d73a160bb2de10268f88ef60aae91771fefdeee4992b791c76ce6592a4a4b"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/fontconfig/src/COPYING",
       "bytes": 8616,
       "sha256": "51a51aa9823704fd90bccc616cdd17ebabb5b2b3e9cbde886ca02c7002288067"
@@ -6080,6 +5363,21 @@
       "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/freetype/src/src/tools/no-copyright",
+      "bytes": 1282,
+      "sha256": "3e2c8db4e09e12e9a138ba7ba8c0b762eff36802c6c1273d73ac049d4949a298"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/freetype/src/src/tools/update-copyright",
+      "bytes": 383,
+      "sha256": "ae5b05f1d3f5235eb91ce41518be95022443f68bce5d200b6e1cc1fb57a5017e"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/freetype/src/src/tools/update-copyright-year",
+      "bytes": 4272,
+      "sha256": "1043ab2f00dc9b79e90f913f3cc8c9e45759f12b4676d8188a6be81a578612c1"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/fuchsia-gn-sdk/LICENSE",
       "bytes": 1274,
       "sha256": "47248d1ec833e0771ddacb65f2cf9978785f4a9976b5b0b69d1e33c60a50be55"
@@ -6095,6 +5393,11 @@
       "sha256": "914f11a8222cc1db6e863518b72d7cdca0ea261c9910ead094291c4003ec49b6"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/fuzztest/src/centipede/AUTHORS",
+      "bytes": 319,
+      "sha256": "20e8d24ae523a82eb49dd1bbede8618a3c3127b721f78ed5d78c9bebef974ba9"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/fxdiv/src/LICENSE",
       "bytes": 1117,
       "sha256": "7cac00006125b1486a27e4801ed66357236e984c540bd323945ab7b66b078ec3"
@@ -6103,6 +5406,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/gemmlowp/LICENSE",
       "bytes": 11358,
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/gemmlowp/src/AUTHORS",
+      "bytes": 390,
+      "sha256": "916234caa03bbb2769b278e165515a8ca9fa9d8f60b7b57a5dd6a4f026208ce2"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/gemmlowp/src/LICENSE",
@@ -6130,9 +5438,19 @@
       "sha256": "fb261b2d5dbe76c4850f90da763210bc385e52428df6bbfd7b06295ac8a32914"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/glib/src/docs/reference/AUTHORS",
+      "bytes": 122,
+      "sha256": "b4f60a02b2b1f82764f8295b2eafbfcd4c33f596d70abcf5cb3c3623b1cfbc6d"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/glib/src/docs/reference/COPYING",
       "bytes": 1698,
       "sha256": "b1ec1d0e5947f81e815d8771f7d4d90671a94bb10a42dc687fb566de461a57aa"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/glib/src/gmodule/AUTHORS",
+      "bytes": 25,
+      "sha256": "28073c8c65c072387b778ba00b6c24a2ff1b573ca4415e151aa91fab5a6454be"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/glib/src/gmodule/COPYING",
@@ -6153,6 +5471,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/glslang/src/license-checker.cfg",
       "bytes": 1673,
       "sha256": "5ff8933ec26a2d865b8d44c6d6a594f7307709a58176d0c42e9c4c50fb580a5e"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/google-closure-library/AUTHORS",
+      "bytes": 942,
+      "sha256": "5bdc021e550b33a18e4af67d53a625ce4843ca088d7887c1438a683b014e1812"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/google-closure-library/LICENSE",
@@ -6215,6 +5538,11 @@
       "sha256": "96e5bbd81970983d666e702fa56f67dfd2fdaa363b8a4266e8d98847374cd7c8"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/harfbuzz-ng/src/AUTHORS",
+      "bytes": 201,
+      "sha256": "19bfe8f5ed100636cd24ab0c90a3f71c21d8b02d9ba00719447a0faab364d49f"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/harfbuzz-ng/src/COPYING",
       "bytes": 1971,
       "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64"
@@ -6238,6 +5566,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/highway/src/LICENSE-BSD3",
       "bytes": 1515,
       "sha256": "d25e82e26acd42ca3ccc9993622631163425b869b9e16284226d534cff6470f2"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/highway/src/debian/copyright",
+      "bytes": 825,
+      "sha256": "6e4ecf1cae052b678ea3178dd4b3652d581ee66a82d58db8800dd7d80dd6de76"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/hunspell/COPYING",
@@ -6875,14 +6208,14 @@
       "sha256": "76c45ece83a26117f86f4e349e7df118708e061e87225328fb478ce1e8b3eb86"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/jsoncpp/source/AUTHORS",
+      "bytes": 4200,
+      "sha256": "0b21b1d9c90421380d30e8b55a02204949cd737535d98bf56076d661816deec4"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/jsoncpp/source/LICENSE",
       "bytes": 2714,
       "sha256": "cec0db5f6d7ed6b3a72647bd50aed02e13c3377fd44382b96dc2915534c042ad"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/jsoncpp/source/devtools/licenseupdater.py",
-      "bytes": 3962,
-      "sha256": "81d0fc4498e695444090a0ba9a74398f8738cd1ae18c788734be93fec2dc3515"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/khronos/LICENSE",
@@ -7070,6 +6403,11 @@
       "sha256": "a3775cb5f3e55a1a7fc417a6aed46048fe675d7377f88f143dab15694b9b2029"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/leveldatabase/src/AUTHORS",
+      "bytes": 293,
+      "sha256": "75cccce858c06397a2736b5018b304a6fe50fce7148c7ea7fd532dd255d264b9"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/leveldatabase/src/LICENSE",
       "bytes": 1484,
       "sha256": "ccc19f1da0798ed666609b65a5b44dd8b3abe6fc08b9c0592eb76e82e174db19"
@@ -7078,6 +6416,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaddressinput/LICENSE",
       "bytes": 11358,
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaddressinput/src/AUTHORS",
+      "bytes": 318,
+      "sha256": "d01df9ef8a84e3699a6f073e0c895e9657d6440994c16d7fce41c98aefed25ba"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaddressinput/src/LICENSE",
@@ -7090,14 +6433,29 @@
       "sha256": "c9a5bd7c8cc1267ddacdc5228c68ecd811cf6d74286e9141bc80d8af2eb1a025"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaom/source/libaom/AUTHORS",
+      "bytes": 13105,
+      "sha256": "1bf4faf64255fc1ffe1428e56f58f36050eeaac47a6401e532ca15823d21e9ac"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaom/source/libaom/LICENSE",
       "bytes": 1316,
       "sha256": "4764a286d8b2faeaf42f4418e7d7a28d58fc8fd4d00a3d0a7f44b0a4099de7f2"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaom/source/libaom/PATENTS",
+      "bytes": 5701,
+      "sha256": "661fb8e504744e95587b556b94a58343448300606a41bea8c7a9b97125696e61"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaom/source/libaom/third_party/SVT-AV1/LICENSE.md",
       "bytes": 1709,
       "sha256": "0acc2fcb27472bdc9aaf8b71f37055bbdac4f54671b7d922f241bd7fcd0dd3e6"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaom/source/libaom/third_party/SVT-AV1/PATENTS.md",
+      "bytes": 5767,
+      "sha256": "20678ab10402659106dc4c147c97b2a6e94b5c0695415e15a8f195ebc3547922"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaom/source/libaom/third_party/fastfeat/LICENSE",
@@ -7115,9 +6473,19 @@
       "sha256": "d25e82e26acd42ca3ccc9993622631163425b869b9e16284226d534cff6470f2"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaom/source/libaom/third_party/libwebm/AUTHORS.TXT",
+      "bytes": 137,
+      "sha256": "3edb5f5496bfff3d6d4a62fa75fe996b814920d0d6e348c2e65c589e7ac5d177"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaom/source/libaom/third_party/libwebm/LICENSE.TXT",
       "bytes": 1496,
       "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaom/source/libaom/third_party/libwebm/PATENTS.TXT",
+      "bytes": 1436,
+      "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libaom/source/libaom/third_party/libyuv/LICENSE",
@@ -7143,6 +6511,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libavif/src/LICENSE",
       "bytes": 20415,
       "sha256": "165abf92cc04b39e80d29cadea7a6a7e8fddf59407d4ad2616507a7ebe8216f9"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libavif/src/third_party/libyuv/AUTHORS",
+      "bytes": 148,
+      "sha256": "406e9dee7651ff7a415ef126fe6f649b29312ea3f2b28f11bb7f0bf458edb3bd"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libbrlapi/LICENSE",
@@ -7173,6 +6546,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libei/LICENSE",
       "bytes": 1088,
       "sha256": "99406b2e7cacd825c770d1652bbac228c8ab33ea0ae8e204c803949f11fb31cd"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libgav1/src/AUTHORS",
+      "bytes": 295,
+      "sha256": "161b003e23e84069189c06028a1ad5f220760d79f5352915413630d9599eff0c"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libgav1/src/LICENSE",
@@ -7220,9 +6598,19 @@
       "sha256": "96f5b328adbb78eeaaec6980d73fd558cb1e4d62560ed615646bc3cf5e532430"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libpng/AUTHORS",
+      "bytes": 1773,
+      "sha256": "0c777e9f2a67bd4058ab91050eb7a56106c92ed038ba8fe5f54c83344f2d93ca"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libpng/LICENSE",
       "bytes": 5345,
       "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libprotobuf-mutator/src/AUTHORS",
+      "bytes": 329,
+      "sha256": "cc8417cac69a4a124a2b83a6f88db2b0106808a6573d126b8def8cab126400f5"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libprotobuf-mutator/src/LICENSE",
@@ -7260,6 +6648,11 @@
       "sha256": "6d7cc46ab05b4712dd73ea17df4bb808cd104836706dbe10bd007a556ce66130"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libusb/src/AUTHORS",
+      "bytes": 1321,
+      "sha256": "a0b04d56d159fd407dd3e330c9b59536cb8be88b8f22495f173299ef2b32edd9"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libusb/src/COPYING",
       "bytes": 26436,
       "sha256": "5df07007198989c622f5d41de8d703e7bef3d0e79d62e24332ee739a452af62a"
@@ -7275,9 +6668,19 @@
       "sha256": "c86a782ee845b52472dae9b9d79fb915d333628ac0efe49cdce63644814931de"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libvpx/source/libvpx/AUTHORS",
+      "bytes": 9352,
+      "sha256": "fd2d1ac03d9d3c864bd98c2042de2d8f7fbd78b298c8d9c506076b6c6a9de889"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libvpx/source/libvpx/LICENSE",
       "bytes": 1537,
       "sha256": "8267348d5af1262c11d1a08de2f5afc77457755f1ac658627dd9acf71011d615"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libvpx/source/libvpx/PATENTS",
+      "bytes": 1436,
+      "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libvpx/source/libvpx/third_party/googletest/src/LICENSE",
@@ -7285,9 +6688,19 @@
       "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libvpx/source/libvpx/third_party/libwebm/AUTHORS.TXT",
+      "bytes": 137,
+      "sha256": "3edb5f5496bfff3d6d4a62fa75fe996b814920d0d6e348c2e65c589e7ac5d177"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libvpx/source/libvpx/third_party/libwebm/LICENSE.TXT",
       "bytes": 1496,
       "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libvpx/source/libvpx/third_party/libwebm/PATENTS.TXT",
+      "bytes": 1436,
+      "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libvpx/source/libvpx/third_party/libyuv/LICENSE",
@@ -7305,14 +6718,34 @@
       "sha256": "719d8fa235f2068e0ae6d6a7dceb0a7720d7840f0f0ebed29957989e6ded3cd8"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libwebm/source/AUTHORS.TXT",
+      "bytes": 137,
+      "sha256": "3edb5f5496bfff3d6d4a62fa75fe996b814920d0d6e348c2e65c589e7ac5d177"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libwebm/source/LICENSE.TXT",
       "bytes": 1496,
       "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libwebm/source/PATENTS.TXT",
+      "bytes": 1436,
+      "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libwebp/src/AUTHORS",
+      "bytes": 3279,
+      "sha256": "f251be89fd442bd9d701360730aea163cc8e2076ff03528f59267dc2c4f8b60a"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libwebp/src/COPYING",
       "bytes": 1496,
       "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libwebp/src/PATENTS",
+      "bytes": 1436,
+      "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libx11/LICENSE",
@@ -7325,9 +6758,29 @@
       "sha256": "d499c1bf2c2a5f0a0498e5204d998388e308dcf2273dfbe2250a5b9a73f66537"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libxml/src/Copyright",
+      "bytes": 1314,
+      "sha256": "5d4873884a890122a4b9b20ad56ac6f7da1d796a5bfcf04a427970ac96217626"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libxslt/linux/COPYING",
       "bytes": 2968,
       "sha256": "7e48e290b6bfccc2ec1b297023a1d77f2fd87417f71fbb9f50aabef40a851819"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libxslt/src/AUTHORS",
+      "bytes": 2080,
+      "sha256": "05bd0eb6e913e96da423efd14013c562e1d77c345c447aea8b67910469d9910d"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libxslt/src/Copyright",
+      "bytes": 2968,
+      "sha256": "7e48e290b6bfccc2ec1b297023a1d77f2fd87417f71fbb9f50aabef40a851819"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libyuv/AUTHORS",
+      "bytes": 179,
+      "sha256": "0c4a51c72a06b3431bb2b750e3b04dbe3694b22e2fcae6e370216424eec56d52"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libyuv/LICENSE",
@@ -7335,9 +6788,19 @@
       "sha256": "2b2cc1180c7e6988328ad2033b04b80117419db9c4c584918bbb3cfec7e9364f"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libyuv/PATENTS",
+      "bytes": 1387,
+      "sha256": "4da84211f947c6f9f7dd8fbce513e1522e01833407ae732b8c9a2bbb75fed495"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libzip/LICENSE",
       "bytes": 1451,
       "sha256": "0b052dcaa4b084c41fd5ba28c8ca4c54e24750d34ac9a07c758d3ea88aa0ea93"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libzip/src/AUTHORS",
+      "bytes": 60,
+      "sha256": "d86af3fec78c51a91e637ec2a6a6823c8a1769edf8f1098973bfbe4b20eee997"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/libzip/src/LICENSE",
@@ -7365,9 +6828,19 @@
       "sha256": "7de6196d9c03ec05e626d4fe7ab86a9c900f11d73176a816423fc14e0a1ee0de"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/mako/mako/AUTHORS",
+      "bytes": 282,
+      "sha256": "228d95c3bd268d84bbc85714b89c6120688c510b7c15626ec628b0c945b55918"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/mako/mako/LICENSE",
       "bytes": 1098,
       "sha256": "760f22b3e9ea4a50eb99201bd8dd118869f28108cfb64ccce6d1b305cf9ae9fa"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/markupsafe/AUTHORS",
+      "bytes": 248,
+      "sha256": "bca90e12c0bf6998d25eb74bc0aa76f1f781493ff81a8a71ad6fb0d692248c45"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/markupsafe/LICENSE",
@@ -7545,6 +7018,11 @@
       "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/nasm/AUTHORS",
+      "bytes": 3060,
+      "sha256": "8a7bd0cc6c517a220265548bf2ecf62fe89bf682b6a9938afb7521008679149e"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/nasm/LICENSE",
       "bytes": 1521,
       "sha256": "1563996c52e220e15ef2418e67d39488255aa8c28c89e617074d3afe3ee329e0"
@@ -7558,26 +7036,6 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/nearby/src/LICENSE",
       "bytes": 10173,
       "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/nearby/src/internal/platform/implementation/windows/generated/winrt/Windows.ApplicationModel.Store.LicenseManagement.h",
-      "bytes": 23448,
-      "sha256": "b55df7cd2a978660fedcb1818df075d7112f633b58a712bbe106ebe2f87d56a5"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/nearby/src/internal/platform/implementation/windows/generated/winrt/impl/Windows.ApplicationModel.Store.LicenseManagement.0.h",
-      "bytes": 9618,
-      "sha256": "1e82c3236ffbe2a297c4abc8380bda4bda962b76f5fd24f8db77a51813d650b5"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/nearby/src/internal/platform/implementation/windows/generated/winrt/impl/Windows.ApplicationModel.Store.LicenseManagement.1.h",
-      "bytes": 2001,
-      "sha256": "266d6d347d1d15264ef8cbb1a93440b1c88f51bd3098b7fda0189fd78e24fd28"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/nearby/src/internal/platform/implementation/windows/generated/winrt/impl/Windows.ApplicationModel.Store.LicenseManagement.2.h",
-      "bytes": 1809,
-      "sha256": "e5766c7c3bac3073aed5abb3588816a40a471f49ce32e3ac929e8a7955409aa7"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/neon_2_sse/LICENSE",
@@ -8380,6 +7838,11 @@
       "sha256": "6cb0631f71c7749763fd3dd1d5bee52dd1070ec17f2edc1710079ad070bd2fbd"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/node/node_modules/spdx-expression-parse/AUTHORS",
+      "bytes": 203,
+      "sha256": "44ba6c2bc625f3b99bce248a62b29b088538f4f337f9e04679547c1195e634a4"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/node/node_modules/spdx-expression-parse/LICENSE",
       "bytes": 1111,
       "sha256": "7edb57f7065309027de249642341292a5b21410d5773cc55bba73ff9cf01060e"
@@ -8495,6 +7958,11 @@
       "sha256": "dd5c1c9668512530fa5a96e4c29ac4033d70a7eeb0eed7a42fddb6dd794ebdbb"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/openscreen/src/AUTHORS",
+      "bytes": 2491,
+      "sha256": "4c2e270bc05a6b53902ab5546b8a358c0e4fa78b95186ad1ad7d0169f9ed192c"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/openscreen/src/LICENSE",
       "bytes": 1536,
       "sha256": "4df77ff8575f0b6053e0e02e1b60aa0b2e87e6aaaaa629a7111970e6c4a12e94"
@@ -8530,9 +7998,9 @@
       "sha256": "249994fe7f34f098c2a1ac549afe7879f2950aa7d71bb778eb723e22f9ae1791"
     },
     {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/openscreen/src/tools/licenses.py",
-      "bytes": 23289,
-      "sha256": "d15f98a631825e2019e9c1baa867ef330eaf0eafd64424bf28c6ec21e96c1fb5"
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/opus/src/AUTHORS",
+      "bytes": 239,
+      "sha256": "f9fd849e652219ce98e008303370b352d37663d0ffb27b8dc514ad93c9c7438b"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/opus/src/COPYING",
@@ -8563,6 +8031,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/ots/src/subprojects/packagefiles/woff2/LICENSE.build",
       "bytes": 1105,
       "sha256": "a2fa8b742d513802526cb71efa7f3843a46773d7294c5c37466c3d99b08bda6a"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/pdfium/AUTHORS",
+      "bytes": 2227,
+      "sha256": "57b11cf4d954df8d6aa13507db27072c1d74525e11cc6911b4729561775be792"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/pdfium/LICENSE",
@@ -8623,6 +8096,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/perfetto/MODULE_LICENSE_APACHE2",
       "bytes": 1,
       "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/perfetto/debian/copyright",
+      "bytes": 765,
+      "sha256": "6979cdeec4c40ec1c93b743d9af77fcd23cdea403855501d96f18f1854c573fb"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/perfetto/python/LICENSE",
@@ -8723,6 +8201,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/puffin/LICENSE",
       "bytes": 1562,
       "sha256": "a6d3ebd1c2f37d4fd83d0676621f695fc0cc2d8c6e646cdbb831b46e0650c208"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/pycoverage/AUTHORS.txt",
+      "bytes": 696,
+      "sha256": "fcba70b7cb05902c31a3b9ac0ea90611b78e7dd5d937f29d77262953b7642c4b"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/pycoverage/LICENSE",
@@ -9148,6 +8631,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/rust/chromium_crates_io/vendor/either-v1/LICENSE-MIT",
       "bytes": 1043,
       "sha256": "7576269ea71f767b99297934c0b2367532690f8c4badc695edf8e04ab6a1e545"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/rust/chromium_crates_io/vendor/encoding_rs-v0_8/COPYRIGHT",
+      "bytes": 713,
+      "sha256": "11789f45bb180841cd362a5eee6789c68ddb573a11105e30768c308a6add0190"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/rust/chromium_crates_io/vendor/encoding_rs-v0_8/LICENSE-APACHE",
@@ -9890,6 +9378,11 @@
       "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/rust/chromium_crates_io/vendor/unicode-width-v0_2/COPYRIGHT",
+      "bytes": 321,
+      "sha256": "23860c2a7b5d96b21569afedf033469bab9fe14a1b24a35068b8641c578ce24d"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/rust/chromium_crates_io/vendor/unicode-width-v0_2/LICENSE-APACHE",
       "bytes": 10847,
       "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
@@ -10020,6 +9513,11 @@
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/s2cellid/AUTHORS",
+      "bytes": 341,
+      "sha256": "2954c1b50c0b1c278d5583f68d824ab54eb9ec391ecc1011ed55ac8cad938949"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/s2cellid/LICENSE",
       "bytes": 11358,
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
@@ -10130,6 +9628,11 @@
       "sha256": "8bb850c565aa389fdc16f3a46965ad23d82adff60f2393fc2762b63185e8e6c9"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/skia/AUTHORS",
+      "bytes": 4689,
+      "sha256": "92fc483e4adb0a6aefc58da7a6f893128733001f933469148d5d37705d226a36"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/skia/LICENSE",
       "bytes": 1507,
       "sha256": "5f787c1dee3c56547f09ccc2906ab5f5293c4d8dd6c8654e573216c38e908dbd"
@@ -10183,6 +9686,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/smhasher/LICENSE",
       "bytes": 1176,
       "sha256": "3f6f1b520bc53e878ccbb698ad0bacef3752a5f4e4b50a26552bd70f60b40748"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/snappy/src/AUTHORS",
+      "bytes": 22,
+      "sha256": "710c0a3a4681c8c40f5a59eb794f61093fa142935c647c92f46ea595f0591833"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/snappy/src/COPYING",
@@ -10268,6 +9776,11 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/swift-toolchain/LICENSE",
       "bytes": 11752,
       "sha256": "e859b9ea44caa0bb817f080d8601477916419f464209b222fd73c852edb1df0d"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/swiftshader/AUTHORS.txt",
+      "bytes": 370,
+      "sha256": "2189b65717f2f5bc39fa762fde69b89849dfded858ca20c0dba075a3185b0347"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/swiftshader/LICENSE.txt",
@@ -10455,9 +9968,19 @@
       "sha256": "6068d739ce4ff781c851592321a140e25efc5b21f6605cb70201957effd47fde"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/webrtc/AUTHORS",
+      "bytes": 7566,
+      "sha256": "a964d1fb42a3437fdb9ea0883ed480f0b660940dc4d5678c2a04b15c1b8f2270"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/webrtc/LICENSE",
       "bytes": 1511,
       "sha256": "ab00a482b6a3902e40211b43c5d0441962ea99b6cc7c25c0f243fa270b78d482"
+    },
+    {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/webrtc/PATENTS",
+      "bytes": 1388,
+      "sha256": "01462e2068d1a04c2274f3389773014c14ed9bc3446b28303543bd3e3c064145"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/webrtc/common_audio/third_party/ooura/LICENSE",
@@ -10518,16 +10041,6 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/webrtc/rtc_base/third_party/sigslot/LICENSE",
       "bytes": 262,
       "sha256": "905bc5ab1c66eea2669aee6cb5185488508264df6492f71ae1a6595180ff8c2b"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/webrtc/tools_webrtc/libs/generate_licenses.py",
-      "bytes": 11337,
-      "sha256": "52d0efcc0badd76311168ed7d34e4cdbb954262341f9d0d9f69ca535175a6199"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/webrtc/tools_webrtc/libs/generate_licenses_test.py",
-      "bytes": 4509,
-      "sha256": "7656eef23d99487147d48b9fbda5510946c379028050773ca2560156722bcf5b"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/third_party/webrtc_overrides/LICENSE",
@@ -10700,26 +10213,6 @@
       "sha256": "1744e977d24e20e77b1e97d745fe43779430a1b84247b6c0e89d16e116e7ff92"
     },
     {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/tools/checklicenses/checklicenses.py",
-      "bytes": 22432,
-      "sha256": "7d46a9b6d4d20d05b18d7e178699ce58a9368177ee4b2e0ca7a503e0065969fb"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/tools/crates/gnrt/lib/readme.rs-third-party-license-review.md",
-      "bytes": 1064,
-      "sha256": "666b4cd363f4df097ef55ff81ef1c5e5d382d591f9c1f7792a4963163ca0b5c1"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/tools/licenses/licenses.py",
-      "bytes": 55938,
-      "sha256": "eafbddd25db801a722e5eef6f5bdda56b62d84c9f18dcc1dd5cc42b3607a77c0"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/tools/licenses/licenses_test.py",
-      "bytes": 19270,
-      "sha256": "07206d489dc1fe16b66f437f3f6b21d3df86e98b5ecfc91ddc102feb91ca2d0a"
-    },
-    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/tools/licenses/test_dir/LICENSE",
       "bytes": 92,
       "sha256": "470a42e43cbafb72dfec8b4c62f16b587a5a243483c17358fe71af739dcb5ba5"
@@ -10750,6 +10243,11 @@
       "sha256": "284545e873c704952e5b1b39d457dd83a3b115a51d9f1eb5175137bd69b8fa1b"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/v8/AUTHORS",
+      "bytes": 12687,
+      "sha256": "a5c8a29ce17251dcbc585e8d89d5566ca6dbfa91f8d318536c9882b234485316"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/v8/LICENSE",
       "bytes": 3093,
       "sha256": "6ab33af8774a0f396ee3aeeb761e3229057682d6f9fa7f572e390c2cb3a6e509"
@@ -10768,16 +10266,6 @@
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/v8/LICENSE.v8",
       "bytes": 1527,
       "sha256": "4af93c12062c58058378de2397dc1c92bbff9ddfb1d583a01c84127557ce97ca"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/v8/src/compiler/turboshaft/copying-phase.cc",
-      "bytes": 650,
-      "sha256": "8050804c21e9547da764741ae0aa9b8a3fb8df1f7a24c8ba5f94e7fa7e3564d9"
-    },
-    {
-      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/v8/src/compiler/turboshaft/copying-phase.h",
-      "bytes": 45047,
-      "sha256": "7b07b99f6d3dd638d4ea50a2a40c77197180c319df2adb7d0665976dea3d188d"
     },
     {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/chromium/v8/third_party/colorama/LICENSE",
@@ -10855,6 +10343,11 @@
       "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
     },
     {
+      "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/gn/AUTHORS",
+      "bytes": 1864,
+      "sha256": "e5b4d6013b910cca1d8375640643cef54ae400d9cf908294593942a2807b13d8"
+    },
+    {
       "path": "qtwebengine-everywhere-src-6.11.2/src/3rdparty/gn/LICENSE",
       "bytes": 1559,
       "sha256": "845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308"
@@ -10865,8 +10358,8 @@
       "sha256": "5d85142a5609ad177a2d7a2e7cae060b886b8b42f25c5b9803cf0cb5ee04ad2f"
     }
   ],
-  "noticeBytes": 9405114,
-  "noticeZipSha256": "97a8dfe4c1ba322a75b204ad431a4fe1c93855a4875d2a69be7b361dd6714bb3",
+  "noticeBytes": 8901864,
+  "noticeZipSha256": "9cb4fe71235b5ea070ee1b6727dfc103e339ef964d6f52f40416436ad6394b48",
   "executedDownloadedCode": false,
   "sourceModified": false,
   "boundary": "官方同版完整源码归档及其许可集合；使用官方未修改 wheel，不声明自行重建 Chromium。"

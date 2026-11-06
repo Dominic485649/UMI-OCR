@@ -23,6 +23,9 @@ _chunks_spec.loader.exec_module(chunks)
 _directed_spec = importlib.util.spec_from_file_location("umi_directed_release312", Path(__file__).with_name("release312_directed_evidence.py"))
 directed = importlib.util.module_from_spec(_directed_spec)
 _directed_spec.loader.exec_module(directed)
+_directed313_spec = importlib.util.spec_from_file_location("umi_directed_release313", Path(__file__).with_name("release313_directed_evidence.py"))
+directed313 = importlib.util.module_from_spec(_directed313_spec)
+_directed313_spec.loader.exec_module(directed313)
 
 PLUGIN_ID = "win32_PaddleOCRv6_CUDA"
 PUBLIC_REPOSITORIES = {
@@ -615,6 +618,8 @@ def _verify_base_capture_waiver(record, kind, binding, staging, authorized, auto
 def verify_current_source(record, kind: str, binding: dict, staging: Path, authorized: bool) -> dict:
     if isinstance(record, dict) and record.get("validation_scope") == directed.SCOPE:
         return directed.verify(record, kind, binding, staging, authorized, globals())
+    if isinstance(record, dict) and record.get("validation_scope") == directed313.SCOPE:
+        return directed313.verify(record, kind, binding, staging, authorized, globals())
     if isinstance(record, dict) and record.get("validation_scope", "full") not in {"full", BASE_CAPTURE_SCOPE}:
         if record.get("validation_scope") != STARTUP_SCOPE:
             raise ValueError("Unknown current-source validation scope")
