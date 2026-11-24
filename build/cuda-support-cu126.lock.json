@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "paddle_version": "3.3.1",
+  "cuda_version": "12.6",
+  "wheel_sha256": "dbcbe299e8af3c8b45bede6eff58f473dec5cb333ebefda5d5ac7dc0ebb78fdd",
+  "providers": [
+    {
+      "path": "vendor/paddle/base/libpaddle.pyd",
+      "sha256": "1729228606646e3ddf33393c93c4c69c74b8b164d89abf6d85f99e09851195ad",
+      "cubins": ["75", "80", "86", "89"],
+      "ptx": []
+    },
+    {
+      "path": "vendor/paddle/libs/phi.dll",
+      "sha256": "33d0928c0b7be812e1a8862dae743cc2a9321bfae155e066a61c30b0e0081d5d",
+      "cubins": ["75", "80", "86", "89"],
+      "ptx": []
+    }
+  ]
+}

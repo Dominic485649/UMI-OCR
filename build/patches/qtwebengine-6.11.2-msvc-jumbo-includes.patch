@@ -1,0 +1,27 @@
+--- a/src/3rdparty/chromium/build/config/merge_for_jumbo.py
++++ b/src/3rdparty/chromium/build/config/merge_for_jumbo.py
+@@ -72,6 +72,15 @@
+   return stops
+ 
+ 
++def include_path(filename):
++  # MSVC may reject a joined path before collapsing its ".." components.
++  if os.name == "nt":
++    full_path = os.path.join(os.getcwd(), filename)
++    if len(full_path) >= 260:
++      return os.path.normpath(full_path).replace("\\", "/")
++  return filename
++
++
+ def write_jumbo_files(inputs, outputs, written_input_set, written_output_set):
+   chunk_stops = generate_chunk_stops(inputs, len(outputs), len(inputs) > len(outputs))
+ 
+@@ -91,7 +100,7 @@
+     while written_inputs < input_limit:
+       filename = inputs[written_inputs]
+       written_inputs += 1
+-      out.write("#include \"%s\"\n" % filename)
++      out.write("#include \"%s\"\n" % include_path(filename))
+       written_input_set.add(filename)
+     new_jumbo_file = out.getvalue()
+     out.close()

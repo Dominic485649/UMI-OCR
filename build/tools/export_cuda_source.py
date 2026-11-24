@@ -1,0 +1,178 @@
+"""Export a new public CUDA source tree, offline and without Git history."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from source_snapshot import files_for_repo, git_output, locked_sources, version_from_about
+
+PLUGIN = "UmiOCR-data/plugins/win32_PaddleOCRv6_CUDA/"
+TOOLS = {
+    "run_pip.py", "patch_paddlex_3_7_2.py", "generate_third_party_components.py",
+    "verify_release_evidence.py", "strip_optional_models_3_7.py",
+    "derive_uvdoc_grid_model.py", "split_lock.py", "source_snapshot.py",
+    "package_tar_xz.py", "export_cuda_source.py", "record_gpu_e2e.py", "verify_public_payload.py", "freeze_gpu_runtime.py", "prepare_cuda_overlay.py",
+    "staging_smoke.py", "measure_closure.py", "release_gate_inputs.py", "finalize_release.py",
+    "record_gpu_startup.py", "gpu_startup_evidence.py", "prepare_products.py",
+    "merge_runtime.py", "runtime_archive_layout.py", "audit_runtime_archives.py", "measure_runtime_layout.py",
+    "chunked_files.py", "release312_directed_evidence.py",
+    "project_dependency_runtime.py", "build_minimal_opencv.ps1", "package_minimal_opencv.py",
+    "package_modelscope_download.py", "project_cuda_native_wrappers.py",
+    "project_inherited_runtime.py", "fixed_installation_update.py", "reviewed_gpu_seed.py", "gpu_package_tier.py",
+    "prepare_minimal_distribution.py", "package_local_review.py", "package_local_review_fast.py",
+    "release313_directed_evidence.py", "shared_runtime_projection.py", "runtime_development_strip.py",
+}
+NATIVE_SOURCES = {
+    "build/windows/CudaWorker/CMakeLists.txt",
+    "build/windows/CudaWorker/worker_main.cpp",
+    "build/windows/CudaWorker/worker.manifest",
+    "build/windows/CudaWorker/resource.rc.in",
+}
+DOCS = {
+    "BUILD_WINDOWS_CUDA.md", "BUILD_WINDOWS_CUDA_en.md", "PLUGIN_API.md", "README_CUDA_PLUGIN.md", "GPU_TIER_BUILD.md",
+    "RELEASE_3.0.1_DRAFT.md", "RELEASE_CUDA_3.0.1_DRAFT.md", "RELEASE_3.0.1_ACCEPTANCE.md",
+    "RELEASE_3.0.2_LOCAL.md", "RELEASE_CUDA_3.0.2_LOCAL.md", "RELEASE_3.0.2_ACCEPTANCE.md",
+    "RELEASE_3.0.2_DRAFT.md", "RELEASE_CUDA_3.0.2_DRAFT.md", "RELEASE_3.0.2_REVIEW.md",
+    "RELEASE_3.0.3_DRAFT.md", "RELEASE_CUDA_3.0.3_DRAFT.md",
+    "RELEASE_3.0.3_ACCEPTANCE.md", "RELEASE_3.0.3_REVIEW.md",
+    "RELEASE_CUDA_3.0.4_DRAFT.md", "RELEASE_CUDA_3.0.4_REVIEW.md",
+    "RELEASE_CUDA_3.0.5_DRAFT.md", "RELEASE_CUDA_3.0.6_DRAFT.md", "RELEASE_CUDA_3.0.7_DRAFT.md",
+}
+
+
+def selected_sources(repo: Path) -> list[Path]:
+    selected = []
+    for relative in files_for_repo(repo, public=True):
+        name = relative.as_posix()
+        if (name.startswith(PLUGIN) or name.startswith("LICENSES/") or
+            name in {"COPYING", "LICENSE", ".gitattributes", "SOURCE-CODE.md", "UmiOCR-data/about.json",
+                     "UmiOCR-data/shared_runtime_bootstrap.py", "build/requirements-base-windows.lock",
+                     "build/runtime-seed-cuda310-windows-cu126.lock.json", "build/runtime-development-strip.lock.json",
+                     "UmiOCR-data/py_src/plugins_controller/host_api.py",
+                     "build/requirements-gpu-plugin-windows-cu126.lock",
+                     "build/sources-windows-cu126.lock.json", "build/runtime-subsets-windows.json",
+                     "build/requirements-gpu-plugin-windows-cu129.lock", "build/sources-windows-cu129.lock.json",
+                     "build/runtime-subsets-windows-cu129.lock.json", "build/cuda-support-cu129.lock.json",
+                     "build/runtime-inheritance-cuda-cu129.lock.json", "build/cuda-support-cu126.lock.json",
+                     "build/runtime-seed-windows-cu126.lock.json",
+                     "build/windows/Build-GpuPlugin.ps1", "build/windows/Audit-Package.ps1",
+                     "build/windows/runtime_archives_cuda.json",
+                     "build/windows/Finalize-Release.ps1"} or
+            name in NATIVE_SOURCES or
+            relative.parent == Path("build/tools") and relative.name in TOOLS or
+            name.startswith("docs/") and relative.name in DOCS or
+            relative.parent == Path("tests") and relative.name in {
+                "test_cuda_worker_client.py", "test_cuda_warmup.py", "test_ocr_workflows.py", "test_public_payload.py",
+                "test_release_evidence_status.py", "test_release_gate_inputs.py",
+                "test_optional_model_strip.py", "test_cuda_overlay.py", "test_finalize_release.py",
+                "test_finalize_path_guards.py", "test_cuda_native_launcher.py",
+                "test_gpu_startup_record.py", "test_gpu_startup_evidence.py",
+                "test_gpu_lock.py", "test_cuda_runtime_check.py", "test_gpu_cuda_version_evidence.py", "test_gpu_package_tier.py", "test_local_build_tools.py", "test_release_metadata.py",
+                "test_cuda_image_tiles.py", "test_runtime_archives.py", "test_runtime_archive_audit.py",
+                "test_runtime_archive_bootstrap.py", "test_runtime_archive_evidence.py",
+                "test_chunked_files.py", "test_release312_directed_evidence.py", "test_release312_native.py", "test_windows_tray.py",
+                "test_project_dependency_runtime.py", "test_project_inherited_runtime.py", "test_package_modelscope_download.py", "test_project_cuda_native_wrappers.py",
+                "test_pymupdf_source_gate.py", "test_minimal_distribution.py", "test_release313_directed_evidence.py",
+                "test_runtime_development_strip.py",
+            }):
+            selected.append(relative)
+    required = {"COPYING", "LICENSE", PLUGIN + "umi-plugin.json", PLUGIN + "api.py", PLUGIN + "worker.py",
+                "build/windows/Build-GpuPlugin.ps1", "build/tools/package_tar_xz.py", "build/tools/source_snapshot.py",
+                "build/runtime-subsets-windows.json", "build/tools/project_dependency_runtime.py",
+                "build/tools/build_minimal_opencv.ps1", "build/tools/package_minimal_opencv.py",
+                "build/tools/package_modelscope_download.py", "build/tools/project_cuda_native_wrappers.py",
+                "build/tools/prepare_minimal_distribution.py", "build/tools/package_local_review.py",
+                "build/tools/package_local_review_fast.py", "build/tools/release313_directed_evidence.py",
+                "build/windows/Finalize-Release.ps1", "build/tools/finalize_release.py", "tests/test_finalize_release.py",
+                "tests/test_finalize_path_guards.py", "build/tools/record_gpu_startup.py",
+                "build/tools/gpu_startup_evidence.py", "tests/test_gpu_startup_record.py",
+                "tests/test_gpu_startup_evidence.py", "tests/test_cuda_native_launcher.py",
+                "docs/history/RELEASE_CUDA_3.0.4_DRAFT.md", "docs/history/RELEASE_CUDA_3.0.4_REVIEW.md"} | NATIVE_SOURCES
+    version = version_from_about(repo / PLUGIN / "umi-plugin.json")
+    if tuple(map(int, version.split('.'))) >= (3, 0, 7):
+        required |= {
+            PLUGIN + "cuda_runtime_check.py", "build/tools/freeze_gpu_runtime.py",
+            "build/requirements-gpu-plugin-windows-cu129.lock", "build/sources-windows-cu129.lock.json",
+            "build/runtime-subsets-windows-cu129.lock.json", "build/cuda-support-cu129.lock.json",
+            "tests/test_cuda_runtime_check.py", "tests/test_gpu_cuda_version_evidence.py",
+            "build/runtime-inheritance-cuda-cu129.lock.json", "build/tools/project_inherited_runtime.py",
+            "build/tools/fixed_installation_update.py", "build/tools/merge_runtime.py", "tests/test_project_inherited_runtime.py",
+        }
+    if tuple(map(int, version.split('.'))) >= (3, 0, 8):
+        required |= {"build/cuda-support-cu126.lock.json", "build/runtime-seed-windows-cu126.lock.json",
+                     "build/tools/reviewed_gpu_seed.py", "build/tools/gpu_package_tier.py"}
+    if tuple(map(int, version.split('.'))) >= (3, 1, 2):
+        required |= {"UmiOCR-data/shared_runtime_bootstrap.py", "build/tools/shared_runtime_projection.py",
+                     "build/runtime-development-strip.lock.json", "build/tools/runtime_development_strip.py",
+                     "tests/test_runtime_development_strip.py"}
+    missing = required - {path.as_posix() for path in selected}
+    if missing:
+        raise RuntimeError(f"CUDA source export lacks required public files: {sorted(missing)}")
+    return selected
+
+
+def export_repository(repo: Path, output: Path, cache: Path, sources_lock: Path | None = None) -> dict[str, object]:
+    if output.exists() or output.is_symlink():
+        raise RuntimeError(f"refusing to overwrite source repository: {output}")
+    output = output.resolve()
+    output.relative_to((repo / "build").resolve())
+    selected = selected_sources(repo)
+    archives = locked_sources(repo, cache, sources_lock)
+    version = version_from_about(repo / PLUGIN / "umi-plugin.json")
+    files = [(repo / relative, relative) for relative in selected] + archives
+    if len({relative.as_posix().casefold() for _, relative in files}) != len(files):
+        raise RuntimeError("duplicate CUDA source export paths")
+    output.mkdir(parents=True)
+    manifest = {}
+    for source, relative in files:
+        target = output / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+        checksum = hashlib.sha256(target.read_bytes()).hexdigest()
+        if checksum != hashlib.sha256(source.read_bytes()).hexdigest():
+            raise RuntimeError(f"source changed while exporting: {relative}")
+        manifest[relative.as_posix()] = checksum
+    # The repository needs a root README, with links that remain valid after
+    # exporting from the host's docs/ directory into this independent checkout.
+    readme = output / "docs/README_CUDA_PLUGIN.md"
+    if readme.is_file():
+        content = readme.read_bytes()
+        (output / "README.md").write_bytes(content)
+        manifest["README.md"] = hashlib.sha256(content).hexdigest()
+    (output / "VERSION").write_text(version + "\n", encoding="utf-8")
+    manifest["VERSION"] = hashlib.sha256((output / "VERSION").read_bytes()).hexdigest()
+    result = {
+        "version": version, "scope": "public-cuda-only", "parent_revision": git_output(repo, "rev-parse", "HEAD").strip(),
+        "git_history_included": False, "local_changes_included": True,
+        "public_release_allowed": False, "current_source_e2e": "NOT_RUN", "files": manifest,
+    }
+    (output / "source-export.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    return result
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[2])
+    parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--source-cache", type=Path)
+    parser.add_argument("--sources-lock", type=Path)
+    args = parser.parse_args(argv)
+    try:
+        repo = args.repo_root.resolve()
+        version = version_from_about(repo / PLUGIN / "umi-plugin.json")
+        output = args.output_dir or repo / "build/artifacts" / f"{version.replace('.', '')}-plugin-repository"
+        result = export_repository(repo, output, args.source_cache or repo / "build/cache/sources", args.sources_lock)
+        print(f"Public CUDA source exported locally: {output}; version={version}; files={len(result['files'])}; E2E=NOT_RUN")
+        return 0
+    except (OSError, RuntimeError, ValueError, json.JSONDecodeError) as exc:
+        print(f"CUDA source export error: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

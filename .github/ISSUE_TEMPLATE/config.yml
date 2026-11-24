@@ -1,0 +1,12 @@
+blank_issues_enabled: true
+contact_links:
+  - name: QQ 群【AWJ | Umi-OCR】
+    url: https://qm.qq.com/q/5XHoXCOU26
+    about: |
+      Contact Dominic485649 for community support and separately priced CPU / PaddleOCR-VL delivery and support.
+      使用交流、CPU / PaddleOCR-VL 付费交付与支持，请在本分支作者的 QQ 群联系。CUDA 插件公开提供，第三方插件开发与接入保持开放。
+  - name: CUDA plugin / CUDA 插件
+    url: https://github.com/Dominic485649/UMI-OCR_plugins
+    about: |
+      CUDA plugin source, build instructions, and releases belong to this fork's plugin repository.
+      本分支 CUDA 插件源码、构建说明与发行版入口。

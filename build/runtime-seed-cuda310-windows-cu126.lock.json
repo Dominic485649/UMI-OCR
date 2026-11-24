@@ -1,0 +1,22 @@
+{
+  "format": "umi-reviewed-cu126-runtime-seed-v1",
+  "platform": "windows-x64-cp313",
+  "cudaVersion": "12.6",
+  "requirementsSha256": "5ff92d7b6f6fcada729ea15ff2c65ad90a40339e5b34a268a72a428d6f25515c",
+  "sourcesSha256": "3c67ac4ac1710403ffa60aec342efe0015218ba2ff954326d91e216cdb2e8a93",
+  "baselineReceiptSha256": "d1af2081ca84c025b98654cd795e225383d3090ec3b2bce0b826b0fbd8fc0867",
+  "components": {
+    "cuda": {
+      "id": "win32_PaddleOCRv6_CUDA",
+      "version": "3.1.0",
+      "archiveName": "Umi-OCR-Plugin_v3.1.0_Windows_x64_CUDA.tar.xz",
+      "archiveBytes": 1954817124,
+      "archiveSha256": "4725a9738f108e8f9c5415d144800f018da30a26b4acf07b9c2146606e56549b",
+      "runtimeBytes": 3985163915,
+      "layoutSha256": "00202f5fd9d54fd0ba16395838f7720cde227f7ec4c0c0df0efa93b1fdb0e695",
+      "originalRequirementsSha256": "5ff92d7b6f6fcada729ea15ff2c65ad90a40339e5b34a268a72a428d6f25515c",
+      "priorRuntimePackReceiptSha256": "7d0d4b044d52fc08ba3fdca1d9a00a015a68fbaaed2f8a64a490eb5a26b0d29c",
+      "priorVendorRestoreReceiptSha256": "b236d6beb72c54bf5fda9a7cf794c3c9a4aaf498d6d18583d365825c4122ea67"
+    }
+  }
+}

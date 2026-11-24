@@ -1,0 +1,61 @@
+name: Bug 错误
+description: Report bugs 报告错误
+body:
+- type: markdown
+  attributes:
+    value: |
+      Please first search the [Issues](https://github.com/Dominic485649/UMI-OCR/issues) to make sure that no one else has already raised a similar issue. If there is an existing issue, you can reply under that Issue to provide more details. The more the developer knows, the easier it is to fix the problem.
+
+      请先浏览或搜索 [Issues](https://github.com/Dominic485649/UMI-OCR/issues) ，确保没有其他人曾经提出过类似问题。如果已有类似问题，你可以在该Issue下回复，提供更多细节。开发者知道得越多，修复问题越容易。
+
+      The original project's [historical FAQ](https://github.com/hiroi-sora/Umi-OCR/issues/447) may help with older versions. Its Windows 7, Qt 5 and legacy plugin remedies do not describe this fork's 3.0.0 release.
+
+      原项目的 [历史常见问题解答](https://github.com/hiroi-sora/Umi-OCR/issues/447) 可供旧版本参考，其中 Windows 7、Qt 5 和旧插件的处理方法不适用于本 fork 的 3.0.0 版本。
+- type: checkboxes
+  attributes:
+    label: Issues
+    options:
+      - label: I have browsed through the Issues. 我已浏览过Issues，确定没有重复提问。
+        required: true
+- type: input
+  attributes:
+    label: Umi-OCR version 程序版本
+    placeholder: 3.0.0
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Windows version 系统版本
+    placeholder: win10
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: OCR plugins Used 使用的OCR插件
+    description: If the bug is related to OCR, please select the plugins you were using. 如果Bug与OCR相关，请选择您使用的插件。可多选。
+    multiple: true
+    options:
+      - PaddleOCR CUDA 3.x
+      - PaddleOCR
+      - RapidOCR
+      - TesseractOCR
+      - Pix2Text
+      - ChineseOCR
+      - Other 其他插件/自开发插件
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Reproduction steps 复现步骤
+    description: Describe the reproduction steps precisely if possible. 尽可能详细描述错误产生的细节。
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Problem screenshots or related files (optional) 问题截图或相关文件（可选）
+    description:
+      If there are pop-up errors, interface anomalies, or obviously incorrect results, please provide complete screenshots.
+      If a specific image or document can reliably trigger a bug, please upload that file.
+      
+      如果存在弹窗报错、界面异常、结果明显错误等问题，请提供完整截图。
+      如果特定的图片或文档能稳定触发Bug，请上传该文件。

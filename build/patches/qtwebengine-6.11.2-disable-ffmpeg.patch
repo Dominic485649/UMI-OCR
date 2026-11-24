@@ -1,0 +1,20 @@
+--- a/src/core/CMakeLists.txt
++++ b/src/core/CMakeLists.txt
+@@ -612,6 +612,17 @@
+             )
+         endif()
+
++        # Umi运行派生：只设置本版本真实声明的FFmpeg开关。
++        # 同时移除上游可能加入但该Chromium未声明的旧WebAudio参数。
++        if(UMI_WEBENGINE_DISABLE_FFMPEG)
++            list(FILTER gnArgArg EXCLUDE
++                REGEX "^(media_use_ffmpeg|use_webaudio_ffmpeg)=")
++            list(APPEND gnArgArg media_use_ffmpeg=false)
++        endif()
++        if(UMI_WEBENGINE_MSVC_WRAPPER)
++            list(APPEND gnArgArg "cc_wrapper=\"${UMI_WEBENGINE_MSVC_WRAPPER}\"")
++        endif()
++
+         add_gn_command(
+             CMAKE_TARGET WebEngineCore
+             NINJA_TARGETS QtWebEngineCore convert_dict

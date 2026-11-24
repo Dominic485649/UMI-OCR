@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "verification_date": "2026-11-22",
+  "artifact_kind": "base",
+  "gates": {
+    "runtime_vendor": "PASS",
+    "paddle_models": "NOT_INCLUDED",
+    "cuda": "NOT_INCLUDED",
+    "cudnn": "NOT_INCLUDED",
+    "opencv": "PASS",
+    "ffmpeg": "NOT_INCLUDED",
+    "mpl": "NOT_INCLUDED",
+    "agpl_nvidia": "NOT_INCLUDED",
+    "cpu_ocr": "NOT_INCLUDED",
+    "document_models": "NOT_INCLUDED",
+    "source_delivery": "BLOCK",
+    "pymupdf_corresponding_source": "BLOCK",
+    "current_source_e2e": "BLOCK"
+  },
+  "public_prerelease_allowed": false,
+  "validation_errors": [],
+  "current_source_e2e": {
+    "status": "BLOCK",
+    "verified": false,
+    "previous_recorded_status": "BLOCK",
+    "blockers": [
+      "A fresh --release-gates input and successful verification are required."
+    ]
+  },
+  "local_candidate": true,
+  "source_delivery": {
+    "status": "BLOCK",
+    "public_source_url": "PENDING",
+    "source_tree": "source-snapshot.zip; exact file hashes and local parent revisions included",
+    "reason": "No user-owned public 3.1.9 source repository is available yet."
+  },
+  "current_source_validation": {
+    "status": "NOT_RUN",
+    "reason": "Static build/audit is not current-artifact E2E. Historical evidence is not current acceptance."
+  }
+}

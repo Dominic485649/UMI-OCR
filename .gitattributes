@@ -1,0 +1,6 @@
+# 固定摘要的派生补丁/编译包装器在Windows检出时也必须保持同一字节序列。
+build/patches/*.patch text eol=lf whitespace=-blank-at-eol
+build/tools/normalize_msvc_paths.py text eol=lf
+# 普通档复用历史 Windows 精简闭包，来源与 requirements 字节与该构建的 CRLF 版本绑定。
+build/requirements-gpu-plugin-windows-cu126.lock text eol=crlf
+build/sources-windows-cu126.lock.json text eol=crlf

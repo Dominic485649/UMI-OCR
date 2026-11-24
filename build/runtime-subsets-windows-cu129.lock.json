@@ -1,0 +1,339 @@
+{
+  "acceptance": "输入及转换锁，不代替三个组件的实际消费者、最终归档重装和固定安装验收。",
+  "cudaExcludedDistributions": [
+    {
+      "name": "bce-python-sdk",
+      "packages": [
+        "baidubce"
+      ],
+      "scripts": {},
+      "version": "0.9.72"
+    },
+    {
+      "name": "crc32c",
+      "packages": [
+        "crc32c"
+      ],
+      "scripts": {
+        "bin/crc32c.exe": "from crc32c import main"
+      },
+      "version": "2.8"
+    },
+    {
+      "name": "future",
+      "packages": [
+        "future",
+        "past",
+        "libfuturize",
+        "libpasteurize"
+      ],
+      "scripts": {
+        "bin/futurize.exe": "from libfuturize.main import main",
+        "bin/pasteurize.exe": "from libpasteurize.main import main"
+      },
+      "version": "1.0.0"
+    },
+    {
+      "name": "psutil",
+      "packages": [
+        "psutil"
+      ],
+      "scripts": {},
+      "version": "7.2.2"
+    },
+    {
+      "name": "pycryptodome",
+      "packages": [
+        "Crypto"
+      ],
+      "scripts": {},
+      "version": "3.23.0"
+    }
+  ],
+  "cudaExclusionScope": "仅CUDA私有依赖：未暴露的PaddleX BOS云存储依赖链及其开发命令；psutil唯一静态引用为numpy.testing测试辅助。保留原始统一锁/源码/许可；不裁本体或PaddleVL。须以实际批量/PDF/二维码GPU流程另行验收。",
+  "cudaNativeWrappers": [
+    {
+      "bytes": 334848,
+      "dist": "nvidia_cublas_cu12-12.9.0.13.dist-info",
+      "distribution": "nvidia-cublas-cu12",
+      "metadataSha256": "9f334ab0a404fa42dde6cbadf299d18d231afc1559287bd5844f1f6389653c6e",
+      "originalMetadata": "Metadata-Version: 2.4\nName: nvidia-cublas-cu12\nVersion: 12.9.0.13\nSummary: CUBLAS native runtime libraries\nHome-page: https://developer.nvidia.com/cuda-zone\nAuthor: Nvidia CUDA Installer Team\nAuthor-email: compute_installer@nvidia.com\nLicense: LicenseRef-NVIDIA-Proprietary\nKeywords: cuda,nvidia,runtime,machine learning,deep learning\nClassifier: Development Status :: 4 - Beta\nClassifier: Intended Audience :: Developers\nClassifier: Intended Audience :: Education\nClassifier: Intended Audience :: Science/Research\nClassifier: License :: Other/Proprietary License\nClassifier: Natural Language :: English\nClassifier: Programming Language :: Python :: 3\nClassifier: Programming Language :: Python :: 3.5\nClassifier: Programming Language :: Python :: 3.6\nClassifier: Programming Language :: Python :: 3.7\nClassifier: Programming Language :: Python :: 3.8\nClassifier: Programming Language :: Python :: 3.9\nClassifier: Programming Language :: Python :: 3.10\nClassifier: Programming Language :: Python :: 3.11\nClassifier: Programming Language :: Python :: 3 :: Only\nClassifier: Topic :: Scientific/Engineering\nClassifier: Topic :: Scientific/Engineering :: Mathematics\nClassifier: Topic :: Scientific/Engineering :: Artificial Intelligence\nClassifier: Topic :: Software Development\nClassifier: Topic :: Software Development :: Libraries\nClassifier: Operating System :: Microsoft :: Windows\nClassifier: Operating System :: POSIX :: Linux\nRequires-Python: >=3\nLicense-File: License.txt\nDynamic: author\nDynamic: author-email\nDynamic: classifier\nDynamic: description\nDynamic: home-page\nDynamic: keywords\nDynamic: license\nDynamic: license-file\nDynamic: requires-python\nDynamic: summary\n\nCUBLAS native runtime libraries\n",
+      "originalRecord": "nvidia/cublas/bin/cublas64_12.dll,sha256=BkECga1gQtLr0x-ksxXEes7yTb-clG-IEx5AUgxon7w,102518784\r\nnvidia/cublas/bin/cublasLt64_12.dll,sha256=x4YZw-K-MU9cyEZA6IqvSTz0BNkhdFqrbF7AV6Cn4Ng,667338752\r\nnvidia/cublas/bin/nvblas64_12.dll,sha256=EjLh8z8UPHgDdY8TDwOqstJ_EbhF8PvwvxfiDHcvDiM,334848\r\nnvidia/cublas/include/cublas.h,sha256=kXl5hD7UsEJnSg3ye4bAb-HiiyZDyOJOZwnB4Nhci0E,42137\r\nnvidia/cublas/include/cublasLt.h,sha256=OpgjK2o7ecJc7Cp2qDSC-3sWaSt7GbqIjhRAi3CSqpk,106800\r\nnvidia/cublas/include/cublasXt.h,sha256=pRKZYWAEr8wO1E0zlFCNSHjGbW5f0kG6AnvBfk3MT7U,38073\r\nnvidia/cublas/include/cublas_api.h,sha256=EA_vgre4unkvNvm7SxTNsWd7Oodyucn0FSCB9T_BdaM,381551\r\nnvidia/cublas/include/cublas_v2.h,sha256=wA1Cb7x6okwQcCSSwN8lMPz0V4b8PniDKh3Ms_uixO4,15938\r\nnvidia/cublas/include/nvblas.h,sha256=C-uuZBhBSOeMcJ_Sg2FuyDHwgCypFfGVFBKpGFpiegw,24165\r\nnvidia_cublas_cu12-12.9.0.13.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4\r\nnvidia_cublas_cu12-12.9.0.13.dist-info/METADATA,sha256=nzNKsKQE-kLd5sut8pnRjSMa_BVZKHvVhE8fY4llPG4,1708\r\nnvidia_cublas_cu12-12.9.0.13.dist-info/RECORD,,\r\nnvidia_cublas_cu12-12.9.0.13.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0\r\nnvidia_cublas_cu12-12.9.0.13.dist-info/WHEEL,sha256=4nekLwvbEBuQYQE0Pacb5Hdh_AnNYk7aHh8LK3Y6Wac,97\r\nnvidia_cublas_cu12-12.9.0.13.dist-info/licenses/License.txt,sha256=rW9YU_ugyg0VnQ9Y1JrkmDDC-Mk_epJki5zpCttMbM0,59262\r\nnvidia_cublas_cu12-12.9.0.13.dist-info/top_level.txt,sha256=fTkAtiFuL16nUrB9ytDDtpytz2t0B4NvYTnRzwAhO14,7\r\n",
+      "package": "nvidia/cublas",
+      "path": "nvidia/cublas/bin/nvblas64_12.dll",
+      "recordSha256": "2e0aa976966382c68d10e79f1e516d33e57bd29dcc9d39e539344e35146f192b",
+      "requiredFiles": [
+        "nvidia/cublas/bin/cublas64_12.dll",
+        "nvidia/cublas/bin/cublasLt64_12.dll"
+      ],
+      "sha256": "1232e1f33f143c7803758f130f03aab2d27f11b845f0fbf0bf17e20c772f0e23",
+      "version": "12.9.0.13"
+    },
+    {
+      "bytes": 163328,
+      "dist": "nvidia_cufft_cu12-11.4.0.6.dist-info",
+      "distribution": "nvidia-cufft-cu12",
+      "metadataSha256": "30b94fa4688a7624adf2d700a687603972fef2d3784e4f6762f765d2cf62d217",
+      "originalMetadata": "Metadata-Version: 2.2\nName: nvidia-cufft-cu12\nVersion: 11.4.0.6\nSummary: CUFFT native runtime libraries\nHome-page: https://developer.nvidia.com/cuda-zone\nAuthor: Nvidia CUDA Installer Team\nAuthor-email: compute_installer@nvidia.com\nLicense: NVIDIA Proprietary Software\nKeywords: cuda,nvidia,runtime,machine learning,deep learning\nClassifier: Development Status :: 4 - Beta\nClassifier: Intended Audience :: Developers\nClassifier: Intended Audience :: Education\nClassifier: Intended Audience :: Science/Research\nClassifier: License :: Other/Proprietary License\nClassifier: Natural Language :: English\nClassifier: Programming Language :: Python :: 3\nClassifier: Programming Language :: Python :: 3.5\nClassifier: Programming Language :: Python :: 3.6\nClassifier: Programming Language :: Python :: 3.7\nClassifier: Programming Language :: Python :: 3.8\nClassifier: Programming Language :: Python :: 3.9\nClassifier: Programming Language :: Python :: 3.10\nClassifier: Programming Language :: Python :: 3.11\nClassifier: Programming Language :: Python :: 3 :: Only\nClassifier: Topic :: Scientific/Engineering\nClassifier: Topic :: Scientific/Engineering :: Mathematics\nClassifier: Topic :: Scientific/Engineering :: Artificial Intelligence\nClassifier: Topic :: Software Development\nClassifier: Topic :: Software Development :: Libraries\nClassifier: Operating System :: Microsoft :: Windows\nClassifier: Operating System :: POSIX :: Linux\nRequires-Python: >=3\nLicense-File: License.txt\nRequires-Dist: nvidia-nvjitlink-cu12\nDynamic: author\nDynamic: author-email\nDynamic: classifier\nDynamic: description\nDynamic: home-page\nDynamic: keywords\nDynamic: license\nDynamic: requires-dist\nDynamic: requires-python\nDynamic: summary\n\nCUFFT native runtime libraries\n",
+      "originalRecord": "nvidia/__init__.py,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0\r\nnvidia/cufft/__init__.py,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0\r\nnvidia/cufft/bin/__init__.py,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0\r\nnvidia/cufft/bin/cufft64_11.dll,sha256=ndgY1yLJkOPjMLiqLYCTtKoPo8t092eBglCpztmtaRE,287272448\r\nnvidia/cufft/bin/cufftw64_11.dll,sha256=uZYxZyzbNp1cIICpoU1NwIJKDwBCjWh-pgwYaYOn4Fg,163328\r\nnvidia/cufft/include/__init__.py,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0\r\nnvidia/cufft/include/cudalibxt.h,sha256=oWgDIGMOdgyygiO-hvcgF4sbl3fx1TY4Zlqx7rsnRZE,4202\r\nnvidia/cufft/include/cufft.h,sha256=gnWa37pNTQULYLk3-N3itjVLopn-bm2WwIj1j4jwLQk,13503\r\nnvidia/cufft/include/cufftXt.h,sha256=Qg60zsp-YDxKSDtoHXCFlRjn4qhp-vCcaWMSvcMc2qc,13223\r\nnvidia/cufft/include/cufftw.h,sha256=ZK_MaHkKTkalslVurWUC9myiOtReqI7ls2hltM9NM1o,20516\r\nnvidia_cufft_cu12-11.4.0.6.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4\r\nnvidia_cufft_cu12-11.4.0.6.dist-info/License.txt,sha256=rW9YU_ugyg0VnQ9Y1JrkmDDC-Mk_epJki5zpCttMbM0,59262\r\nnvidia_cufft_cu12-11.4.0.6.dist-info/METADATA,sha256=MLlPpGiKdiSt8tcApodgOXL-8tN4Tk9nYvdl0s9i0hc,1740\r\nnvidia_cufft_cu12-11.4.0.6.dist-info/RECORD,,\r\nnvidia_cufft_cu12-11.4.0.6.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0\r\nnvidia_cufft_cu12-11.4.0.6.dist-info/WHEEL,sha256=IS7GGfNNwN5x0ehvJ3YrlYCb3DoCm5wnLTXXYlwtEbw,97\r\nnvidia_cufft_cu12-11.4.0.6.dist-info/top_level.txt,sha256=fTkAtiFuL16nUrB9ytDDtpytz2t0B4NvYTnRzwAhO14,7\r\n",
+      "package": "nvidia/cufft",
+      "path": "nvidia/cufft/bin/cufftw64_11.dll",
+      "recordSha256": "326184da7a6475ebc5e9044bdb2e57400917a79df620647dc2615b1133ba8494",
+      "requiredFiles": [
+        "nvidia/cufft/bin/cufft64_11.dll"
+      ],
+      "sha256": "b99631672cdb369d5c2080a9a14d4dc0824a0f00428d687ea60c186983a7e058",
+      "version": "11.4.0.6"
+    }
+  ],
+  "developmentScriptScope": "仅移除本产品未调用的pip命令启动器；保留所有库API、模型下载入口、Qt运行工具及原始许可。按完整__main__.py摘要拒绝变更入口。外部pip开发命令不是Umi-OCR命令行接口。原件和逐文件删除来源保持。",
+  "developmentScripts": {
+    "cuda": {
+      "bin/aistudio.exe": {
+        "entry": "from aistudio_sdk.cmdline import main",
+        "mainSha256": "be6035141391a13c71d9f0a8905ac4ec2433c0abe8f35e212fa632434563ea2f"
+      },
+      "bin/chardetect.exe": {
+        "entry": "from chardet.cli import main",
+        "mainSha256": "fbb771b9ee338b2a5d2be0cfc5890ab6c64f07059f6035d68b0e24759c9a7420"
+      },
+      "bin/cpuinfo.exe": {
+        "entry": "from cpuinfo import main",
+        "mainSha256": "ecf8b6e7878f9122d837970900ab3b1bd29dc492bef6165747a5a0c9ddc8d8e4"
+      },
+      "bin/f2py.exe": {
+        "entry": "from numpy.f2py.f2py2e import main",
+        "mainSha256": "2d73868079e22c5dc0c7c029f74467e340acfb2938b89d326aba23cb2740944e"
+      },
+      "bin/fleetrun.exe": {
+        "entry": "from paddle.distributed.launch.main import launch",
+        "mainSha256": "6ceee12095ea6f4de0f49e43e2f8bd4cf17348536a239c2cca5216cd95aa3d9a"
+      },
+      "bin/hf.exe": {
+        "entry": "from huggingface_hub.cli.hf import main",
+        "mainSha256": "401f14defc5b1f6ab2db1ae805b9558a5231b5e2925476c60d86b14bb7141c05"
+      },
+      "bin/httpx.exe": {
+        "entry": "from httpx import main",
+        "mainSha256": "d6db284e41bc337eb25466601bdec801e51fa72ff3a8d8080f297a14755888d7"
+      },
+      "bin/huggingface-cli.exe": {
+        "entry": "from huggingface_hub.cli.deprecated_cli import main",
+        "mainSha256": "3bc5b5c7937d0b98a2b19b6f6e6552818f58b968cd7cd71d0048dc73f8347f90"
+      },
+      "bin/idna.exe": {
+        "entry": "from idna.cli import main",
+        "mainSha256": "394fc961587249ec4e837372d202228905ce236a018f5ca71c765ae02c69c1d2"
+      },
+      "bin/modelscope.exe": {
+        "entry": "from modelscope.cli.cli import run_cmd",
+        "mainSha256": "6625c703ff951b1cc06a317ed1d52540fbfed4e58c4344e191a5cb9c34676033"
+      },
+      "bin/ms.exe": {
+        "entry": "from modelscope.cli.cli import run_cmd",
+        "mainSha256": "6625c703ff951b1cc06a317ed1d52540fbfed4e58c4344e191a5cb9c34676033"
+      },
+      "bin/normalizer.exe": {
+        "entry": "from charset_normalizer.cli import cli_detect",
+        "mainSha256": "0ec2ff383ec154f206c10a48ac845fda04ac392b88c445104cd1952c5afd3fba"
+      },
+      "bin/numpy-config.exe": {
+        "entry": "from numpy._configtool import main",
+        "mainSha256": "f5ab47845c4247f252ff90a9da07fe3870a2518df2d59aa26503b30dc2d96b8d"
+      },
+      "bin/paddleocr.exe": {
+        "entry": "from paddleocr.__main__ import console_entry",
+        "mainSha256": "4e66f0caf262c0cbc5e66222fc9179119061afaf8fe00a732189fd01151b4bd6"
+      },
+      "bin/paddlex.exe": {
+        "entry": "from paddlex.__main__ import console_entry",
+        "mainSha256": "45e70931feb732a4b66f700a3e126b06292fce01dbb95d285c3074f13ad0ab2d"
+      },
+      "bin/paddlex_genai_server.exe": {
+        "entry": "from paddlex.inference.genai.server import main",
+        "mainSha256": "6cd5b1018c722b87dd7038260ab4bf82ca7e56d69b8c306c034a59f203a27bb4"
+      },
+      "bin/pybidi.exe": {
+        "entry": "from bidi import main",
+        "mainSha256": "212a35044b31b9c7f4262da4982b702b8bf3e9ec261899a20fb8e23e21146c07"
+      },
+      "bin/pypdfium2.exe": {
+        "entry": "from pypdfium2_cli.__main__ import cli_main",
+        "mainSha256": "7bf657e676812019ebd47417fa265d6b54b5cca6d0f341917a9d7515184123d0"
+      },
+      "bin/tiny-agents.exe": {
+        "entry": "from huggingface_hub.inference._mcp.cli import app",
+        "mainSha256": "878d505680f397896deee7ec852a6f656e8d64f5b4d16665ad7ba4da9b77d9c9"
+      },
+      "bin/tqdm.exe": {
+        "entry": "from tqdm.cli import main",
+        "mainSha256": "d17ee0a418c29518aa901fa7f578eb2855b7d1bd65f46ee40a699407305493db"
+      }
+    },
+    "host": {
+      "bin/bottle.exe": {
+        "entry": "from bottle import main",
+        "mainSha256": "9f6bc90ac51e5123724a1c9dbf038ec7f1a246891d8eb3a85776bca0ec396ecd"
+      },
+      "bin/f2py.exe": {
+        "entry": "from numpy.f2py.f2py2e import main",
+        "mainSha256": "2d73868079e22c5dc0c7c029f74467e340acfb2938b89d326aba23cb2740944e"
+      },
+      "bin/fonttools.exe": {
+        "entry": "from fontTools.__main__ import main",
+        "mainSha256": "fcffb820f3deb7de40c8bb91a4092b57e350ff485f6a6de0af1d9d6afa79e961"
+      },
+      "bin/imagecodecs.exe": {
+        "entry": "from imagecodecs.__main__ import main",
+        "mainSha256": "f5f0c90edc28c2a15859643a10965344677f73b5fa0f0387595aefc5c6812af3"
+      },
+      "bin/numpy-config.exe": {
+        "entry": "from numpy._configtool import main",
+        "mainSha256": "f5ab47845c4247f252ff90a9da07fe3870a2518df2d59aa26503b30dc2d96b8d"
+      },
+      "bin/pyftmerge.exe": {
+        "entry": "from fontTools.merge import main",
+        "mainSha256": "b14fa11bdc40b56f14fd1b7f6d540eab10c9b4ccd1d0dc7ef70366b05345d1f5"
+      },
+      "bin/pyftsubset.exe": {
+        "entry": "from fontTools.subset import main",
+        "mainSha256": "0dfbc57e51f5e957587782fe7e4265d36795c79a14b41f452d81e33bfad959fa"
+      },
+      "bin/pymupdf.exe": {
+        "entry": "from pymupdf.__main__ import main",
+        "mainSha256": "6b31b95aec24a50c0659e9940683f2d101d030a385ab3d2f2379d8e04b6513d8"
+      },
+      "bin/pyside6-assistant.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import assistant",
+        "mainSha256": "7de6d6b85b038ff628795b6855686c0c0314cce4b05ab29008c58eab394cb32b"
+      },
+      "bin/pyside6-balsam.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import balsam",
+        "mainSha256": "1e19798821eb8aca2fef5c7cc967b55bb0b4918149f308008d4763e6926be360"
+      },
+      "bin/pyside6-balsamui.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import balsamui",
+        "mainSha256": "b9def48dcd1df5874d0d301c07fa53d4bd1c6552d238315df40250d4631704ac"
+      },
+      "bin/pyside6-deploy.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import deploy",
+        "mainSha256": "7e597690c8d1795d40a405ab62e7417981c0f4e1fb44d6f9e2becc371bbcd638"
+      },
+      "bin/pyside6-designer.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import designer",
+        "mainSha256": "b7f29ec48be878404c87fcb438670e36d50c380b65c14709a3cf4d8d0984d2f2"
+      },
+      "bin/pyside6-genpyi.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import genpyi",
+        "mainSha256": "add7227664631db12414ba54bf824687db2f7164a41075442808ebda5ec53e05"
+      },
+      "bin/pyside6-linguist.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import linguist",
+        "mainSha256": "5c73363280d4fbd53009a4238057e369851f83d383e5008a29a4857b2442b0fc"
+      },
+      "bin/pyside6-lrelease.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import lrelease",
+        "mainSha256": "8589d54d1c6660254b6489f9289150fa3265737e0add987cc1168c9427479254"
+      },
+      "bin/pyside6-lupdate.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import lupdate",
+        "mainSha256": "4121fe368d2875b384bc417532e1cd58dcd53b91747f62f443e9b9e72dad8a5d"
+      },
+      "bin/pyside6-metaobjectdump.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import metaobjectdump",
+        "mainSha256": "5d034fd2f2623b66bc89ff80d72075dc16985b871421f9b262fe89f39d6fa635"
+      },
+      "bin/pyside6-project.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import project",
+        "mainSha256": "757fbfe5eb7c388d9d4ada1579443a4d45a55de4552ca4836261b7b2d5f45da0"
+      },
+      "bin/pyside6-qml.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import qml",
+        "mainSha256": "b3ceeaf85c0c69dcd0cdd18aaa0f66ec7191be5d549805e2f5640ef200bcce39"
+      },
+      "bin/pyside6-qmlcachegen.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import qmlcachegen",
+        "mainSha256": "ce3d5fceaee081142cdf2f63a1cacb2ac929e2b4eb729e339082fe9ae85eb2a9"
+      },
+      "bin/pyside6-qmlformat.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import qmlformat",
+        "mainSha256": "95ac70fcdb137383ff4f0241b0a253f0b948f7bda124d0a69a2772516c547df3"
+      },
+      "bin/pyside6-qmlimportscanner.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import qmlimportscanner",
+        "mainSha256": "ae6e4bb58fe9028d0a7b3a545bf979bb8e82c58c0449a4492571b74d0f767a03"
+      },
+      "bin/pyside6-qmllint.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import qmllint",
+        "mainSha256": "7d558dc540caf7c5744b7d5cce61158bfc86dbb5a08601ddda3b3e56152be526"
+      },
+      "bin/pyside6-qmlls.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import qmlls",
+        "mainSha256": "176ac8b3099a6a263b14f7aae21edeee9aec83640517ca28302f132b3cd06a58"
+      },
+      "bin/pyside6-qmltyperegistrar.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import qmltyperegistrar",
+        "mainSha256": "4d9233f54346e53140b5017c38be8eb21b3202d19a349a184a5591ebcfe4cc94"
+      },
+      "bin/pyside6-qsb.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import qsb",
+        "mainSha256": "b0d15b26d47983b58124e730979d30839d9a03ca1b60f6a5bef86add9993dfd9"
+      },
+      "bin/pyside6-qtpy2cpp.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import qtpy2cpp",
+        "mainSha256": "7f1a2dbac19fbb2fd6a03f70c37ce03379c9481449e2d2b12d7beeeed7ce56b9"
+      },
+      "bin/pyside6-rcc.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import rcc",
+        "mainSha256": "4b3de6a7d29fb1d49681110a2b2ea11e1c2f261b02cce34aa9b71245f75fd80f"
+      },
+      "bin/pyside6-svgtoqml.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import svgtoqml",
+        "mainSha256": "8a3af5e2b530ba06c0358afdba37290f741fbb277fcd6df6d2cb3f21efdd90ac"
+      },
+      "bin/pyside6-uic.exe": {
+        "entry": "from PySide6.scripts.pyside_tool import uic",
+        "mainSha256": "b54c83e40186f2096affdce8eeaecd58612c9ac4a72d849eb8ce0843c4d957d9"
+      },
+      "bin/ttx.exe": {
+        "entry": "from fontTools.ttx import main",
+        "mainSha256": "6130f2105dd26e33329848b5ddead4b94e52973ddc035ea4b759536c03036ab5"
+      }
+    }
+  },
+  "format": "umi-dependency-subsets-v1",
+  "imagecodecs": {
+    "derivedPayloadSha256": "956700c0ad95d576bc1001cd5c9c8d048d073f5ae1347baab620bc7a5d53607b",
+    "extensions": [
+      "_jpegxl",
+      "_jpegxr",
+      "_shared",
+      "_shared_cython"
+    ],
+    "scope": "本体仅保留JPEG XL/XR实际消费者与共享扩展；其它原生格式由现有Pillow/OpenCV路径处理，非官方完整imagecodecs。",
+    "upstreamVersion": "2026.8.16",
+    "version": "2026.8.16+umi.jxlxr.1"
+  },
+  "modelscope": {
+    "filename": "modelscope-1.38.1+umi.download.1-py3-none-any.whl",
+    "sha256": "8eea9d27b594ca71030997f50683eb77698617f0e4005d2ed16bc2e02828206b",
+    "upstreamVersion": "1.38.1",
+    "version": "1.38.1+umi.download.1"
+  },
+  "opencv": {
+    "filename": "opencv_contrib_python-4.10.0.84+umi.coreimg.1-cp313-cp313-win_amd64.whl",
+    "modules": [
+      "core",
+      "imgproc",
+      "imgcodecs",
+      "python3"
+    ],
+    "nativeSha256": "fbdb2c1f62ff1e83f5dfc9d56c8344d673de0dec0d17510b4fcafc7d37852661",
+    "sha256": "6e58965db2144b82036116de78d2d076ec6ec19744fc75886141456f61e744c6",
+    "sourceCommit": "71d3237a093b60a27601c20e9ee6c3e52154e8b1",
+    "upstreamVersion": "4.10.0.84",
+    "version": "4.10.0.84+umi.coreimg.1"
+  },
+  "sourceDelivery": "上游输入锁保持原始摘要；完整对应源码、补丁、构建与转换回执在运行包外独立提供。",
+  "target": "Windows-x64-cp313"
+}

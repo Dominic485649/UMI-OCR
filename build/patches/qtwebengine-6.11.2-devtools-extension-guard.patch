@@ -1,0 +1,15 @@
+--- a/src/core/configure/BUILD.root.gn.in
++++ b/src/core/configure/BUILD.root.gn.in
+@@ -260,9 +260,11 @@
+     "//third_party/blink/public/mojom:mojom_platform",
+     "//chrome/common:buildflags",
+     "//components/compose:buildflags",
+-    "//extensions/common:mojom",
+     "//rlz/buildflags:buildflags",
+     ]
++  if (enable_extensions_core) {
++    deps += [ "//extensions/common:mojom" ]
++  }
+   sources = [
+      "//chrome/browser/devtools/devtools_eye_dropper.cc",
+      "//chrome/browser/devtools/devtools_eye_dropper.h",

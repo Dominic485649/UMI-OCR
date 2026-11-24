@@ -1,0 +1,3 @@
+# Keep unrelated transitive packages on the versions already validated for this release line.
+filelock==3.29.7
+pypdfium2==5.11.0

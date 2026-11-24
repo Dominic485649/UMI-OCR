@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "format": "umi-source-chunks-v1",
+  "files": [
+    {
+      "path": "third_party/qtwebengine-everywhere-src-6.11.2.tar.xz",
+      "bytes": 580351104,
+      "sha256": "6101c1aa00ff933d1b65ee5d167f76e8d71b9ac5b378b0111277723ebda7c163",
+      "parts": [
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000001.part",
+          "bytes": 50331648,
+          "sha256": "4edca9b3b72e99627f793670bc291ec9b7a85a9a613c842cc50cbb10c15b777d"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000002.part",
+          "bytes": 50331648,
+          "sha256": "86efd15b264a5bf84bfb6265c0c7fa9095a295afcbcb5036dd936857c5fefcee"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000003.part",
+          "bytes": 50331648,
+          "sha256": "a225871112863c3fb42cda2b598284a1768301b3ae374bb99ff5c799c746974a"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000004.part",
+          "bytes": 50331648,
+          "sha256": "cd956faec91e7373456d6410a4d08bbab45114a60ca2191ca2a2e3743d53ed06"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000005.part",
+          "bytes": 50331648,
+          "sha256": "b0070f9d22d5387704230e94c1aed9055b2419d958bd1808f6fb8e6adf53af6c"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000006.part",
+          "bytes": 50331648,
+          "sha256": "7b58634252e8c4ab725c15774e1688a3beb1dee9c60b4da7733d574cc252b827"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000007.part",
+          "bytes": 50331648,
+          "sha256": "7d703cbc9aec0bc9273b3bccad93c9b908759a6e10fc7cee5385b70c38d89db8"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000008.part",
+          "bytes": 50331648,
+          "sha256": "9c539842198a7e2dc4136de810b9cf883dc042b520bc14f19c3ae4f80518b1af"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000009.part",
+          "bytes": 50331648,
+          "sha256": "b2c9a8d0207520522234a4fd45ecbc2d285f857c7571b3bae2ebd8c70ea10053"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000010.part",
+          "bytes": 50331648,
+          "sha256": "a9103696330abeb18042be8637f626fcbef6b423ac8ae63c72deec9889413b0a"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000011.part",
+          "bytes": 50331648,
+          "sha256": "3840d9f4fbac18c5a2160d8fd76587975f69e2e6dcce8f0807319f1833419f23"
+        },
+        {
+          "path": ".source-chunks/9d51d01a836498869ac3ce185e72112eff5082b63e68b5ebbd35c756ad841fda/000012.part",
+          "bytes": 26702976,
+          "sha256": "57e61a458e58e46162020bd9a1bde3e451e012c954b49cb354b15b042b171ad2"
+        }
+      ]
+    }
+  ]
+}

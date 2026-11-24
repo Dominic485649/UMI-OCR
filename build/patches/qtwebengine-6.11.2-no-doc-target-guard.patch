@@ -1,0 +1,14 @@
+--- a/src/core/api/CMakeLists.txt
++++ b/src/core/api/CMakeLists.txt
+@@ -130,7 +130,10 @@
+     BUILDDIR ${buildDir}/${config}/${arch}
+ )
+ add_dependencies(generate_chromium_attributions run_core_GnDone)
+-add_dependencies(prepare_docs_WebEngineCore generate_chromium_attributions)
++# Umi派生：QT_BUILD_DOCS=OFF时不引用未创建的文档目标。
++if(TARGET prepare_docs_WebEngineCore)
++    add_dependencies(prepare_docs_WebEngineCore generate_chromium_attributions)
++endif()
+
+ ##
+ #  WEBENGINECORE RESOURCES

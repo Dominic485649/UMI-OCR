@@ -1,0 +1,3440 @@
+{
+  "schema_version": 1,
+  "verification_date": "2026-11-22",
+  "runtime_lock": "UmiOCR-data/native-dlls.lock.json",
+  "runtime_lock_valid": true,
+  "runtime_lock_failures": [],
+  "packages": [
+    {
+      "name": "bottle",
+      "version": "0.13.4",
+      "artifact_path": "UmiOCR-data/site-packages/bottle-0.13.4.dist-info",
+      "SHA256": "441619180223f6ae8a92d1e88e4bbd48159c452bedae1e7c9c27f0673fa720d1",
+      "upstream_source": "https://github.com/bottlepy/bottle",
+      "upstream_revision": "0.13.4",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "bottle-0.13.4.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/bottle-0.13.4.dist-info/METADATA",
+        "SHA256": "441619180223f6ae8a92d1e88e4bbd48159c452bedae1e7c9c27f0673fa720d1"
+      }
+    },
+    {
+      "name": "fonttools",
+      "version": "4.63.0",
+      "artifact_path": "UmiOCR-data/site-packages/fonttools-4.63.0.dist-info",
+      "SHA256": "4f5b717b2fac47775a2f22e2fc3930714979b038d20851daaf10d9032bea152d",
+      "upstream_source": "http://github.com/fonttools/fonttools",
+      "upstream_revision": "4.63.0",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "fonttools-4.63.0.dist-info/licenses/LICENSE",
+        "fonttools-4.63.0.dist-info/licenses/LICENSE.external"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/fonttools-4.63.0.dist-info/METADATA",
+        "SHA256": "4f5b717b2fac47775a2f22e2fc3930714979b038d20851daaf10d9032bea152d"
+      }
+    },
+    {
+      "name": "imagecodecs",
+      "version": "2026.8.16+umi.jxlxr.1",
+      "artifact_path": "UmiOCR-data/site-packages/imagecodecs-2026.8.16+umi.jxlxr.1.dist-info",
+      "SHA256": "6ab4898993c62368f70321378dceab947c4ab2120a6622520b36c5124e3f41b6",
+      "upstream_source": "https://github.com/cgohlke/imagecodecs",
+      "upstream_revision": "2026.8.16+umi.jxlxr.1",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "BSD-3-Clause",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "imagecodecs-2026.8.16+umi.jxlxr.1.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/imagecodecs-2026.8.16+umi.jxlxr.1.dist-info/METADATA",
+        "SHA256": "6ab4898993c62368f70321378dceab947c4ab2120a6622520b36c5124e3f41b6"
+      }
+    },
+    {
+      "name": "numpy",
+      "version": "2.3.5",
+      "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info",
+      "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "opencv-contrib-python",
+      "version": "4.10.0.84+umi.coreimg.1",
+      "artifact_path": "UmiOCR-data/site-packages/opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info",
+      "SHA256": "8900b46d997b613fb8bdf825a32afcb8579a5e2da58526f4a58509033334ef30",
+      "upstream_source": "https://pypi.org/project/opencv-contrib-python/4.10.0.84+umi.coreimg.1/",
+      "upstream_revision": "4.10.0.84+umi.coreimg.1",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": null,
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/OpenCV-LICENSE",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/SoftFloat-COPYING.txt",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/flatbuffers-LICENSE.txt",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/libjpeg-turbo-LICENSE.md",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/libopenjp2-LICENSE",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/libpng-LICENSE",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/libwebp-COPYING",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/openexr-LICENSE",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/protobuf-LICENSE",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/zlib-LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/METADATA",
+        "SHA256": "8900b46d997b613fb8bdf825a32afcb8579a5e2da58526f4a58509033334ef30"
+      }
+    },
+    {
+      "name": "pillow",
+      "version": "12.3.0",
+      "artifact_path": "UmiOCR-data/site-packages/pillow-12.3.0.dist-info",
+      "SHA256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5",
+      "upstream_source": "https://github.com/python-pillow/Pillow",
+      "upstream_revision": "12.3.0",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pillow-12.3.0.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pillow-12.3.0.dist-info/METADATA",
+        "SHA256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+      }
+    },
+    {
+      "name": "psutil",
+      "version": "7.2.2",
+      "artifact_path": "UmiOCR-data/site-packages/psutil-7.2.2.dist-info",
+      "SHA256": "a263a40220d921d9cb963fc636d34f817aa2eb72c2696e3e3465d088cdb1976b",
+      "upstream_source": "https://github.com/giampaolo/psutil",
+      "upstream_revision": "7.2.2",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "BSD-3-Clause",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "psutil-7.2.2.dist-info/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/psutil-7.2.2.dist-info/METADATA",
+        "SHA256": "a263a40220d921d9cb963fc636d34f817aa2eb72c2696e3e3465d088cdb1976b"
+      }
+    },
+    {
+      "name": "pymupdf",
+      "version": "1.28.0",
+      "artifact_path": "UmiOCR-data/site-packages/pymupdf-1.28.0.dist-info",
+      "SHA256": "f0e2033d3c1efb8d58c4f4650110319a63aa36d0070a9a224b956e03640d5d05",
+      "upstream_source": "https://github.com/pymupdf/pymupdf",
+      "upstream_revision": "1.28.0",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "Dual Licensed - GNU AFFERO GPL 3.0 or Artifex Commercial License",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pymupdf-1.28.0.dist-info/COPYING"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pymupdf-1.28.0.dist-info/METADATA",
+        "SHA256": "f0e2033d3c1efb8d58c4f4650110319a63aa36d0070a9a224b956e03640d5d05"
+      }
+    },
+    {
+      "name": "pynput",
+      "version": "1.8.2",
+      "artifact_path": "UmiOCR-data/site-packages/pynput-1.8.2.dist-info",
+      "SHA256": "b37d8f63315b56780af1fc0d3104d231d50caa6436ff6aa0a6603adb5cdcb5f3",
+      "upstream_source": "https://github.com/moses-palmer/pynput",
+      "upstream_revision": "1.8.2",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "LGPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pynput-1.8.2.dist-info/licenses/COPYING.LGPL"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pynput-1.8.2.dist-info/METADATA",
+        "SHA256": "b37d8f63315b56780af1fc0d3104d231d50caa6436ff6aa0a6603adb5cdcb5f3"
+      }
+    },
+    {
+      "name": "PySide6",
+      "version": "6.11.2",
+      "artifact_path": "UmiOCR-data/site-packages/pyside6-6.11.2.dist-info",
+      "SHA256": "bddd6d1e6f840de4ecf6464c1afe885491c76d1081c72ce30744deaa74949276",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6-6.11.2.dist-info/METADATA",
+        "SHA256": "bddd6d1e6f840de4ecf6464c1afe885491c76d1081c72ce30744deaa74949276"
+      }
+    },
+    {
+      "name": "PySide6_Addons",
+      "version": "6.11.2",
+      "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info",
+      "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "PySide6_Essentials",
+      "version": "6.11.2",
+      "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info",
+      "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "shiboken6",
+      "version": "6.11.2",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info",
+      "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "six",
+      "version": "1.17.0",
+      "artifact_path": "UmiOCR-data/site-packages/six-1.17.0.dist-info",
+      "SHA256": "562042078c2752549f6d8a7c86dbc5dd708088a7be6d80672ec7b07100b72468",
+      "upstream_source": "https://github.com/benjaminp/six",
+      "upstream_revision": "1.17.0",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "six-1.17.0.dist-info/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/six-1.17.0.dist-info/METADATA",
+        "SHA256": "562042078c2752549f6d8a7c86dbc5dd708088a7be6d80672ec7b07100b72468"
+      }
+    },
+    {
+      "name": "zxing-cpp",
+      "version": "3.1.1",
+      "artifact_path": "UmiOCR-data/site-packages/zxing_cpp-3.1.1.dist-info",
+      "SHA256": "1f2642f835a20c70376e540b348591825363be469ae8458a5ab69dfab4c13d7a",
+      "upstream_source": "https://github.com/zxing-cpp/zxing-cpp.git",
+      "upstream_revision": "3.1.1",
+      "source_revision_note": "Exact installed distribution release version from METADATA; no Git commit is asserted unless a component-specific evidence record supplies one.",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "zxing_cpp-3.1.1.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/zxing_cpp-3.1.1.dist-info/METADATA",
+        "SHA256": "1f2642f835a20c70376e540b348591825363be469ae8458a5ab69dfab4c13d7a"
+      }
+    }
+  ],
+  "binaries": [
+    {
+      "name": "cv2.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/cv2/python-3.13/cv2.cp313-win_amd64.pyd",
+      "SHA256": "fbdb2c1f62ff1e83f5dfc9d56c8344d673de0dec0d17510b4fcafc7d37852661",
+      "package": "opencv-contrib-python",
+      "version": "4.10.0.84+umi.coreimg.1",
+      "upstream_source": "https://pypi.org/project/opencv-contrib-python/4.10.0.84+umi.coreimg.1/",
+      "upstream_revision": "4.10.0.84+umi.coreimg.1",
+      "license_spdx": null,
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/OpenCV-LICENSE",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/SoftFloat-COPYING.txt",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/flatbuffers-LICENSE.txt",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/libjpeg-turbo-LICENSE.md",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/libopenjp2-LICENSE",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/libpng-LICENSE",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/libwebp-COPYING",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/openexr-LICENSE",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/protobuf-LICENSE",
+        "opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/licenses/zlib-LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/opencv_contrib_python-4.10.0.84+umi.coreimg.1.dist-info/METADATA",
+        "SHA256": "8900b46d997b613fb8bdf825a32afcb8579a5e2da58526f4a58509033334ef30"
+      }
+    },
+    {
+      "name": "cu2qu.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/fontTools/cu2qu/cu2qu.cp313-win_amd64.pyd",
+      "SHA256": "81a4fe51014eb55df81caa37dcd8e18a97d01b85aa87b91afc3c2d3a541c328f",
+      "package": "fonttools",
+      "version": "4.63.0",
+      "upstream_source": "http://github.com/fonttools/fonttools",
+      "upstream_revision": "4.63.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "fonttools-4.63.0.dist-info/licenses/LICENSE",
+        "fonttools-4.63.0.dist-info/licenses/LICENSE.external"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/fonttools-4.63.0.dist-info/METADATA",
+        "SHA256": "4f5b717b2fac47775a2f22e2fc3930714979b038d20851daaf10d9032bea152d"
+      }
+    },
+    {
+      "name": "lexer.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/fontTools/feaLib/lexer.cp313-win_amd64.pyd",
+      "SHA256": "ab71c2f01598c6ad13918b5322975039bc8b1a842db03f183fd84a3bdddbbd1d",
+      "package": "fonttools",
+      "version": "4.63.0",
+      "upstream_source": "http://github.com/fonttools/fonttools",
+      "upstream_revision": "4.63.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "fonttools-4.63.0.dist-info/licenses/LICENSE",
+        "fonttools-4.63.0.dist-info/licenses/LICENSE.external"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/fonttools-4.63.0.dist-info/METADATA",
+        "SHA256": "4f5b717b2fac47775a2f22e2fc3930714979b038d20851daaf10d9032bea152d"
+      }
+    },
+    {
+      "name": "bezierTools.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/fontTools/misc/bezierTools.cp313-win_amd64.pyd",
+      "SHA256": "514a5779bb7496ae7eebea1fa72d3132ed57672402f8e1f394d009d870ac5587",
+      "package": "fonttools",
+      "version": "4.63.0",
+      "upstream_source": "http://github.com/fonttools/fonttools",
+      "upstream_revision": "4.63.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "fonttools-4.63.0.dist-info/licenses/LICENSE",
+        "fonttools-4.63.0.dist-info/licenses/LICENSE.external"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/fonttools-4.63.0.dist-info/METADATA",
+        "SHA256": "4f5b717b2fac47775a2f22e2fc3930714979b038d20851daaf10d9032bea152d"
+      }
+    },
+    {
+      "name": "momentsPen.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/fontTools/pens/momentsPen.cp313-win_amd64.pyd",
+      "SHA256": "8a258123bd59e414bc5278e7e56c66bc689e9511ddd60ffdd23e96101ab5f631",
+      "package": "fonttools",
+      "version": "4.63.0",
+      "upstream_source": "http://github.com/fonttools/fonttools",
+      "upstream_revision": "4.63.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "fonttools-4.63.0.dist-info/licenses/LICENSE",
+        "fonttools-4.63.0.dist-info/licenses/LICENSE.external"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/fonttools-4.63.0.dist-info/METADATA",
+        "SHA256": "4f5b717b2fac47775a2f22e2fc3930714979b038d20851daaf10d9032bea152d"
+      }
+    },
+    {
+      "name": "qu2cu.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/fontTools/qu2cu/qu2cu.cp313-win_amd64.pyd",
+      "SHA256": "2b0afa5447e6a95390368731997faa2680a7561e7f79f99501899380a29537d1",
+      "package": "fonttools",
+      "version": "4.63.0",
+      "upstream_source": "http://github.com/fonttools/fonttools",
+      "upstream_revision": "4.63.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "fonttools-4.63.0.dist-info/licenses/LICENSE",
+        "fonttools-4.63.0.dist-info/licenses/LICENSE.external"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/fonttools-4.63.0.dist-info/METADATA",
+        "SHA256": "4f5b717b2fac47775a2f22e2fc3930714979b038d20851daaf10d9032bea152d"
+      }
+    },
+    {
+      "name": "iup.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/fontTools/varLib/iup.cp313-win_amd64.pyd",
+      "SHA256": "67c99f42023db28e3d896ed0d3d8d46f2b5960c8b20176ccf498aad32a5ed3ce",
+      "package": "fonttools",
+      "version": "4.63.0",
+      "upstream_source": "http://github.com/fonttools/fonttools",
+      "upstream_revision": "4.63.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "fonttools-4.63.0.dist-info/licenses/LICENSE",
+        "fonttools-4.63.0.dist-info/licenses/LICENSE.external"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/fonttools-4.63.0.dist-info/METADATA",
+        "SHA256": "4f5b717b2fac47775a2f22e2fc3930714979b038d20851daaf10d9032bea152d"
+      }
+    },
+    {
+      "name": "_jpegxl.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/imagecodecs/_jpegxl.pyd",
+      "SHA256": "970dccb04c9009fe05f2d2f03a7b35d7331a9f1f39c3ce7e68a62b7673a5f3d0",
+      "package": "imagecodecs",
+      "version": "2026.8.16+umi.jxlxr.1",
+      "upstream_source": "https://github.com/cgohlke/imagecodecs",
+      "upstream_revision": "2026.8.16+umi.jxlxr.1",
+      "license_spdx": "BSD-3-Clause",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "imagecodecs-2026.8.16+umi.jxlxr.1.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/imagecodecs-2026.8.16+umi.jxlxr.1.dist-info/METADATA",
+        "SHA256": "6ab4898993c62368f70321378dceab947c4ab2120a6622520b36c5124e3f41b6"
+      }
+    },
+    {
+      "name": "_jpegxr.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/imagecodecs/_jpegxr.pyd",
+      "SHA256": "a7cef6f037a693021984eb75c9f8b959898329af90d5c0cc0697fc1a7af57e68",
+      "package": "imagecodecs",
+      "version": "2026.8.16+umi.jxlxr.1",
+      "upstream_source": "https://github.com/cgohlke/imagecodecs",
+      "upstream_revision": "2026.8.16+umi.jxlxr.1",
+      "license_spdx": "BSD-3-Clause",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "imagecodecs-2026.8.16+umi.jxlxr.1.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/imagecodecs-2026.8.16+umi.jxlxr.1.dist-info/METADATA",
+        "SHA256": "6ab4898993c62368f70321378dceab947c4ab2120a6622520b36c5124e3f41b6"
+      }
+    },
+    {
+      "name": "_shared.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/imagecodecs/_shared.pyd",
+      "SHA256": "55602449316f31da6a52f046e555637b6927180a6829a98aabe9a8feb22a256e",
+      "package": "imagecodecs",
+      "version": "2026.8.16+umi.jxlxr.1",
+      "upstream_source": "https://github.com/cgohlke/imagecodecs",
+      "upstream_revision": "2026.8.16+umi.jxlxr.1",
+      "license_spdx": "BSD-3-Clause",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "imagecodecs-2026.8.16+umi.jxlxr.1.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/imagecodecs-2026.8.16+umi.jxlxr.1.dist-info/METADATA",
+        "SHA256": "6ab4898993c62368f70321378dceab947c4ab2120a6622520b36c5124e3f41b6"
+      }
+    },
+    {
+      "name": "_shared_cython.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/imagecodecs/_shared_cython.pyd",
+      "SHA256": "2e06a27d6ad8c434926b123a2a4fa8ec5b4dfc2434a5189f90ff4a6b6890ad4a",
+      "package": "imagecodecs",
+      "version": "2026.8.16+umi.jxlxr.1",
+      "upstream_source": "https://github.com/cgohlke/imagecodecs",
+      "upstream_revision": "2026.8.16+umi.jxlxr.1",
+      "license_spdx": "BSD-3-Clause",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "imagecodecs-2026.8.16+umi.jxlxr.1.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/imagecodecs-2026.8.16+umi.jxlxr.1.dist-info/METADATA",
+        "SHA256": "6ab4898993c62368f70321378dceab947c4ab2120a6622520b36c5124e3f41b6"
+      }
+    },
+    {
+      "name": "_multiarray_tests.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/_core/_multiarray_tests.cp313-win_amd64.pyd",
+      "SHA256": "181efbd14d98fc4ccf96fc5c274fb7c85294e263a93320d8f261eb36881a9000",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_multiarray_umath.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/_core/_multiarray_umath.cp313-win_amd64.pyd",
+      "SHA256": "04a87dcb37e46eff7b931a45e6d87366ede144b5ff319070a2cb983a9b2e1bbc",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_operand_flag_tests.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/_core/_operand_flag_tests.cp313-win_amd64.pyd",
+      "SHA256": "28560c499d8c3086be7db1438e68824337c4c5e3df27d9e67101333d57d28857",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_rational_tests.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/_core/_rational_tests.cp313-win_amd64.pyd",
+      "SHA256": "1400cb24611534b26d9ae7efd326cf99ab35fd59eea6f42cda567f6be70ea9b0",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_simd.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/_core/_simd.cp313-win_amd64.pyd",
+      "SHA256": "29c67076acce4e18996e318ea5b8ce62667e5135fcbeb47d0db57a0567e47e80",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_struct_ufunc_tests.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/_core/_struct_ufunc_tests.cp313-win_amd64.pyd",
+      "SHA256": "fc8c492d7e590d6924bbabd5f6ecdf6a4e7226cf36a68c9b52d9ef686c766f27",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_umath_tests.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/_core/_umath_tests.cp313-win_amd64.pyd",
+      "SHA256": "575c613565707e94d1ffa975aa2a5f96ded5c02bbe35941206fa7fdbe687b732",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_pocketfft_umath.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/fft/_pocketfft_umath.cp313-win_amd64.pyd",
+      "SHA256": "450931b90eabbb64b3f7936f06ee95250fb5b9d1c06cf3892efed36c025909e8",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_umath_linalg.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/linalg/_umath_linalg.cp313-win_amd64.pyd",
+      "SHA256": "ce9c95c3836521e26f4b34d71ad89ddc8e945fe72a2016f8b339999c6fb0edf4",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "lapack_lite.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/linalg/lapack_lite.cp313-win_amd64.pyd",
+      "SHA256": "f035059e2922723770f8c60af58e054102a0fb09c0b3455ee23fd95e2bd28f2a",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_bounded_integers.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/random/_bounded_integers.cp313-win_amd64.pyd",
+      "SHA256": "5423456cf271a96c9bf8376d5a49634465f393a681b8f29f0039a2206c542de6",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_common.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/random/_common.cp313-win_amd64.pyd",
+      "SHA256": "db844232c16284032a353198f3606416ee1b7768ca46286e91819d34f645e627",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_generator.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/random/_generator.cp313-win_amd64.pyd",
+      "SHA256": "14fd4a00819b036bcaab9b92b9fadb5aad5dbcea00390a6b7e78bffe4ec13aa0",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_mt19937.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/random/_mt19937.cp313-win_amd64.pyd",
+      "SHA256": "1cd4a5e52ac6791d91b94bce072579804c7a01961691986441692285891c5194",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_pcg64.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/random/_pcg64.cp313-win_amd64.pyd",
+      "SHA256": "a26be0e497ed821f02a25c91c73e3487bcde37a2ae6643eeb2f8ea536eecd3da",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_philox.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/random/_philox.cp313-win_amd64.pyd",
+      "SHA256": "d7c2370679114aed54bdd64089d7f77b5d68261f1775967603376c72a593b001",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_sfc64.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/random/_sfc64.cp313-win_amd64.pyd",
+      "SHA256": "333b0369d2538ee4ca1db76734bc1c943a4e8cff1b8c8c3ded080f18ff71cc95",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "bit_generator.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/random/bit_generator.cp313-win_amd64.pyd",
+      "SHA256": "9463c856a55cba2d6a5776954ce74ef7693030c1b9bc29ef9a1c9c26b87ba3d3",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "mtrand.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/numpy/random/mtrand.cp313-win_amd64.pyd",
+      "SHA256": "da9ea962151d7d6d140c1c6266dd3e2da61d9a2c84fea6d68917206c1dc72fad",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "libscipy_openblas64_-9e3e5a4229c1ca39f10dc82bba9e2b2b.dll",
+      "artifact_path": "UmiOCR-data/site-packages/numpy.libs/libscipy_openblas64_-9e3e5a4229c1ca39f10dc82bba9e2b2b.dll",
+      "SHA256": "9e3e5a4229c1ca39f10dc82bba9e2b2bf48037790932566f37aff1a7ccf3588f",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "msvcp140-a4c2229bdc2a2a630acdc095b4d86008.dll",
+      "artifact_path": "UmiOCR-data/site-packages/numpy.libs/msvcp140-a4c2229bdc2a2a630acdc095b4d86008.dll",
+      "SHA256": "a4c2229bdc2a2a630acdc095b4d86008e5c3e3bc7773174354f3da4f5beb9cde",
+      "package": "numpy",
+      "version": "2.3.5",
+      "upstream_source": "https://github.com/numpy/numpy",
+      "upstream_revision": "2.3.5",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "numpy-2.3.5.dist-info/LICENSE.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/numpy-2.3.5.dist-info/METADATA",
+        "SHA256": "7f8a1bfc2b82fee89e1ceef1038aa174ee814832b54c39b4b1b93028ce3f27b1"
+      }
+    },
+    {
+      "name": "_avif.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PIL/_avif.cp313-win_amd64.pyd",
+      "SHA256": "2e3e5cce3aea38c603680ca3da5d161fad123ce23a803bb692a56aff608989be",
+      "package": "pillow",
+      "version": "12.3.0",
+      "upstream_source": "https://github.com/python-pillow/Pillow",
+      "upstream_revision": "12.3.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pillow-12.3.0.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pillow-12.3.0.dist-info/METADATA",
+        "SHA256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+      }
+    },
+    {
+      "name": "_imaging.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PIL/_imaging.cp313-win_amd64.pyd",
+      "SHA256": "88756e8e0e3f6180e518da25d379597c861e2d20d716ef001894789b515c1777",
+      "package": "pillow",
+      "version": "12.3.0",
+      "upstream_source": "https://github.com/python-pillow/Pillow",
+      "upstream_revision": "12.3.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pillow-12.3.0.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pillow-12.3.0.dist-info/METADATA",
+        "SHA256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+      }
+    },
+    {
+      "name": "_imagingcms.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PIL/_imagingcms.cp313-win_amd64.pyd",
+      "SHA256": "7ecb50b954d13d72b7a0ff565872332443cdbc83a36e58a56b2b949a56f32549",
+      "package": "pillow",
+      "version": "12.3.0",
+      "upstream_source": "https://github.com/python-pillow/Pillow",
+      "upstream_revision": "12.3.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pillow-12.3.0.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pillow-12.3.0.dist-info/METADATA",
+        "SHA256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+      }
+    },
+    {
+      "name": "_imagingft.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PIL/_imagingft.cp313-win_amd64.pyd",
+      "SHA256": "e94673a471a0b6fd5e92e8b6cdbdfe16e2e91bcf5689e9e4c9b391ab43788d85",
+      "package": "pillow",
+      "version": "12.3.0",
+      "upstream_source": "https://github.com/python-pillow/Pillow",
+      "upstream_revision": "12.3.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pillow-12.3.0.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pillow-12.3.0.dist-info/METADATA",
+        "SHA256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+      }
+    },
+    {
+      "name": "_imagingmath.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PIL/_imagingmath.cp313-win_amd64.pyd",
+      "SHA256": "9d5bbea6a877a48ed7995a0640ecb0a5567d9fad544a4a1fbf9f22d507029b57",
+      "package": "pillow",
+      "version": "12.3.0",
+      "upstream_source": "https://github.com/python-pillow/Pillow",
+      "upstream_revision": "12.3.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pillow-12.3.0.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pillow-12.3.0.dist-info/METADATA",
+        "SHA256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+      }
+    },
+    {
+      "name": "_imagingmorph.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PIL/_imagingmorph.cp313-win_amd64.pyd",
+      "SHA256": "9aa1903b1c4ecd1269a2f7575a62f764492b5510b43fe477970ecc606595cfc5",
+      "package": "pillow",
+      "version": "12.3.0",
+      "upstream_source": "https://github.com/python-pillow/Pillow",
+      "upstream_revision": "12.3.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pillow-12.3.0.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pillow-12.3.0.dist-info/METADATA",
+        "SHA256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+      }
+    },
+    {
+      "name": "_imagingtk.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PIL/_imagingtk.cp313-win_amd64.pyd",
+      "SHA256": "8ccd6128481d5a3a15993c2f8a69585694ff972652a6b06dcaee276fc65633a7",
+      "package": "pillow",
+      "version": "12.3.0",
+      "upstream_source": "https://github.com/python-pillow/Pillow",
+      "upstream_revision": "12.3.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pillow-12.3.0.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pillow-12.3.0.dist-info/METADATA",
+        "SHA256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+      }
+    },
+    {
+      "name": "_webp.cp313-win_amd64.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PIL/_webp.cp313-win_amd64.pyd",
+      "SHA256": "9918faf8d90faa86e03e48479c6a62383be71da759254afded18591a406a92fe",
+      "package": "pillow",
+      "version": "12.3.0",
+      "upstream_source": "https://github.com/python-pillow/Pillow",
+      "upstream_revision": "12.3.0",
+      "license_spdx": "MIT",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pillow-12.3.0.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pillow-12.3.0.dist-info/METADATA",
+        "SHA256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+      }
+    },
+    {
+      "name": "_psutil_windows.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/psutil/_psutil_windows.pyd",
+      "SHA256": "0035450801bd7d938e9e146c5ec28e619cb5a5f4a18cdc53ac7e9734c7f94f78",
+      "package": "psutil",
+      "version": "7.2.2",
+      "upstream_source": "https://github.com/giampaolo/psutil",
+      "upstream_revision": "7.2.2",
+      "license_spdx": "BSD-3-Clause",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "psutil-7.2.2.dist-info/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/psutil-7.2.2.dist-info/METADATA",
+        "SHA256": "a263a40220d921d9cb963fc636d34f817aa2eb72c2696e3e3465d088cdb1976b"
+      }
+    },
+    {
+      "name": "_extra.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/pymupdf/_extra.pyd",
+      "SHA256": "2f40b8c8c1ea0e76e3443f1c7b0cc7830dac61667537ce4c6bc92d495a5a94d8",
+      "package": "pymupdf",
+      "version": "1.28.0",
+      "upstream_source": "https://github.com/pymupdf/pymupdf",
+      "upstream_revision": "1.28.0",
+      "license_spdx": "Dual Licensed - GNU AFFERO GPL 3.0 or Artifex Commercial License",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pymupdf-1.28.0.dist-info/COPYING"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pymupdf-1.28.0.dist-info/METADATA",
+        "SHA256": "f0e2033d3c1efb8d58c4f4650110319a63aa36d0070a9a224b956e03640d5d05"
+      }
+    },
+    {
+      "name": "_mupdf.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/pymupdf/_mupdf.pyd",
+      "SHA256": "000d93f313bd541de0a302e3c17b8a4ce51afe788c6062b225b2d02d52cea7ec",
+      "package": "pymupdf",
+      "version": "1.28.0",
+      "upstream_source": "https://github.com/pymupdf/pymupdf",
+      "upstream_revision": "1.28.0",
+      "license_spdx": "Dual Licensed - GNU AFFERO GPL 3.0 or Artifex Commercial License",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pymupdf-1.28.0.dist-info/COPYING"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pymupdf-1.28.0.dist-info/METADATA",
+        "SHA256": "f0e2033d3c1efb8d58c4f4650110319a63aa36d0070a9a224b956e03640d5d05"
+      }
+    },
+    {
+      "name": "mupdfcpp64.dll",
+      "artifact_path": "UmiOCR-data/site-packages/pymupdf/mupdfcpp64.dll",
+      "SHA256": "6d26bbdcbbb2489fd1343a7f317aecd5614243b98d6db5c3776db170a6edfea7",
+      "package": "pymupdf",
+      "version": "1.28.0",
+      "upstream_source": "https://github.com/pymupdf/pymupdf",
+      "upstream_revision": "1.28.0",
+      "license_spdx": "Dual Licensed - GNU AFFERO GPL 3.0 or Artifex Commercial License",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pymupdf-1.28.0.dist-info/COPYING"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pymupdf-1.28.0.dist-info/METADATA",
+        "SHA256": "f0e2033d3c1efb8d58c4f4650110319a63aa36d0070a9a224b956e03640d5d05"
+      }
+    },
+    {
+      "name": "msvcp140.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/msvcp140.dll",
+      "SHA256": "4c667b706893593812cd111b369ba6a77f54d1f1b1ae87cf3bf37692663cfba2",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "msvcp140_1.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/msvcp140_1.dll",
+      "SHA256": "d419d24b0a76366f5c9d908b0e45fe70e9e9154bb8ad5f3de42070f2337f857b",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "msvcp140_2.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/msvcp140_2.dll",
+      "SHA256": "89917964abb6ca16a260cab258e180c3abc239b5af00eed659d0edf0efdd339c",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qsvgicon.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/iconengines/qsvgicon.dll",
+      "SHA256": "5bb97b6f114682ae0b5f42b23b6818aece6499bad88dac80a138efa8a88c12bc",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qgif.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/imageformats/qgif.dll",
+      "SHA256": "d301d7e9a68327692e4c76faa6b125517730b22c68f4de7f09fda9d4ac0ddee1",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qico.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/imageformats/qico.dll",
+      "SHA256": "1684fd56f1758167f7b3ac011264ae5859b3cf6113e381626ec3dc1d3122fe52",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qjpeg.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/imageformats/qjpeg.dll",
+      "SHA256": "6517345ac19f5c489daeadc029d0018bbdc09d8e1031c60d714557972f22c6d4",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qsvg.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/imageformats/qsvg.dll",
+      "SHA256": "4b7d65ba39be58cb469b54b5fdee2987871d67e5050cd70724016e09966e54f6",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qtiff.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/imageformats/qtiff.dll",
+      "SHA256": "3d6ea04da215ee2a9459399fb9f6d73cad8787944b9d450399025bcd39d020b5",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qwebp.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/imageformats/qwebp.dll",
+      "SHA256": "6b2c53cc4423140c29a6a1eb6dd908016e09d794b5739a05a3a39c8c49a0df8a",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qnetworklistmanager.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/networkinformation/qnetworklistmanager.dll",
+      "SHA256": "e571a4b4e582738cd1bc4889cb2896635c2543baff408442701b6706a1b4a86e",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qwindows.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/platforms/qwindows.dll",
+      "SHA256": "bf6dbc3009f386fa22f0ced560bea6bbf3e0e0b4442d2fb855db67cffce49dbf",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qmodernwindowsstyle.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/styles/qmodernwindowsstyle.dll",
+      "SHA256": "a7a6424c23bf371bd28a404a196b210971726f6f2a87b63aac185a5e6e40da71",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qcertonlybackend.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/tls/qcertonlybackend.dll",
+      "SHA256": "67be4d333a0f489d02714169a6ec54eaa80efa649d733fcbeb81881ecb02b4f3",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qschannelbackend.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/plugins/tls/qschannelbackend.dll",
+      "SHA256": "14abc5b245c0f2e03f7bc0b474a8db2ecb441c7300a8a8b16fb865eaf2674619",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "pyside6.abi3.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/pyside6.abi3.dll",
+      "SHA256": "d0b5c701fb3a8ea839e72b602058f3960935156ebeca084893c54c99e54dd707",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "pyside6.abi3.lib",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/pyside6.abi3.lib",
+      "SHA256": "6b162ac3df358530e0f9eb0a358b7b69e3fb44cb05c6ae918501dda0a35ab1ad",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "pyside6qml.abi3.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/pyside6qml.abi3.dll",
+      "SHA256": "045b18fcee846bdd4c546daa3a20346fcf9e812f126d70382aad427bc6bb40c3",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "pyside6qml.abi3.lib",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/pyside6qml.abi3.lib",
+      "SHA256": "68e83d3acd1cbbf7dd298b204b84c9ddbc3b708163e90d6b5e3f2a3de4354c09",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qmlfolderlistmodelplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/Qt/labs/folderlistmodel/qmlfolderlistmodelplugin.dll",
+      "SHA256": "2a9d67e88e3a6f64c2e7b7810389d050d22ff840e3b476dbaefe901bd894fcbf",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "labsplatformplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/Qt/labs/platform/labsplatformplugin.dll",
+      "SHA256": "5e31865f96856b2eb9e0403df2ed222587b20d1a848ce05bec6e14be1884680e",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "labsmodelsplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/Qt/labs/qmlmodels/labsmodelsplugin.dll",
+      "SHA256": "c8cc3f556069a580c7552a93b634a1050cfff490b54a8297417013e6c5e93334",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qtgraphicaleffectsprivateplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/Qt5Compat/GraphicalEffects/private/qtgraphicaleffectsprivateplugin.dll",
+      "SHA256": "7f95919af93644b445d25e31fb8bfa433d28b5416047088ff63c406d29f17cf6",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "qtgraphicaleffectsplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/Qt5Compat/GraphicalEffects/qtgraphicaleffectsplugin.dll",
+      "SHA256": "302764ddd95ca75797485f53a73a7fdebdf1b78d9409b3987973bde494ff6f86",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "modelsplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQml/Models/modelsplugin.dll",
+      "SHA256": "4a5b0416508f75dac0c52b921c74f187cbad3ef9b9e1fe87dca5ba0547e81c32",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qmlplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQml/qmlplugin.dll",
+      "SHA256": "bff0eda5f38f4b3854100ad1ac1577e6b479060a7a717eeb6cd3e00ffcd1c9b8",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "workerscriptplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQml/WorkerScript/workerscriptplugin.dll",
+      "SHA256": "59a252ec828ac1cb51ec87cb84d1f95155fb2b6811b8d32f7bc6a52b038b52d0",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qtquickcontrols2basicstyleimplplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Controls/Basic/impl/qtquickcontrols2basicstyleimplplugin.dll",
+      "SHA256": "d180d812fe566ae42aaca10a9721993012c8df37a35bff7564879ce37fb26476",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qtquickcontrols2basicstyleplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Controls/Basic/qtquickcontrols2basicstyleplugin.dll",
+      "SHA256": "35739f2ea4c95336ce581eca0757d6f8aeb87bf8e235585b02f9b28d3348367e",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qtquickcontrols2implplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Controls/impl/qtquickcontrols2implplugin.dll",
+      "SHA256": "79e340576ea558fe50ab90f38ec9fe4c5f24a331802f82b9e441f42d64439684",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qtquickcontrols2plugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Controls/qtquickcontrols2plugin.dll",
+      "SHA256": "e855789cec1c35c2328eb8610cc8c17114ce74c4983f29ecf7a3c72a2dafab6e",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qtquickdialogsplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Dialogs/qtquickdialogsplugin.dll",
+      "SHA256": "aa96a6d4f4b7bd2b7590364147d8b1a793888c1f885a919c840e62d8cfceee41",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qtquickdialogs2quickimplplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Dialogs/quickimpl/qtquickdialogs2quickimplplugin.dll",
+      "SHA256": "4f87ccf867c94af153ec70c9c6ff56f78f7169a46b928761d69e6ad79b627385",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "effectsplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Effects/effectsplugin.dll",
+      "SHA256": "0297a92d101548330fb5546280f9cc65fde8c26f453bce724e744e1189c6b2b9",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qquicklayoutsplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Layouts/qquicklayoutsplugin.dll",
+      "SHA256": "beda5876e73dae1b7ba821904479afee7356b44342e0ad0cdaa1568d1b66debd",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qtquick2plugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/qtquick2plugin.dll",
+      "SHA256": "c836bbb05df5aa7d434cc1f55b4fc2cc587054f024c6f7e3e0d9af83954f2976",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qmlshapesplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Shapes/qmlshapesplugin.dll",
+      "SHA256": "2e825f20dfeb8f4f5f790ce8a2da66a9702abd50a88c5f6e47df6f17d49d0b91",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "qtquicktemplates2plugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Templates/qtquicktemplates2plugin.dll",
+      "SHA256": "6de57692e911a791be3ab6c7c6d51b163cb2ce7dba581643900b581b0eadd99e",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "quickwindowplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtQuick/Window/quickwindowplugin.dll",
+      "SHA256": "1e36ed3b9945a7025dffbe07e3a41b1d7363e802a7a8e90eae0906d4a420e79f",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "webchannelquickplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtWebChannel/webchannelquickplugin.dll",
+      "SHA256": "68e9870c90d81e41ffc6f70e429483d9537fff685a3903b67e83dc2a00abfba2",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "qtwebenginequickdelegatesplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtWebEngine/ControlsDelegates/qtwebenginequickdelegatesplugin.dll",
+      "SHA256": "7999638d56f9c19400f5fe7553a8c8564ed38531c821559475783917405c6636",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "qtwebenginequickplugin.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/qml/QtWebEngine/qtwebenginequickplugin.dll",
+      "SHA256": "c5b03d745a3f1d76e07a1e73c8dba5b1b29e78e96e47b548709194a2a3cba05b",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "Qt6Core.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6Core.dll",
+      "SHA256": "d6a3c37c5263c5d418fc0e80b722bc9fca7c0859e6f635f9624a2fde00bdc653",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6Gui.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6Gui.dll",
+      "SHA256": "ae29b005f51b6850bf57fa06fced0dc8c7039fd6fafc3bfbcfe76e38adc7abf1",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6LabsFolderListModel.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6LabsFolderListModel.dll",
+      "SHA256": "759bee3b552b9916630eb51d081dd6d57e23b809293fcb89243087b21d40bf3c",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6LabsPlatform.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6LabsPlatform.dll",
+      "SHA256": "5a3debb6b04893b920f6428fb5425516eed6eeed73997a6697bcd8bfdba738e7",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6LabsQmlModels.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6LabsQmlModels.dll",
+      "SHA256": "caed7fd2e3d4d91ebdef66d8c2f7083deda0511950ea151c507466d64c2393a2",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6Network.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6Network.dll",
+      "SHA256": "dd3512d1c5ed062d30c98426cd0a850f13e0cf31437afb5b0b474132b9c52922",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6OpenGL.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6OpenGL.dll",
+      "SHA256": "d51088f16db8c96dba7ef3c1474e611adb3ebdb211fea35b8e755d2a7407f7ad",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6Positioning.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6Positioning.dll",
+      "SHA256": "cc8e780dc080292ec8aee7e1a2c9661d14a344b5fd92f22cadcd82ab02245c59",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "Qt6PrintSupport.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6PrintSupport.dll",
+      "SHA256": "fccd235e7ceabb9ff7bb8c185b238bcb5cb553b2ef3894308adbab0fb4862b2f",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6Qml.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6Qml.dll",
+      "SHA256": "514fc8d9ff0754d2bcb446bbe0f6cc421213d92c8c1870e4cf787e4e176d51f6",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QmlMeta.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QmlMeta.dll",
+      "SHA256": "c6e8b02ad52e01e0e865a085b629b08629fbe5c68146425d4cefdcaaef7a8462",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QmlModels.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QmlModels.dll",
+      "SHA256": "066e72ad668ff02dcf530805d071313f9e89d9f1fb49a522aa4ed52712741bf2",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QmlWorkerScript.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QmlWorkerScript.dll",
+      "SHA256": "c037ab72fb9c1c1ebbe47f70b8a35d440537765ef6207424aae0c16fea26eda1",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6Quick.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6Quick.dll",
+      "SHA256": "900a493625af1f7d9fe6071b9aaee15e560cc7afc122702656723539ed81975f",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickControls2.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickControls2.dll",
+      "SHA256": "724b3aa080627846ee67f09ab72b879f332c7890564ecd9ccd82bacc24d244c0",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickControls2Basic.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickControls2Basic.dll",
+      "SHA256": "61fc5a35e1f2a7c14319bbc6d34d33a6d97ec95f94f6bcbba32010f8399aa818",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickControls2BasicStyleImpl.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickControls2BasicStyleImpl.dll",
+      "SHA256": "c76f607efbb49e4d413a3848528e0fd5b7a6c9b40c3b783040d5e1f28de1bb11",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickControls2Impl.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickControls2Impl.dll",
+      "SHA256": "a08c628795c8e6cc3e51a0c763a8a3b3fb4288905febb15fa74c6c6ba86e2744",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickDialogs2.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickDialogs2.dll",
+      "SHA256": "f240fc6008273e71ccf5d483aa87a1bad1997dba4ac7a91440af6e382b45a034",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickDialogs2QuickImpl.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickDialogs2QuickImpl.dll",
+      "SHA256": "f5cb7e90bcc393730c7abe4b6141e19f73f47ff52aec48674a7c39b80576737b",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickDialogs2Utils.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickDialogs2Utils.dll",
+      "SHA256": "b06d2a937b3b498c3ed792df88fe490c35d93be2ef16a72ac3c976a7ca76a570",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickEffects.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickEffects.dll",
+      "SHA256": "42a6a8fdb652ae997c883d624ceb5b19ddb70096706c23c7cc3b19d5d6cab8bb",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickLayouts.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickLayouts.dll",
+      "SHA256": "6dea3b782fc02bddf4ba46cea60065368875854be881e4dfa7df5fd36f47ed49",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickShapes.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickShapes.dll",
+      "SHA256": "aacaf1618cfef72950a46d35a19447eba2c6a74989687166a7c10267d0cea499",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6QuickTemplates2.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6QuickTemplates2.dll",
+      "SHA256": "60855b9af083723f547f282d0fa93044135d6489f72aa3bcefc02403957423b7",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6ShaderTools.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6ShaderTools.dll",
+      "SHA256": "e843fd943f4e5d75289b6ea191d366084d05607a99066d76f0635cc0f26c2fee",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "Qt6Svg.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6Svg.dll",
+      "SHA256": "1eac8f7415b311a88cb3cb4e25c3098d0e059c24c831fbbb13f43a80f0df06b7",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "Qt6WebChannel.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6WebChannel.dll",
+      "SHA256": "3c47f91df0b64bf178c56445b1bd4c6299b7d147b7d3765d51cf886c7eec7566",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "Qt6WebChannelQuick.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6WebChannelQuick.dll",
+      "SHA256": "18bc7082204784f77b19ff8b1327a1afdd5ecd0150e2e703794897eb604e69c0",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "Qt6WebEngineCore.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6WebEngineCore.dll",
+      "SHA256": "0f80260d95d1dda217da75121f3caf5e2bacc765305c31426093d82088f2c2b2",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "Qt6WebEngineQuick.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6WebEngineQuick.dll",
+      "SHA256": "d3dbfdc49ae124bbc5d1f91c76cbfa9e5acbdae8b13034bf0a27829aa8af6709",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "Qt6WebEngineQuickDelegatesQml.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6WebEngineQuickDelegatesQml.dll",
+      "SHA256": "be043a49fd4e0c5a3cde3b1e68188d0d9e37174de4bd4287002284f78cd580bf",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "Qt6Widgets.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/Qt6Widgets.dll",
+      "SHA256": "ff0df9e2e6827e035f0731a4cedfc6333f4602bca00775e56346f27032406b74",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "QtCore.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtCore.pyd",
+      "SHA256": "74f96322c5e9cea73aefd2ed5870e5275336b31f552fcd32f12fc81d23f1bc6f",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "QtGui.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtGui.pyd",
+      "SHA256": "7bef20046045199c037b7cbfedaa1c5464730fa948b2c9ec8afbf718e63774d4",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "QtNetwork.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtNetwork.pyd",
+      "SHA256": "c5038bb71fc9d57330fa2d8eeec65aab69fcf02687cc8f54dbfb5995cfec6a71",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "QtOpenGL.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtOpenGL.pyd",
+      "SHA256": "645f5ffcdf31ada7a71bf40e9290ec0ca8afb125dfa0602ca7f10b624b3f1fd3",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "QtPrintSupport.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtPrintSupport.pyd",
+      "SHA256": "5c4671afb67b53533848ad43d2f58e128b1603309cd89cb8eb11329d234b8e70",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "QtQml.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtQml.pyd",
+      "SHA256": "2a6b5b8e904a2dbf1efd8bede950605bd05e27fb6f403764715bc133fe386d23",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "QtQuick.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtQuick.pyd",
+      "SHA256": "0b7e25855eecccf0e9d9cf58367ea2d0af69654e995ff500b4af5619ecdb0136",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "QtQuickControls2.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtQuickControls2.pyd",
+      "SHA256": "04a3171b6b416b6145b6848da84578e9bbd8132f473b9e6ca8a8728153abead0",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "QtWebChannel.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtWebChannel.pyd",
+      "SHA256": "acb4e5f77f967c0c75d62fdaee1ca28402113ae853b173b236afda9526556d04",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "QtWebEngineCore.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtWebEngineCore.pyd",
+      "SHA256": "ec22d4cfa84677cd0903f07225fa8f1c3a523046e5fc7a7cd521a0f77591c963",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "QtWebEngineQuick.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtWebEngineQuick.pyd",
+      "SHA256": "c2999917ea544da6897eac337f02ad98b0d13c5be4ac1753082280727d3c113f",
+      "package": "PySide6_Addons",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_addons-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_addons-6.11.2.dist-info/METADATA",
+        "SHA256": "6c14f94cb03f754a3d8e9ada4d726dbc08aff04d4f0b4377483f9921aa646952"
+      }
+    },
+    {
+      "name": "QtWidgets.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/QtWidgets.pyd",
+      "SHA256": "f12f4ca641998e5706d5f7b0023147d573f0f2d2361e26dadf31bdbf05fbfd1d",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "vcruntime140.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/vcruntime140.dll",
+      "SHA256": "f893ae75a1a24eea174d982f94bc80ce2448201eaa919a73c0653a5657685de4",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "vcruntime140_1.dll",
+      "artifact_path": "UmiOCR-data/site-packages/PySide6/vcruntime140_1.dll",
+      "SHA256": "48aa2783793ea18ab3c2c71d420d4fff9814e662a1ff810053c6e5250061a716",
+      "package": "PySide6_Essentials",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "pyside6_essentials-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/pyside6_essentials-6.11.2.dist-info/METADATA",
+        "SHA256": "a9bdd4937ee837eb46e0c38f9c0ab6c59a6f788d711b96b63c726247ca7a2379"
+      }
+    },
+    {
+      "name": "concrt140.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/concrt140.dll",
+      "SHA256": "b724ef089cb22625e3281da4b6f7513381eef726ea73e4ee8a875d6749e61a24",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "msvcp140.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/msvcp140.dll",
+      "SHA256": "fd4a8c046fa3fea9ca6132f50cf8a56cf1e783b2d3093ba5c85fa063bc6b3845",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "msvcp140_1.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/msvcp140_1.dll",
+      "SHA256": "7f556f0a0b944df7b64b916b344a070b7e6f6cf342194475594447ca88c07659",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "msvcp140_2.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/msvcp140_2.dll",
+      "SHA256": "720091576d0e2669d16e8ad203a1f81a7c0811a6906452964d6e5fcb28a8de4d",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "msvcp140_codecvt_ids.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/msvcp140_codecvt_ids.dll",
+      "SHA256": "e5fd27e8f57810eb40196a7ce5bff7bccc01ea4663e0d3af073539c26604cfa9",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "Shiboken.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/Shiboken.pyd",
+      "SHA256": "2f6f3a694f675b1dafdae26903191613c02866ab48e02591ae34ca1a3b1284f1",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "shiboken6.abi3.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/shiboken6.abi3.dll",
+      "SHA256": "de3c6b2ed5f75c9ac0de4a6844b653b3b9d09263ce68c2b5fc25a96c5c3e8469",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "shiboken6.abi3.lib",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/shiboken6.abi3.lib",
+      "SHA256": "24cbe659a91465f51668bc37fabc0cf9965eb10756dfcdfd749a6b4e6b859b0f",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "vcamp140.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/vcamp140.dll",
+      "SHA256": "ebbd56b4f03091a8bd074aa0de9f93f6884d8bb3da5d0375ec08cbe18eede619",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "vccorlib140.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/vccorlib140.dll",
+      "SHA256": "de937dcaf545a60a789c261143883de681be95a70789010b47c541d68cc25ec5",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "vcomp140.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/vcomp140.dll",
+      "SHA256": "2407d7152d585a8ecc701454b2903db3b1abaca31b4288ae4fbf905f06d5a0f1",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "vcruntime140.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/vcruntime140.dll",
+      "SHA256": "de617641d82eac15595d2e39394163ac33e49bb032cf2c2ea0044ed39d3675e9",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "vcruntime140_1.dll",
+      "artifact_path": "UmiOCR-data/site-packages/shiboken6/vcruntime140_1.dll",
+      "SHA256": "fa577d54bd10a91e52472da784a619da6cf241af45f0a0c48b27e91fa0fe6104",
+      "package": "shiboken6",
+      "version": "6.11.2",
+      "upstream_source": "https://code.qt.io/cgit/pyside/pyside-setup.git/",
+      "upstream_revision": "6.11.2",
+      "license_spdx": "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "shiboken6-6.11.2.dist-info/licenses/LicenseRef-Qt-Commercial.txt"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/shiboken6-6.11.2.dist-info/METADATA",
+        "SHA256": "d118511674eb858e7e0666fae0de10ac79ae31800ad1215ad57285953d4ad241"
+      }
+    },
+    {
+      "name": "zxingcpp.pyd",
+      "artifact_path": "UmiOCR-data/site-packages/zxingcpp/zxingcpp.pyd",
+      "SHA256": "61538e8df1aefa2b04ce9307b9b4d27d3c7c68b7f2eb3ac55b46f94435c0ce30",
+      "package": "zxing-cpp",
+      "version": "3.1.1",
+      "upstream_source": "https://github.com/zxing-cpp/zxing-cpp.git",
+      "upstream_revision": "3.1.1",
+      "license_spdx": "Apache-2.0",
+      "proprietary_agreement_name": null,
+      "redistribution_basis": "component license and bundled wheel notice",
+      "required_notices": [
+        "zxing_cpp-3.1.1.dist-info/licenses/LICENSE"
+      ],
+      "source_availability_obligation": "See component license and source URL.",
+      "modification_status": "unmodified",
+      "evidence_snapshot": {
+        "artifact_path": "UmiOCR-data/site-packages/zxing_cpp-3.1.1.dist-info/METADATA",
+        "SHA256": "1f2642f835a20c70376e540b348591825363be469ae8458a5ab69dfab4c13d7a"
+      }
+    }
+  ],
+  "status": "PASS",
+  "blockers": []
+}

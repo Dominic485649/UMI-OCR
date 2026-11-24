@@ -1,0 +1,1467 @@
+// ============================================
+// =============== 参数配置 逻辑 ===============
+// ============================================
+
+/*
+定义规则：
+
+configDict: {
+
+    "配置项组": {
+        "title": 若填单个空格“ ”，则不显示标题栏
+        "type": "group",
+        "配置项或配置项组"
+        // 折叠属性，仅内层组生效
+        "enabledFold": 填true时显示折叠标签
+        "fold": 填true时初始折叠
+    },
+
+    "布尔 boolean （开关）": {
+        "title": ,
+        "default": true / false,
+    },
+    "文本 text （文本框）": {
+        "title": ,
+        "default": "文本",
+    },
+    "数字 number （输入框）": {
+        "title": ,
+        "isInt": true 整数 / false 浮点数,
+        "default": 233,
+        "max": 可选，上限,
+        "min": 可选，下限,
+        "unit": 可选，单位。qsTr("秒"),
+    },
+    "枚举 enum （下拉框）": {
+        "title": ,
+        "optionsList": [
+            ["键1", "名称1"],
+            ["键2", "名称2"],
+        ],
+    },
+    "文件路径 file （文件选择框）": {
+        "title": ,
+        "type": "file",
+        "default": "默认路径",
+        "selectExisting": true 选择现有文件 / false 新创建文件(夹),
+        "selectFolder": true 选择文件夹 / false 选择文件,
+        "dialogTitle": 对话框标题,
+        "nameFilters": ["图片 (*.jpg *.jpeg)", "类型2..."] 文件夹类型可不需要
+    },
+    "热键 hotkey": {
+        "title": ,
+        "type": "hotkey",
+        "default": "win+alt+c", // 默认热键
+        "eventTitle": "<<screenshot>>", // 触发事件标题
+    },
+    "按钮组 buttons": {
+        "title": ,
+        "btnsList": [
+            {"text":"名称1", "onClicked":函数1, "textColorKey": 字体颜色名}},
+            {"text":"名称2", "onClicked":函数2, "bgColorKey": 背景颜色名}},
+        ],
+        // 颜色名 ColorKey 为 theme.keys 的值
+    },
+    "任意变量 var": { // 程序缓存任意变量
+        "type": "var",
+        "save": false,
+    }
+
+    通用配置元素：
+    "title": 显示名称。不填（或undefined）时不生成组件。填写（包括空字符串""）时自动生成控件。
+    "type": 控件类型,
+    "save": 可选，填false时不保存（每次初始化为默认值）,
+    "toolTip": 可选，字符串，鼠标悬停时的提示,
+    "advanced": 可选，填true时为高级选项，平时隐藏
+    "onChanged": 可选，值变化时的回调函数，  (newVal, oldVal)=>{console.log(`值从 ${oldVal} 变为 ${newVal}`)}
+        onChanged可以有返回值。默认返回 undefined 表示允许变动，返回 true 表示阻止这次变动。
+}
+
+configDict为嵌套形式，而originDict与valueDict为展开形式的单层字典。例：
+    configDict["aaa"]["bbb"]["ccc"] === originDict["aaa.bbb.ccc"]
+    configDict["aaa"]["bbb"]["ccc"]的当前取值 === valueDict["aaa.bbb.ccc"]
+*/
+
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import "../Widgets"
+
+Item {
+    id: configs
+
+    // ========================= 【对外接口】 =========================
+
+    property string category_: "" // 配置名
+    property var configDict: { } // 定义字典，静态参数，key为嵌套
+    onConfigDictChanged: { if(autoLoad && isChangedInit) Qt.callLater(reload) }
+    property alias panelComponent: panelComponent // 自动生成的组件
+    property bool alignEditorColumn: false // 全局设置按面板坐标对齐，任务页保持原布局
+    readonly property bool stackEditorTitles: alignEditorColumn && panelContainer.width < size_.line * 31
+    readonly property real editorColumnX: Math.round(panelContainer.width * (stackEditorTitles ? 0.42 : 0.50))
+    function editorLeftFor(item) {
+        // 显式读取每一级 x，让 QML 在组缩进或面板大小变化时重新计算。
+        let offset = 0
+        for(let node = item; node && node !== panelContainer; node = node.parent) offset += node.x
+        return Math.max(0, editorColumnX - offset)
+    }
+    // 只描述展示位置；引用不会进入本页 originDict/valueDict 或持久化类别。
+    property var panelLayout: null
+    onPanelLayoutChanged: { if(isChangedInit && panelBuilt) Qt.callLater(initPanelComponent) }
+    signal panelRebuilt()
+    signal configurationReloaded()
+    property int definitionRevision: 0
+    property bool autoLoad: true // 自动加载设置项
+    // 只有显式声明的前缀从应用级来源取值，不在任务页保存第二份。
+    property var valueSources: ({})
+    // 仅应用级参数来源提前保存待写值，普通面板维持原来的缓存时序。
+    property bool preserveCacheOnReload: false
+    property string reloadSubscriptionGroup: ""
+
+    function sourceForKey(key) {
+        for(const prefix in valueSources) {
+            if(key === prefix || key.startsWith(prefix + ".")) {
+                const source = valueSources[prefix]
+                if(!source || source === configs) throw new Error("Invalid configuration source: " + prefix)
+                if(originDict.hasOwnProperty(key)) throw new Error("Conflicting configuration source: " + key)
+                return source
+            }
+        }
+        return null
+    }
+    function eachValueSource(callback) {
+        const seen = []
+        for(const prefix in valueSources) {
+            const source = valueSources[prefix]
+            if(!source || source === configs) throw new Error("Invalid configuration source: " + prefix)
+            if(seen.indexOf(source) >= 0) continue
+            seen.push(source)
+            callback(source)
+        }
+    }
+    // 重置所属规范值及声明的来源；普通展示引用仍不参与重置。
+    function reset() {
+        for (let key in originDict) {
+            const origin = originDict[key]
+            if(origin.type === "group" || !origin.hasOwnProperty("default")) continue
+            setValue(key, origin.default, true)
+        }
+        eachValueSource(source => source.reset())
+    }
+    function flushCache() {
+        cacheTimer.stop()
+        for(const key in cacheDict) settings.writeValue(key, cacheDict[key])
+        cacheDict = ({})
+    }
+    // 重新从 configDict 加载设置项和UI，不能丢弃尚未落盘的默认值。
+    function reload() {
+        if(preserveCacheOnReload) flushCache()
+        isChangedInit = false
+        initConfigDict()
+        definitionRevision++
+        if(!lazyPanel || panelBuilt) initPanelComponent()
+        initChangedFuncs()
+        configurationReloaded()
+        console.log(`% 加载配置 ${category_} ！`)
+    }
+    // 所属来源也同步原类别，不从另一个页面复制值。
+    function settingsReload() {
+        if(preserveCacheOnReload) flushCache()
+        eachValueSource(source => source.settingsReload())
+        settings.sync()
+        reload()
+    }
+    // 聚合任务快照，但只引入声明前缀，不泄漏共享模型/生命周期参数。
+    function getValueDict() {
+        if(Object.keys(valueSources).length === 0) return valueDict
+        const values = Object.assign({}, valueDict)
+        for(const prefix in valueSources) {
+            const source = valueSources[prefix]
+            if(!source || source === configs) throw new Error("Invalid configuration source: " + prefix)
+            const external = source.getValueDict()
+            for(const key in external) {
+                if(key !== prefix && !key.startsWith(prefix + ".")) continue
+                if(values.hasOwnProperty(key)) throw new Error("Conflicting configuration source: " + key)
+                values[key] = external[key]
+            }
+        }
+        return values
+    }
+    // 获取原始值字典
+    function getOriginDict() {
+        return originDict
+    }
+    
+    // ========================= 【内部变量】 =========================
+
+    // 配置存储字典，key为展开形式，三个字典key对应
+    property var originDict: { } // 键字典，键为展开形式，值指向configDict的项
+    property var valueDict: { } // 值字典，动态变化
+    property var compDict: ({}) // 控件映射；懒面板未展开时也必须是可查询的空对象
+    property var compList: [] // 保存所有组件（包括组）的列表，便于删除
+
+    property var cacheDict: {} // 缓存
+    property int cacheInterval: 500 // 缓存写入本地时间
+
+    property bool enabledAdvanced: false // true时显示高级模式的按钮。只有任意设置项设了高级模式，此项才会被置true
+    property bool advanced: false // true时进入高级模式；每次启动默认收起
+    property bool lazyPanel: false
+    property bool panelBuilt: false
+    property bool applyingPreset: false // 由预设批量写值时避免误标为自定义
+
+    // ========================= 【数值逻辑（内部调用）】 =========================
+
+    // 同类别可有互不重叠的轻量来源和页面，订阅必须按实例注销。
+    Component.onCompleted: {
+        reloadSubscriptionGroup = "settingsReload:" + category_ + ":" + configs.toString()
+        if(autoLoad) reload()
+        Qt.callLater(()=>{
+            qmlapp.pubSub.subscribeGroup("<<settingsReload>>", configs, "settingsReload", reloadSubscriptionGroup)
+        })
+    }
+    Component.onDestruction: {
+        if(preserveCacheOnReload) flushCache()
+        if(qmlapp.pubSub && reloadSubscriptionGroup) qmlapp.pubSub.unsubscribeGroup(reloadSubscriptionGroup)
+    }
+    // 初始化数值
+    function initConfigDict() {
+        originDict = {}
+        valueDict = {}
+        cacheDict = {}
+        function handleConfigItem(config, key) { // 处理一个配置项
+            // 类型：指定type
+            if (config.type !== "") {
+                if(config.type === "file") { // 文件选择
+                    if(! config.hasOwnProperty("default"))
+                        config.default = ""
+                    if(! config.hasOwnProperty("nameFilters")) {
+                        config.nameFilters = []
+                    }
+                }
+                else if(config.type === "var") { // 缓存任意类型
+                    if(!config.hasOwnProperty("default"))
+                        config.default = undefined
+                }
+            }
+            // 类型判断：省略type
+            else{
+                if (typeof config.default === "boolean") { // 布尔
+                    config.type = "boolean"
+                }
+                else if (config.hasOwnProperty("optionsList")) { // 枚举
+                    if(config.optionsList.length==0) {
+                        qmlapp.popup.message("", qsTr("%1 处理配置项异常：\n%2枚举列表为空。").arg(category_).arg(key), "error")
+                        return
+                    }
+                    config.type = "enum"
+                    if(config.default == undefined)
+                        config.default = config.optionsList[0][0]
+                }
+                else if (typeof config.default === "string") { // 文本
+                    config.type = "text"
+                }
+                else if (typeof config.default === "number") { // 数字
+                    config.type = "number"
+                }
+                else if (config.hasOwnProperty("btnsList")) { // 按钮组
+                    config.type = "buttons"
+                    config.fullKey = key // 记录完整key
+                    return
+                }
+                else {
+                    console.error("【Error】未知类型的配置项："+key)
+                    return
+                }
+            }
+            let flag = false
+            // 从配置文件中取值
+            let val = settings.readValue(key, undefined)
+            // 检查和格式化存储值类型
+            if(val !== undefined) { 
+                switch(config.type) {
+                    case "boolean": // 布尔，记录参数字符串转布尔值
+                        if(typeof val === "string")
+                            val = val=="true"
+                        flag = true
+                        break
+                    case "number": // 数字，字符串转数字
+                        if(typeof val === "string") {
+                            if(config.isInt)
+                                val = parseInt(val)
+                            else
+                                val = parseFloat(val)
+                        }
+                        flag = !(val==null || isNaN(val)) // 若非数字，则设为默认数值
+                        break
+                    case "enum": // 枚举，检查记录参数是否在列表内
+                        val = str2var(val) // 尝试转为合适类型
+                        for(let i in config.optionsList) {
+                            if(config.optionsList[i][0] == val) {
+                                flag = true
+                                break
+                            }
+                        }
+                        break
+                    // 无需检查
+                    case "var": // 任意
+                    case "file": // 文件
+                    case "text": // 文本
+                    case "hotkey": // 热键
+                        flag = true
+                        break
+                }
+            }
+            if(!flag) { // 未有存储项或类型检查不合格，则取默认值
+                val = config.default
+                setValue(key, val) // 存储
+                console.log(`${key} 取默认值 ${val}`)
+            }
+            config.fullKey = key // 记录完整key
+            valueDict[key] = val // 设当前值
+        }
+        function handleConfigGroup(group, prefix="") { // 处理一个配置组
+            for(let key in group) {
+                const config = group[key]
+                if(typeof config !== "object"){
+                    continue
+                }
+                // 补充空白参数
+                supplyDefaultParams(config)
+                // 记录完整key
+                const fullKey = prefix+key
+                config.fullKey = fullKey
+                if(config.type==="group") { // 若是配置项组，递归遍历
+                    handleConfigGroup(config, fullKey+".") // 前缀加深一层
+                    originDict[fullKey] = config
+                }
+                else { // 若是配置项
+                    originDict[fullKey] = config
+                    handleConfigItem(config, fullKey)
+                }
+            }
+        }
+        handleConfigGroup(configDict)
+    }
+    // 尝试将字符串类型的变量转为合适的类型
+    function str2var(str) {
+        // 非字符串
+        if(typeof str !== "string") return str
+        // 尝试转数字
+        const num = Number(str)
+        if(!isNaN(num)) return num
+        // 尝试转布尔
+        if(str === "true") return true
+        if(str === "false") return false
+        // 都不符合，保持为字符串
+        return str
+    }
+    // 补充空白参数
+    function supplyDefaultParams(config) {
+        if(!config.hasOwnProperty("type")) // 类型
+            config.type = ""
+        if(!config.hasOwnProperty("save")) // 保存
+            config.save = true
+    }
+    // 外部来源按原键读写，任务页不保存第二份值。
+    function getValue(key) {
+        const source = sourceForKey(key)
+        return source ? source.getValue(key) : valueDict[key]
+    }
+    // 设置值  键, 值, 是否刷新UI, 是否立刻写入本地（还是缓存写入）
+    function setValue(key, val, isupdateUI=false, saveNow=false) {
+        const source = sourceForKey(key)
+        if(source) { source.setValue(key, val, isupdateUI, saveNow); return }
+        if(!originDict.hasOwnProperty(key)) return // 已销毁控件不应提交到新配置。
+        if(typeof val !== "object" && valueDict[key] === val) // 如果val不是数组或字典，排除相同值
+            return
+        let res = onChangedFunc(key, val, valueDict[key]) // 触发函数，传入新值和旧值
+        if(res !== undefined) { // 阻止这次变动
+            if(compDict.hasOwnProperty(key)) compDict[key].updateUI()
+            return
+        }
+        valueDict[key] = val
+        updatePresetState(key, val)
+        if(originDict[key].save) { // 需要保存值
+            if(saveNow || isChangedInit) { // 编辑提交后先保存，再自动应用
+                delete cacheDict[key]
+                settings.writeValue(key, val)
+            }
+            else // 缓存保存
+                saveValue(key)
+        }
+        if(isupdateUI && compDict.hasOwnProperty(key)) { // 刷新UI
+            compDict[key].updateUI()
+        }
+        if(isChangedInit) valueCommitted(key, val)
+    }
+    signal valueCommitted(string key, var value)
+
+    // 通用预设协议：预设项提供 presetValues，受控项标记 presetManaged。
+    function updatePresetState(key, val) {
+        if(!isChangedInit || !originDict.hasOwnProperty(key))
+            return
+        const origin = originDict[key]
+        if(origin.presetValues !== undefined && val !== "custom") {
+            const values = origin.presetValues[val]
+            if(values === undefined)
+                return
+            const dot = key.lastIndexOf(".")
+            const prefix = dot < 0 ? "" : key.slice(0, dot + 1)
+            applyingPreset = true
+            for(let managedKey in values)
+                setValue(prefix + managedKey, values[managedKey], true)
+            applyingPreset = false
+            return
+        }
+        if(origin.presetManaged && !applyingPreset) {
+            const dot = key.lastIndexOf(".")
+            const prefix = dot < 0 ? "" : key.slice(0, dot + 1)
+            const presetKey = prefix + "preset"
+            if(valueDict[presetKey] !== "custom")
+                setValue(presetKey, "custom", true)
+        }
+    }
+    // 初始化期间。不执行触发函数
+    property bool isChangedInit: false
+    // 触发函数
+    function onChangedFunc(key, newVal, oldVal) {
+        if(!isChangedInit) // 初始化期间。不执行触发函数
+            return undefined
+        // 配置项存在触发函数，则执行
+        if(originDict[key].hasOwnProperty("onChanged")) 
+            return originDict[key].onChanged(newVal, oldVal)
+    }
+    // 初始化，执行全部触发函数
+    function initChangedFuncs() {
+        isChangedInit = true
+        for(let k in originDict) {
+            onChangedFunc(k, valueDict[k], undefined) // 传入空旧值
+        }
+    }
+    // 带缓存的存储值
+    function saveValue(key) {
+        cacheDict[key] = valueDict[key]
+        cacheTimer.restart()
+    }
+    // 保存计时器
+    Timer {
+        id: "cacheTimer"
+        running: false
+        interval: cacheInterval
+        onTriggered: {
+            for(let k in cacheDict) {
+                settings.writeValue(k, cacheDict[k]) // 缓存写入本地
+            }
+            cacheDict = {} // 清空缓存
+        }
+    }
+
+    // 存储配置项
+    Settings_ {
+        id: settings
+        category: category_ // 自定义类别名称
+    }
+    // ========================= 【自动生成组件】 =========================
+
+    function ensurePanel() { if(!panelBuilt) initPanelComponent() }
+
+    // 默认布局仍按原配置树生成；显式布局可移动或引用规范项而不改变键。
+    function defaultPanelLayout(group=configDict) {
+        const revision = definitionRevision
+        const entries = []
+        for(const key in group) {
+            const origin = group[key]
+            if(!origin || typeof origin !== "object" || typeof origin.title !== "string") continue
+            const entry = {key: origin.fullKey, origin: origin}
+            if(origin.type === "group") entry.items = defaultPanelLayout(origin)
+            entries.push(entry)
+        }
+        return entries
+    }
+
+    // 初始化 自动生成组件
+    function initPanelComponent() {
+        panelBuilt = true
+        advanced = false
+        enabledAdvanced = false
+        const compListLength = compList.length
+        if(compListLength !== 0) { // 外层组件列表非空，先删除旧的组件
+            for(let i = compListLength-1; i>=0; i--) { // 倒序遍历，从内层往外层删
+                // 延迟销毁前立即隐藏，避免旧、新控件在同一帧重复展示或误触。
+                compList[i].visible = false
+                compList[i].destroy()
+            }
+            compList = []
+        }
+        compDict = {}
+
+        function build(entries, parent=panelContainer) {
+            for(const entry of entries) {
+                const source = entry.sourceConfigs || configs
+                const sourceKey = entry.sourceKey || entry.key || ""
+                const config = entry.origin || source.originDict[sourceKey]
+                if(!config || typeof config.title !== "string") continue
+                if(config.advanced) enabledAdvanced = true
+                if(entry.items !== undefined || config.type === "group") {
+                    const comp = parent === panelContainer ? compGroup : compGroupInner
+                    const obj = comp.createObject(parent, {
+                        "key": entry.key || sourceKey, "configs": configs, "origin": config})
+                    compList.push(obj)
+                    build(entry.items || source.defaultPanelLayout(config), obj.container)
+                }
+                else if(config.deviceProvider === "nvidia-cuda" || componentDict.hasOwnProperty(config.type)) {
+                    const component = config.deviceProvider === "nvidia-cuda" ? compNvidiaDevice : componentDict[config.type]
+                    const obj = component.createObject(parent, {
+                        "key": entry.key || sourceKey, "configs": configs,
+                        "sourceConfigs": source, "sourceKey": sourceKey})
+                    compList.push(obj)
+                    // 只有本页规范项参与 setValue 的直接刷新；外部引用由提交信号同步。
+                    if(source === configs) compDict[sourceKey] = obj
+                }
+            }
+        }
+        build(panelLayout === null ? defaultPanelLayout(configDict) : panelLayout)
+        panelRebuilt()
+    }
+
+    // 总体 滚动视图
+    ScrollView {
+        id: panelComponent
+        anchors.fill: parent
+        contentWidth: width // 内容宽度
+        clip: true // 溢出隐藏
+        property alias ctrlBar: ctrlBar // 控制栏的引用
+        property alias advanced: configs.advanced // 高级标志的引用
+        property int currentGroupIndex: -1 // 仅展示状态，不写入用户配置。
+        property string navigationGroupKey: "" // 显式定位在布局收敛时保持；用户滚动后交回滚动跟踪。
+        // destroy() 的旧组可暂留在 children；只枚举本轮登记的外层活动组件。
+        function activeGroupItems() {
+            return configs.compList.filter(item => item.parent === panelContainer && item.title !== undefined)
+        }
+        // 标题快照和滚动索引必须使用同一活动分组顺序。
+        function getGroupList() {
+            return activeGroupItems().map(item => ({title: item.title, advanced: item.advanced}))
+        }
+        function syncCurrentGroup() {
+            const groups = activeGroupItems()
+            const selected = groups.findIndex(group => group.key === navigationGroupKey && group.visible && group.height > 0)
+            if(selected >= 0) {
+                currentGroupIndex = selected
+                return
+            }
+            navigationGroupKey = ""
+            const top = Math.max(0, ScrollBar.vertical.position * panelContainer.height) + size_.line
+            let current = -1
+            for(let i = 0; i < groups.length; i++) {
+                const group = groups[i]
+                if(!group.visible || group.height <= 0) continue
+                if(current < 0 || group.y <= top + 1) current = i
+                else break
+            }
+            currentGroupIndex = current
+        }
+        function scrollToItem(item, index) {
+            const groups = activeGroupItems()
+            navigationGroupKey = groups[index].key
+            const height = panelContainer.height
+            const maximum = Math.max(0, height - panelComponent.height)
+            const y = Math.max(0, Math.min(item.mapToItem(panelContainer, 0, 0).y - size_.line, maximum))
+            ScrollBar.vertical.position = height > 0 ? y / height : 0
+            currentGroupIndex = index
+            item.kirakira && item.kirakira()
+        }
+        // 标题列表和滚动目标都来自当前活动组件，不枚举待销毁的 children。
+        function scrollToGroup(index) {
+            const groups = activeGroupItems()
+            if(index < 0 || index >= groups.length) {
+                console.error(`无法滚动到${index}，超出范围！`)
+                return
+            }
+            scrollToItem(groups[index], index)
+        }
+        // 支持工作台直达嵌套模型组；展示键不进入规范配置或持久化。
+        function scrollToGroupKey(key) {
+            const groups = activeGroupItems()
+            const item = configs.compList.find(value => value.key === key && value.title !== undefined)
+            if(!item) return false
+            let outer = item
+            while(outer && groups.indexOf(outer) < 0) outer = outer.parent
+            if(!outer) return false
+            scrollToItem(item, groups.indexOf(outer))
+            return true
+        }
+        Connections {
+            target: panelComponent.ScrollBar.vertical
+            function onPositionChanged() { panelComponent.syncCurrentGroup() }
+            function onPressedChanged() {
+                if(panelComponent.ScrollBar.vertical.pressed) panelComponent.navigationGroupKey = ""
+            }
+        }
+        Connections {
+            target: panelComponent.contentItem
+            function onMovingChanged() {
+                if(panelComponent.contentItem.moving) panelComponent.navigationGroupKey = ""
+            }
+        }
+        // 方向键经 ScrollView 步进，不一定触发 Flickable.moving。
+        Keys.onPressed: function(event) {
+            if([Qt.Key_Up, Qt.Key_Down, Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Home, Qt.Key_End].includes(event.key)) {
+                navigationGroupKey = ""
+                Qt.callLater(syncCurrentGroup)
+            }
+        }
+        onAdvancedChanged: Qt.callLater(syncCurrentGroup)
+
+        Column {
+            id: panelContainer
+            anchors.fill: parent
+            anchors.rightMargin: size_.spacing
+            spacing: size_.spacing
+            onHeightChanged: Qt.callLater(panelComponent.syncCurrentGroup)
+
+            // 顶部控制栏
+            Item {
+                id: ctrlBar
+                height: size_.line*1.5
+                anchors.left: parent ? parent.left : undefined
+                anchors.right: parent ? parent.right : undefined
+
+                Button_ {
+                    id: ctrlBtn1
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    text_: qsTr("重置")
+                    toolTip: qsTr("重置本页上的设定")
+                    textColor_: theme.noColor
+                    onClicked: {
+                        const argd = {yesText: qsTr("重置设定")}
+                        const callback = (flag)=>{ if(flag) reset() }
+                        qmlapp.popup.dialog("", qsTr("要重置本页的设定吗？"), callback, "warning", argd)
+                    }
+                }
+                CheckButton {
+                    visible: enabledAdvanced
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right: ctrlBtn1.left
+                    text_: qsTr("高级")
+                    toolTip: qsTr("显示更多高级选项。它们标有 * 号。\n请谨慎修改高级选项。")
+                    textColor_: configs.advanced ? theme.textColor : theme.subTextColor
+                    checked: configs.advanced
+                    enabledAnime: true
+                    onCheckedChanged: configs.advanced = checked
+                }
+            }
+        }
+    }
+    // 配置项组（外层）
+    Component {
+        id: compGroup
+
+        Item {
+            id: groupRoot
+            property string key: "" // 键
+            property var configs: undefined // 保存对Configs组件的引用
+            property var origin: undefined // 起源参数（静态）
+            property string title: "" // 标题
+            property alias container: panelContainer // 容器
+            property bool advanced: false // true时是高级选项
+            anchors.left: parent.left
+            anchors.right: parent.right
+            // 高级模式，整组隐藏
+            height: (advanced&&!configs.advanced) ? 0 : groupText.height+groupRectangle.height
+            visible: !(advanced&&!configs.advanced)
+            // 边框闪烁
+            function kirakira() {
+                if(qmlapp.enabledEffect)
+                    blinkAnimation.start()
+            }
+
+            Component.onCompleted: {
+                if(!origin) origin = configs.originDict[key]
+                title = origin.title
+                if(origin.advanced) {
+                    advanced = origin.advanced
+                    title = "* "+title
+                }
+            }
+            // 标题
+            Text_ {
+                id: groupText
+                text: title
+                anchors.left: parent.left
+                anchors.leftMargin: size_.spacing
+                // 显示标题时，自动高度；否则高度为0
+                height: (title) ? undefined:0
+                
+            }
+            // 内容
+            Rectangle {
+                id: groupRectangle
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: groupText.bottom
+                anchors.topMargin: size_.smallSpacing
+                color: theme.bgColor
+                radius: size_.panelRadius
+                height: panelContainer.height + size_.smallSpacing * 2
+
+                Column {
+                    id: panelContainer
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: size_.smallSpacing
+                    spacing: size_.smallSpacing
+                }
+
+                Item { // 底部占位
+                    anchors.top: panelContainer.bottom
+                    height: size_.smallSpacing
+                }
+            }
+            // 闪烁边框
+            Panel {
+                id: groupBorder
+                anchors.fill: parent
+                color: "#00000000"
+                border.width: 2
+                border.color: theme.specialTextColor
+                visible: false
+                opacity: 0
+                // 颜色闪烁动画
+                SequentialAnimation {
+                    id: blinkAnimation
+                    running: false
+                    loops: 3
+                    onStarted: groupBorder.visible = true
+                    NumberAnimation {
+                        target: groupBorder; property: "opacity"
+                        from: 0; to: 1; duration: 200
+                    }
+                    NumberAnimation {
+                        target: groupBorder; property: "opacity"
+                        from: 1; to: 0; duration: 200
+                    }
+                    onStopped: {
+                        groupBorder.visible = false
+                    }
+                }
+            }
+        }
+    }
+    // 配置项组（内层）
+    Component {
+        id: compGroupInner
+
+        Item {
+            property string key: "" // 键
+            property var configs: undefined // 保存对Configs组件的引用
+            property var origin: undefined // 起源参数（静态）
+            property string title: "" // 标题
+            property alias container: panelContainer // 容器
+            property bool enabledFold: false // 启用折叠机制
+            property bool fold: false // 折叠状态
+            property string foldKey: key+".fold" // 折叠键
+            property alias isFold: foldBtn.checked // 折叠
+            anchors.left: parent.left
+            anchors.right: parent.right
+            clip: true
+            // 折叠时高度=标题+0，展开时高度=标题+内容
+            height: groupText.height + (fold ? 0:panelContainer.height)
+
+            Component.onCompleted: {
+                if(!origin) origin = configs.originDict[key]
+                title = origin.title
+                // 折叠属性。origin值转布尔，undefined当成false
+                enabledFold = origin.enabledFold?true:false
+                const f = origin.fold?true:false
+                if(enabledFold) { // 若启用折叠按钮，则取记录值，无记录则使用设定值
+                    const readf = UmiSettings.value("UI", foldKey, f)
+                    // 字符串转bool
+                    if(readf===undefined) fold = f
+                    else if(readf===true || readf==="true") fold = true
+                    else if(readf===false || readf==="false") fold = false
+                }
+                else { // 未启用折叠按钮，则使用设定值
+                    fold = f
+                }
+                // 如果设定了提示，则加载提示组件
+                if(origin.toolTip) {
+                    toolTipLoader.sourceComponent = toolTip
+                }
+            }
+
+            // 提示
+            Component {
+                id: toolTip
+                ToolTip_ {
+                    visible: mouseAreaBackgroud.hovered
+                    text: origin.toolTip
+                }
+            }
+            Loader { id: toolTipLoader }
+            // 背景
+            MouseAreaBackgroud { id: mouseAreaBackgroud }
+            // 标题
+            Text_ {
+                id: groupText
+                text: title+"："
+                anchors.left: parent.left
+                anchors.leftMargin: size_.smallSpacing
+                height: size_.line+size_.smallSpacing*2
+                verticalAlignment: Text.AlignVCenter
+            }
+            // 折叠按钮
+            Button_ {
+                id: foldBtn
+                visible: enabledFold
+                anchors.right: parent.right
+                anchors.rightMargin: size_.smallSpacing
+                anchors.verticalCenter: groupText.verticalCenter
+                height: groupText.height
+                textSize: size_.smallLine
+                textColor_: theme.subTextColor
+                text_: fold ? qsTr("展开")+" 🔽" : qsTr("折叠")+" 🔼"
+                bgColor_: theme.bgColor
+                onClicked: {
+                    fold=!fold
+                    UmiSettings.setValue("UI", foldKey, fold) // 折叠状态写入本地
+                }
+            }
+            // 内容
+            Column {
+                id: panelContainer
+                visible: !fold
+                anchors.left: panelLeftBorder.right
+                anchors.right: parent.right
+                anchors.top: groupText.bottom
+                anchors.leftMargin: size_.smallSpacing*0.5 // 子项右偏移
+            }
+            // 内容左边的边框
+            Rectangle {
+                id: panelLeftBorder
+                anchors.left: parent.left
+                anchors.top: panelContainer.top
+                anchors.bottom: panelContainer.bottom
+                anchors.leftMargin: size_.smallSpacing*2
+                width: size_.smallSpacing*0.7
+                color: theme.coverColor2
+            }
+        }
+    }
+    // ========== 生成组件字典 ========== 
+    property var componentDict: {
+        "boolean": compBoolean,
+        "enum": compEnum,
+        "file": compFile,
+        "text": compText,
+        "number": compNumber,
+        "hotkey": compHotkey,
+        "buttons": compBtns,
+    }
+    // 配置项：布尔值
+    Component {
+        id: compBoolean
+
+        ConfigItemComp {
+            id: boolRoot
+            property bool checked: true
+            property bool isInit: false
+
+            // 初始化
+            Component.onCompleted: {
+                isInit = true // 初始化完毕，允许启用动画
+            }
+
+            // 更新UI
+            updateUI: ()=>{
+                checked = value()
+            }
+
+            // 按下
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    checked = !checked
+                    value(checked)
+                }
+            }
+
+            // 开关图标
+            CheckBox_ {
+                id: switchBtn
+                anchors.right: parent.right
+                anchors.rightMargin: size_.smallSpacing
+                anchors.verticalCenter: parent.verticalCenter
+                checked: boolRoot.checked
+                enabledAnime: boolRoot.isInit
+            }
+        }
+    }
+    // 配置项：文本
+    Component {
+        id: compText
+
+        ConfigItemComp {
+            id: rootText
+            hasEditor: true
+            // 更新UI
+            updateUI: ()=>{
+                textInput.text = value()
+            }
+            // 修改值
+            function set(t) {
+                value(t) // 设置值
+            }
+            // 输入框
+            Rectangle {
+                objectName: "configEditor"
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.margins: 1
+                anchors.topMargin: rootText.editorTopInset + 1
+                width: rootText.editorWidth(0.5)
+                color: theme.bgColor
+                border.width: 2
+                border.color: theme.coverColor2
+                radius: size_.btnRadius
+
+                TextInput_ {
+                    id: textInput
+                    clip: true
+                    anchors.fill: parent
+                    anchors.leftMargin: parent.border.width
+                    anchors.rightMargin: parent.border.width
+                    onEditingFinished: rootText.set(text)
+                }
+            }
+        }
+    }
+    // 配置项：数字
+    Component {
+        id: compNumber
+
+        ConfigItemComp {
+            id: rootNumber
+            hasEditor: true
+            property string errTips: ""
+            // 更新UI
+            updateUI: ()=>{
+                textInput.text = value()
+            }
+            // 修改值
+            function set(t) {
+                let n = check(t)
+                if(n !== null) value(n) // 无效输入不覆盖已保存配置
+            }
+            // 检查值
+            function check(val) {
+                let n = Number(val);
+                if (!isNaN(n)) { // 是数字
+                    if(origin.isInt && !Number.isInteger(n)) {
+                        errTips = qsTr("必须为整数")
+                    }
+                    else {
+                        if(origin.max !== undefined && n > origin.max) {
+                            errTips = qsTr("不能超过")+origin.max
+                        }
+                        else if(origin.min !== undefined && n < origin.min) {
+                            errTips = qsTr("不能低于")+origin.min
+                        }
+                        else
+                            errTips = ""
+                    }
+                }
+                else {
+                    errTips = qsTr("必须为数字")
+                }
+                if(errTips==="")
+                    return n
+                return null
+            }
+            // 提示信息
+            Rectangle {
+                visible: errTips!==""
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: textInputContainer.left
+                anchors.margins: 3
+                anchors.topMargin: rootNumber.editorTopInset + 3
+                color: theme.noColor
+                radius: size_.btnRadius
+                width: errTipsText.width+size_.smallSpacing*2
+                Text_ {
+                    id: errTipsText
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.leftMargin: size_.smallSpacing
+                    color: theme.bgColor
+                    text: errTips
+                }
+            }
+            // 输入框
+            Rectangle {
+                id: textInputContainer
+                objectName: "configEditor"
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.margins: 1
+                anchors.topMargin: rootNumber.editorTopInset + 1
+                width: rootNumber.editorWidth(0.25)
+                color: theme.bgColor
+                border.width: 2
+                border.color: theme.coverColor2
+                radius: size_.btnRadius
+
+                TextInput_ {
+                    id: textInput
+                    clip: true
+                    anchors.left: parent.left
+                    anchors.right: unitText.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.leftMargin: parent.border.width
+                    // anchors.rightMargin: parent.border.width
+                    onEditingFinished: rootNumber.set(text)
+                }
+                // 单位
+                Text_ {
+                    id: unitText
+                    visible: origin.unit!==undefined
+                    text: origin.unit===undefined ? "" : origin.unit
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.rightMargin: size_.smallSpacing
+                    verticalAlignment: Text.AlignVCenter // 垂直居中
+                    color: theme.subTextColor
+                    font.pixelSize: size_.smallText
+                }
+            }
+        }
+    }
+    // 异步设备列表只改变展示，规范值继续使用旧字符串类型。
+    Component {
+        id: compNvidiaDevice
+        NvidiaDeviceConfig {}
+    }
+    // 配置项：枚举
+    Component {
+        id: compEnum
+
+        ConfigItemComp {
+            id: rootEnum
+            hasEditor: true
+            property var optionsList: [] // 候选列表原型
+            // 更新UI
+            updateUI: ()=>{
+                optionsList = origin.optionsList
+                let model = []
+                let index = 0
+                const v = value()
+                for(let i=0, l=optionsList.length; i<l; i++) {
+                    const opt = optionsList[i]
+                    model.push(opt[1]) // 显示标题
+                    if(v==opt[0]) {
+                        index = i
+                    }
+                }
+                comboBox.model = model
+                comboBox.currentIndex = index
+            }
+            // 更新数值
+            function set() {
+                const curr = optionsList[comboBox.currentIndex][0]
+                value(curr)
+            }
+
+            ComboBox {
+                id: comboBox
+                objectName: "configEditor"
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.margins: 1
+                anchors.topMargin: rootEnum.editorTopInset + 1
+                width: rootEnum.editorWidth(0.5)
+                model: []
+                onActivated: set() // 仅提交用户选择，刷新 model/currentIndex 不写回配置
+
+                popup: Popup {
+                    y: comboBox.height + size_.smallSpacing
+                    width: comboBox.width
+                    implicitHeight: Math.min(contentItem.implicitHeight + padding * 2,
+                                             size_.line * 12)
+                    padding: size_.smallSpacing
+
+                    contentItem: ListView {
+                        clip: true
+                        implicitHeight: contentHeight
+                        model: comboBox.popup.visible ? comboBox.delegateModel : null
+                        currentIndex: comboBox.highlightedIndex
+                        ScrollIndicator.vertical: ScrollIndicator { }
+                    }
+                    background: Rectangle {
+                        color: theme.specialBgColor
+                        border.width: 1
+                        border.color: theme.coverColor4
+                        radius: size_.panelRadius
+                    }
+                    enter: Transition {
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 140 }
+                        NumberAnimation { property: "scale"; from: 0.98; to: 1; duration: 140; easing.type: Easing.OutCubic }
+                    }
+                    exit: Transition {
+                        NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 100 }
+                    }
+                }
+
+                // 前景文字
+                contentItem: Text {
+                    text: parent.currentText
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.right: downIcon.left
+                    anchors.leftMargin: size_.smallSpacing
+                    anchors.rightMargin: size_.smallSpacing
+                    verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: size_.text
+                    font.family: theme.fontFamily
+                    color: theme.subTextColor
+                    clip: true
+                }
+                // 前景箭头
+                indicator: Icon_ {
+                    id: "downIcon"
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.margins: size_.smallSpacing
+                    height: size_.smallLine
+                    width: size_.smallLine
+                    icon: "down"
+                    color: theme.subTextColor
+                }
+                // 背景
+                background: Rectangle {
+                    anchors.fill: parent
+                    color: theme.bgColor
+                    border.width: 2
+                    border.color: theme.coverColor2
+                    radius: size_.btnRadius
+                    
+                    // 背景
+                    MouseAreaBackgroud {
+                        cursorShape: Qt.PointingHandCursor
+                    }
+                }
+                // 选项
+                delegate: ItemDelegate {
+                    width: comboBox.width
+                    height: size_.line + size_.spacing
+                    Text {
+                        text: modelData
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: size_.smallSpacing
+                        anchors.rightMargin: size_.smallSpacing
+                        font.pixelSize: size_.text
+                        font.family: theme.fontFamily
+                        font.bold: comboBox.currentIndex===index
+                        color: comboBox.currentIndex===index? theme.specialTextColor:theme.subTextColor
+                        clip: true
+                    }
+                    background: Rectangle {
+                        color: comboBox.currentIndex===index ? theme.coverColor2 : "transparent"
+                        radius: size_.btnRadius
+                        Rectangle {
+                            visible: comboBox.currentIndex===index
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 3
+                            height: parent.height * 0.55
+                            radius: width / 2
+                            color: theme.specialTextColor
+                        }
+                        MouseAreaBackgroud {
+                            radius_: size_.btnRadius
+                            onClicked: parent.clicked()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // 配置项：文件选择
+    Component {
+        id: compFile
+
+        ConfigItemComp {
+            id: rootFile
+            hasEditor: true
+            editorLeadingWidth: alignedEditor && canDownload ? downloadButton.width + size_.smallSpacing : 0
+            // 更新UI
+            updateUI: ()=>{
+                textInput.text = value()
+            }
+            // 导入路径
+            function set(path) {
+                value(path) // 设置值
+            }
+            property var downloadState: sourceConfigs.modelDownloadStates
+                ? (sourceConfigs.modelDownloadStates[sourceKey] || ({})) : ({})
+            property bool downloading: downloadState.state === "running" || downloadState.state === "cancelling"
+            property bool canDownload: !!origin && !!origin.download && !!sourceConfigs.startModelDownload
+
+            Item {
+                anchors.top: parent.top
+                anchors.topMargin: rootFile.editorTopInset + 1
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 1
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.rightMargin: 1
+                readonly property real inputX: Math.max(0, rootFile.alignedEditor ? rootFile.editorLeft : width - rootFile.width * 0.5)
+
+                // 选择按钮
+                IconButton {
+                    id: iconButton
+                    objectName: "configFilePicker"
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    width: height
+                    icon_: "folder"
+                    onClicked: fileDialog.open()
+
+                    FileDialog_ {
+                        id: fileDialog
+                        title: origin.dialogTitle || ""
+                        selectExisting: origin.selectExisting !== false
+                        selectFolder: !!origin.selectFolder
+                        selectMultiple: false  // 始终禁止多选
+                        nameFilters: origin.nameFilters
+                        onAccepted: {
+                            if(fileDialog.fileUrls_.length > 0) {
+                                textInput.text = fileDialog.fileUrls_[0] // 设置对话框文本
+                                rootFile.set(textInput.text)
+                            }
+                        }
+                    }
+                }
+
+                Button_ {
+                    id: downloadButton
+                    objectName: "modelDownloadButton"
+                    visible: rootFile.canDownload
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right: rootFile.alignedEditor ? pathField.left : iconButton.left
+                    anchors.rightMargin: visible ? size_.smallSpacing : 0
+                    width: {
+                        if(!visible) return 0
+                        const desired = Math.max(implicitWidth, size_.line * 2.8)
+                        return rootFile.alignedEditor ? Math.min(desired, Math.max(0, parent.inputX - 2 * size_.smallSpacing)) : desired
+                    }
+                    Accessible.name: text_
+                    enabled: rootFile.downloadState.state !== "cancelling"
+                    text_: rootFile.downloading
+                        ? qsTr("取消 %1%").arg(Math.floor(100 * (rootFile.downloadState.received || 0) / Math.max(1, rootFile.downloadState.total || 1)))
+                        : qsTr("下载")
+                    onClicked: {
+                        if(rootFile.downloading) sourceConfigs.cancelModelDownload(sourceKey)
+                        else sourceConfigs.startModelDownload(sourceKey)
+                    }
+                }
+                // 文件控件、下载和目录按钮同层，窄窗也不依赖越界点按。
+                Rectangle {
+                    id: pathField
+                    objectName: "configEditor"
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    x: parent.inputX
+                    width: Math.max(0, (rootFile.canDownload && !rootFile.alignedEditor ? downloadButton.x : iconButton.x) - x - 2)
+                    color: theme.bgColor
+                    border.width: 2
+                    border.color: theme.coverColor2
+                    radius: size_.btnRadius
+
+                    TextInput_ {
+                        id: textInput
+                        clip: true
+                        anchors.fill: parent
+                        anchors.leftMargin: parent.border.width
+                        anchors.rightMargin: parent.border.width
+                        onEditingFinished: rootFile.set(text)
+                    }
+                }
+            }
+        }
+    }
+    // 配置项：按钮组
+    Component {
+        id: compBtns
+
+        ConfigItemComp {
+
+            Rectangle {
+                anchors.fill: btnsRow
+                color: theme.bgColor
+            }
+            Row {
+                id: btnsRow
+                anchors.right: parent.right
+                anchors.rightMargin: size_.smallSpacing
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                spacing: size_.smallSpacing
+
+                Repeater {
+                    model: origin.btnsList
+                    Button_ {
+                        property var info: origin.btnsList[index]
+                        text_: info.text
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        bgColor_: info.bgColorKey?theme[info.bgColorKey]:theme.coverColor1
+                        textColor_: info.textColorKey?theme[info.textColorKey]:theme.textColor
+
+                        onClicked: {
+                            info.onClicked()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // 配置项：热键
+    Component {
+        id: compHotkey
+
+        ConfigItemComp {
+            id: rootHotkey
+            hasEditor: true
+            property string eventTitle: origin.eventTitle
+            property string keysName: ""
+            property int readNum: 0 // 记录更新了几次
+
+            // 初始化，更新UI
+            updateUI: ()=>{
+                const kn = value()
+                changeHotkey(kn, false)
+            }
+            // 改变快捷键
+            function changeHotkey(kn, showMsg=true) {
+                // 移除相同事件的快捷键
+                qmlapp.keyMouse.delHotkey("", eventTitle, 0)
+                // 取消快捷键
+                if(kn === "") {
+                    keysName = ""
+                    value("")
+                    if(showMsg)
+                        qmlapp.popup.simple(qsTr("已取消%1的快捷键。").arg(title), "")
+                }
+                // 注册新按键
+                else {
+                    const res = qmlapp.keyMouse.addHotkey(kn, eventTitle, 0)
+                    // 成功
+                    if(res.startsWith("[Success]")) {
+                        keysName = kn
+                        value(kn)
+                        if(showMsg)
+                            qmlapp.popup.simple(qsTr("更新热键成功"), qsTr("%1的快捷键为 %2").arg(title).arg(kn))
+                    }
+                    // 失败
+                    else {
+                        keysName = ""
+                        value("")
+                        // 重复注册
+                        if(res.startsWith("[Warning] Registering same hotkey.")) {
+                            qmlapp.popup.message("", qsTr("%1 快捷键%2已被注册，请尝试另外的按键组合。").arg(title).arg(kn), "warning")
+                        }
+                        else { // 未知原因
+                            qmlapp.popup.message("", qsTr("%1 快捷键%2无法注册，请尝试另外的按键组合。").arg(title).arg(kn), "error")
+                        }
+                    }
+                }
+            }
+            // 录制开始
+            function readHotkey() {
+                // 展开遮罩
+                readNum = 1
+                qmlapp.popup.showMask(qsTr("请按下快捷键组合。按【Esc】退出。"), "<<readHotkey>>")
+                // 订阅事件
+                qmlapp.pubSub.subscribe("<<readHotkeyRunning>>", rootHotkey, "readRunning")
+                qmlapp.pubSub.subscribe("<<readHotkeyFinish>>", rootHotkey, "readFinish")
+                // 开始录制
+                let res = qmlapp.keyMouse.readHotkey("<<readHotkeyRunning>>", "<<readHotkeyFinish>>")
+                if(res !== "[Success]") { // 开始录制失败
+                    // 隐藏遮罩
+                    qmlapp.popup.hideMask("<<readHotkey>>")
+                    // 取消订阅事件
+                    qmlapp.pubSub.unsubscribe("<<readHotkeyRunning>>", rootHotkey, "readRunning")
+                    qmlapp.pubSub.unsubscribe("<<readHotkeyFinish>>", rootHotkey, "readFinish")
+                    if(res.startsWith("[Warning] Recording is running.")) // 报错
+                        qmlapp.popup.message("", qsTr("当前快捷键录制已在进行，不能同时录制！"), "warning")
+                    else
+                        qmlapp.popup.message(qsTr("无法录制快捷键"), res, "error")
+                }
+            }
+            // 录制中的回调
+            function readRunning(kn){
+                readNum++  // 更新遮罩
+                qmlapp.popup.showMask(kn, "<<readHotkey>>")
+            }
+            // 录制完毕的回调
+            function readFinish(kn) {
+                // 隐藏遮罩
+                for(let i=0; i<readNum; i++)
+                    qmlapp.popup.hideMask("<<readHotkey>>")
+                // 取消订阅事件
+                qmlapp.pubSub.unsubscribe("<<readHotkeyRunning>>", rootHotkey, "readRunning")
+                qmlapp.pubSub.unsubscribe("<<readHotkeyFinish>>", rootHotkey, "readFinish")
+                // 改变快捷键
+                changeHotkey(kn)
+            }
+
+            Rectangle {
+                objectName: "configEditor"
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.margins: 1
+                anchors.topMargin: rootHotkey.editorTopInset + 1
+                width: rootHotkey.editorWidth(0.5)
+                color: theme.bgColor
+
+                IconButton {
+                    id: clearBtn
+                    icon_: "clear"
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    anchors.margins: 1
+                    width: height
+                    onClicked: changeHotkey("")
+                }
+                Button_ {
+                    id: hotkeyBtn
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.right: clearBtn.left
+                    clip: true
+                    textColor_: theme.subTextColor
+                    borderWidth: 2
+                    borderColor: theme.coverColor2
+                    text_: keysName
+                    onClicked: readHotkey()
+                }
+            }
+        }
+    }
+}

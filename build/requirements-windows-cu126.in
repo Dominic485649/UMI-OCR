@@ -1,0 +1,22 @@
+--index-url https://pypi.org/simple
+--extra-index-url https://www.paddlepaddle.org.cn/packages/stable/cu126/
+-c constraints-windows-cu126.in
+
+bottle==0.13.4
+fonttools==4.63.0
+imagecodecs==2026.8.16
+numpy==2.3.5
+nvidia-nvjitlink-cu12==12.6.85
+# Paddle 3.3.1 metadata pins cuDNN 9.5 although the wheel was built with 9.9.
+# Resolve-Lock.ps1 replaces that transitive entry with the matching 9.9 wheel.
+opencv-contrib-python==4.10.0.84
+paddleocr==3.7.0
+paddlepaddle-gpu==3.3.1
+paddlex[ocr-core]==3.7.2
+pillow==12.3.0
+psutil==7.2.2
+pymupdf==1.28.0
+pynput==1.8.2
+pyside6==6.11.2
+pyyaml==6.0.2
+zxing-cpp==3.1.1

@@ -1,0 +1,75 @@
+--- a/preprocessing/_data.py
++++ b/preprocessing/_data.py
+@@ -6,7 +6,8 @@
+ from numbers import Integral, Real
+ 
+ import numpy as np
+-from scipy import sparse, stats
++import scipy as _umi_scipy
++from scipy import sparse
+ from scipy.special import boxcox, inv_boxcox
+ 
+ from sklearn.utils import metadata_routing
+@@ -1676,7 +1677,7 @@
+             self.scale_ = quantiles[1] - quantiles[0]
+             self.scale_ = _handle_zeros_in_scale(self.scale_, copy=False)
+             if self.unit_variance:
+-                adjust = stats.norm.ppf(q_max / 100.0) - stats.norm.ppf(q_min / 100.0)
++                adjust = _umi_scipy.stats.norm.ppf(q_max / 100.0) - _umi_scipy.stats.norm.ppf(q_min / 100.0)
+                 self.scale_ = self.scale_ / adjust
+         else:
+             self.scale_ = None
+@@ -2879,7 +2880,7 @@
+             # for inverse transform, match a uniform distribution
+             with np.errstate(invalid="ignore"):  # hide NaN comparison warnings
+                 if output_distribution == "normal":
+-                    X_col = stats.norm.cdf(X_col)
++                    X_col = _umi_scipy.stats.norm.cdf(X_col)
+                 # else output distribution is already a uniform distribution
+ 
+         # find index for lower and higher bounds
+@@ -2914,12 +2915,12 @@
+         if not inverse:
+             with np.errstate(invalid="ignore"):  # hide NaN comparison warnings
+                 if output_distribution == "normal":
+-                    X_col = stats.norm.ppf(X_col)
++                    X_col = _umi_scipy.stats.norm.ppf(X_col)
+                     # find the value to clip the data to avoid mapping to
+                     # infinity. Clip such that the inverse transform will be
+                     # consistent
+-                    clip_min = stats.norm.ppf(BOUNDS_THRESHOLD - np.spacing(1))
+-                    clip_max = stats.norm.ppf(1 - (BOUNDS_THRESHOLD - np.spacing(1)))
++                    clip_min = _umi_scipy.stats.norm.ppf(BOUNDS_THRESHOLD - np.spacing(1))
++                    clip_max = _umi_scipy.stats.norm.ppf(1 - (BOUNDS_THRESHOLD - np.spacing(1)))
+                     X_col = np.clip(X_col, clip_min, clip_max)
+                 # else output distribution is uniform and the ppf is the
+                 # identity function so we let X_col unchanged
+@@ -3511,7 +3512,7 @@
+ 
+         # the computation of lambda is influenced by NaNs so we need to
+         # get rid of them
+-        _, lmbda = stats.boxcox(x[~mask], lmbda=None)
++        _, lmbda = _umi_scipy.stats.boxcox(x[~mask], lmbda=None)
+ 
+         return lmbda
+ 
+--- a/utils/fixes.py
++++ b/utils/fixes.py
+@@ -13,8 +13,6 @@
+ import numpy as np
+ import scipy
+ import scipy.sparse.linalg
+-import scipy.stats
+-from scipy import optimize
+ 
+ try:
+     import pandas as pd
+@@ -107,7 +105,7 @@
+ 
+     if sp_version < parse_version(min_scipy_version):
+         # choosing bracket -2, 2 like for boxcox
+-        return optimize.brent(_neg_log_likelihood, brack=(-2, 2))
++        return scipy.optimize.brent(_neg_log_likelihood, brack=(-2, 2))
+ 
+     _, lmbda = scipy.stats.yeojohnson(x, lmbda=None)
+     return lmbda

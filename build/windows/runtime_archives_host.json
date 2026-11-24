@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "kind": "host",
+  "archives": [
+    {"path": "app.zip", "source_prefix": "", "packages": ["py_src"], "modules": [], "required": true},
+    {"path": "dependencies.zip", "source_prefix": "site-packages", "packages": [], "modules": ["bottle.py", "six.py"]}
+  ]
+}

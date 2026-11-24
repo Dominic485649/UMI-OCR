@@ -1,0 +1,536 @@
+{
+  "format": "umi-runtime-development-strip-v1",
+  "rules": [
+    {
+      "targets": [
+        "base"
+      ],
+      "dist": "fonttools-4.63.0.dist-info",
+      "name": "fonttools",
+      "version": "4.63.0",
+      "kind": "fonttools-cython-output",
+      "reason": "Cython 已生成的编译输入；保留同名 Python 实现或 Windows 扩展及字体处理所需运行代码。",
+      "files": {
+        "fontTools/cu2qu/cu2qu.c": {
+          "bytes": 666724,
+          "sha256": "dd4753dd12bae5b803eff1102ba6296b22fdcb2b7a7fc5c335cd9ca8c0c61225"
+        },
+        "fontTools/feaLib/lexer.c": {
+          "bytes": 765838,
+          "sha256": "d110c383e1cc6c9672a80bfb93e85a699ed4ac01470b8b68275181c4b6d9beaf"
+        },
+        "fontTools/misc/bezierTools.c": {
+          "bytes": 1877361,
+          "sha256": "c562b2e556638fb17d0dc684af6684425a61d150b6e05a681c579de68f4f2ad6"
+        },
+        "fontTools/pens/momentsPen.c": {
+          "bytes": 582135,
+          "sha256": "a6b14d4a77c1f266e0ef90ea6fbb63e6c80df3a352d031c9afa5115b07c0774c"
+        },
+        "fontTools/qu2cu/qu2cu.c": {
+          "bytes": 752087,
+          "sha256": "d143f9dd3d258e4f6abf102e085ba445af2af71ee05a1e18f7106b26b2b4cf7a"
+        },
+        "fontTools/varLib/iup.c": {
+          "bytes": 855692,
+          "sha256": "20a2500d9debc28b2ce173661c06bbc44f07295496db91d8accd782037986963"
+        }
+      }
+    },
+    {
+      "targets": [
+        "cu126",
+        "cu129",
+        "vl-cu126",
+        "vl-cu129"
+      ],
+      "dist": "paddlepaddle_gpu-3.3.1.dist-info",
+      "name": "paddlepaddle-gpu",
+      "version": "3.3.1",
+      "kind": "paddle-ap-kernel-compiler",
+      "reason": "Paddle incubate.cc 实验编译入口使用的 APY 模板，不是产品支持的预编译 OCR 推理路径；不裁 Paddle JIT 模块或原生内核。",
+      "files": {
+        "paddle/apy/matmul_pass/__main__.py": {
+          "bytes": 667,
+          "sha256": "4ce3f391be773aff6a2bbe92e2ff8ff6f426203e8f1b2ba8760349c59ca88b9a"
+        },
+        "paddle/apy/matmul_pass/abstract_drr.py": {
+          "bytes": 1414,
+          "sha256": "0d2c3302c1067331fb206397a38ca977a6a0ea2d19928d7271e058f5ab839e4f"
+        },
+        "paddle/apy/matmul_pass/access_topo_drr.py": {
+          "bytes": 1416,
+          "sha256": "339ce40b50f84fed00d5ffe1134d3814373cdc5243243daa6f1fcf91e6f0a133"
+        },
+        "paddle/apy/matmul_pass/code_gen_value_util.py": {
+          "bytes": 1099,
+          "sha256": "643320232a84c910c0d40c9eea386d8d3e0d93ffe019c3dfa6b61689a9a541cc"
+        },
+        "paddle/apy/matmul_pass/index_code_gen_value_util.py": {
+          "bytes": 772,
+          "sha256": "b30c528ccde6d31ab65cf1c6791fccd249550b6d92623fca51f85a597837a2d8"
+        },
+        "paddle/apy/matmul_pass/index_drr_pass_util.py": {
+          "bytes": 1287,
+          "sha256": "cde58ab90bef423a020935a90ac9277ba150e0fab17e032f8ec5faa95449fd60"
+        },
+        "paddle/apy/matmul_pass/index_program_translator_util.py": {
+          "bytes": 5010,
+          "sha256": "545ce90f93e70b74b2b871fbdb6600a759f4f2e3a2f755f7f8fb259e93d4d035"
+        },
+        "paddle/apy/matmul_pass/kernel_arg_id_util.py": {
+          "bytes": 3561,
+          "sha256": "c4ac8a65408e34115ec004d59c02652c4f910680243f617baff4affaeb986e56"
+        },
+        "paddle/apy/matmul_pass/kernel_arg_translator_util.py": {
+          "bytes": 1111,
+          "sha256": "6a27d237407d5d0a35016b7e30180c4644a1b4ce9bbd7c060f0683f52efb76ca"
+        },
+        "paddle/apy/matmul_pass/low_level_ir_code_gen_ctx_util.py": {
+          "bytes": 2291,
+          "sha256": "2dd8a8da94b5884c7abaf02143e80683204fc3bfb96c8e1c3bab983c3c5ed1da"
+        },
+        "paddle/apy/matmul_pass/matmul/.apy_ignore": {
+          "bytes": 36,
+          "sha256": "7fb2f15850787e7d784133008c1485fa1b0c284516736c58369b65bc92d05797"
+        },
+        "paddle/apy/matmul_pass/matmul/all_tuning_configs.h": {
+          "bytes": 20847,
+          "sha256": "6dcb827002f64361d01cb311c4355f8fadd1d5ef42ed362b9c483b3ccf59402c"
+        },
+        "paddle/apy/matmul_pass/matmul/cutlass_matmul.cuh": {
+          "bytes": 8688,
+          "sha256": "fbee1ad1f1d4bc3f8252e019ed3c1825a955852abd33520d9b24adbf9c62da37"
+        },
+        "paddle/apy/matmul_pass/matmul/cutlass_patch/batched_matrix_coord.h": {
+          "bytes": 994,
+          "sha256": "0f011553ed0f457432e1092cd81435a0e4623ffaa79106d5b56bef40a4f5472d"
+        },
+        "paddle/apy/matmul_pass/matmul/cutlass_patch/epilogue/thread/linear_combination_unary.h": {
+          "bytes": 9996,
+          "sha256": "b41e4f89c7d2e750bb20d5d0192551f0447ba2081f25e766eb32d36e5da44267"
+        },
+        "paddle/apy/matmul_pass/matmul/cutlass_patch/epilogue/thread/linear_combination_variadic.h": {
+          "bytes": 11334,
+          "sha256": "d5641f31c9bd6b72bff8f9608552a26312b2afe78b58b571606bf6ae319be1f8"
+        },
+        "paddle/apy/matmul_pass/matmul/cutlass_patch/epilogue/threadblock/default_epilogue_with_variadic.h": {
+          "bytes": 8900,
+          "sha256": "16618cc6805a28d14e5f8f6a4fdc04f7743a2f3cb32de7bb4a44e7e6357a1c58"
+        },
+        "paddle/apy/matmul_pass/matmul/cutlass_patch/epilogue/threadblock/epilogue_with_variadic.h": {
+          "bytes": 24235,
+          "sha256": "d0ca9b27833a48188bf6c62648c50f70d090182acacf789be44ff7e9fa831a9e"
+        },
+        "paddle/apy/matmul_pass/matmul/cutlass_patch/gemm/device/gemm_universal_with_variadic.h": {
+          "bytes": 15943,
+          "sha256": "cccbf76aad8b8074db4e20de2927aa0ebae55ed1fc2f5eb27072881b78bffa09"
+        },
+        "paddle/apy/matmul_pass/matmul/cutlass_patch/gemm/kernel/default_gemm_with_variadic.h": {
+          "bytes": 9024,
+          "sha256": "288f94a6eca6546f411625221471b6456dc586e01a1b2f9399a89a2519b209ed"
+        },
+        "paddle/apy/matmul_pass/matmul/cutlass_patch/trace_device.h": {
+          "bytes": 3372,
+          "sha256": "442af639b008d8b7dabe6bf0036852e9a0bf11df4b1fe315069b7f120ab10f7f"
+        },
+        "paddle/apy/matmul_pass/matmul/default_config_id.h": {
+          "bytes": 894,
+          "sha256": "d3b039091a064659f8387f6f6505ca619f0b772c74efbcb5a7c32189722734e6"
+        },
+        "paddle/apy/matmul_pass/matmul/generate_configs.py": {
+          "bytes": 12615,
+          "sha256": "01ed54eab17da34f554d72ba8801348ec8ece5d36c91ab7c339cad22910092a1"
+        },
+        "paddle/apy/matmul_pass/matmul/math_function.h": {
+          "bytes": 1076,
+          "sha256": "b72aa84ae50c5aa8fabcbe3147ddc7a41193f4bb00599beabd2ac9107a3f9a9c"
+        },
+        "paddle/apy/matmul_pass/matmul/matmul.h": {
+          "bytes": 9662,
+          "sha256": "569c4768867abad7ff77d5ce0fa211cd678a0adf9c8956dc1e8a01aaa80f898d"
+        },
+        "paddle/apy/matmul_pass/matmul/profile.h": {
+          "bytes": 3127,
+          "sha256": "f8a4b99d4507f4de0e9d66417aea083ec933b0f22e71ed48d2ca17ee7ab80116"
+        },
+        "paddle/apy/matmul_pass/matmul_epilogue_pass.py": {
+          "bytes": 5534,
+          "sha256": "90f12d32efc8c1e281a0f798cb69f143f94c2cb93272d820db1ee7b325ee3170"
+        },
+        "paddle/apy/matmul_pass/matmul_variadic_ptn.py": {
+          "bytes": 22418,
+          "sha256": "9d536e268627f964db6e7a6986dfd0828ad9752f5126aad2d59a936e59efbcfc"
+        },
+        "paddle/apy/matmul_pass/matmul_variadic_tpl.py": {
+          "bytes": 14034,
+          "sha256": "63883f679359bb96d6911507ac39baf6dbece5bc980ea06f34054294783d2c29"
+        },
+        "paddle/apy/matmul_pass/op_compute_translator_util.py": {
+          "bytes": 28078,
+          "sha256": "38510c265ac4b0e200889f0cc63665a1e55582114c0baa6d9417ae2a8df27426"
+        },
+        "paddle/apy/matmul_pass/op_conversion_drr_pass.py": {
+          "bytes": 8529,
+          "sha256": "6de713b04b66c8d2d908a0473c4dfcd3558d464e87e7c1857be258ea47650baa"
+        },
+        "paddle/apy/matmul_pass/op_index_translator_util.py": {
+          "bytes": 7390,
+          "sha256": "d5cfb5b1aa0084c52697d417750119c5af41bb51dad3bc9c3463aff7512c288e"
+        },
+        "paddle/apy/matmul_pass/program_translator_util.py": {
+          "bytes": 3054,
+          "sha256": "0148c18a43de4c426695f0c85945db50b2d4d25f00b79a5f46cd925b159e8acb"
+        },
+        "paddle/apy/matmul_pass/topo_drr_pass.py": {
+          "bytes": 18946,
+          "sha256": "35fca29a17a13aa6406d2e29f1ca7e5bc20dca965ffebd77faf000ac1edbd3cb"
+        },
+        "paddle/apy/matmul_pass/umprime.py": {
+          "bytes": 2296,
+          "sha256": "cff38585642c9aa17710e929c17b656fd115e956244bdfbf2e734593bff52405"
+        },
+        "paddle/apy/sys/__builtin__.py": {
+          "bytes": 1703,
+          "sha256": "872258eb1b619bfee84c63400912967fe42b597f503763a9d37054f4efc452e5"
+        },
+        "paddle/apy/sys/__builtin_registry_item__.py": {
+          "bytes": 2000,
+          "sha256": "0e8369013fff868717f3a94da992acf3bb8916c3a4450569cd5b971b2ba668a5"
+        },
+        "paddle/apy/sys/__builtin_trivial_op_names__.py": {
+          "bytes": 1240,
+          "sha256": "8f8238c38d78e86619ba19a6d7c951749465c2e69f0b35156079ccb29104cfdb"
+        },
+        "paddle/apy/sys/ap.py": {
+          "bytes": 1481,
+          "sha256": "2097dedb5dca8d9fc295405e5c7c8caf997247bb2ae3712d3412498af58579c9"
+        }
+      }
+    },
+    {
+      "targets": [
+        "cu126",
+        "cu129",
+        "vl-cu126",
+        "vl-cu129"
+      ],
+      "dist": "paddlex-3.7.2.dist-info",
+      "name": "paddlex",
+      "version": "3.7.2",
+      "kind": "paddlex-point-cloud-compiler",
+      "reason": "仅供 PaddleX 3D BEVFusion 两个点云自定义算子编译，含专用 setup.py；保留动态算子加载器、OCR 和文档流水线。",
+      "files": {
+        "paddlex/ops/setup.py": {
+          "bytes": 1336,
+          "sha256": "93b6d7a9d98ad369472a0aba73c76d330f1ca29cf9de51d287bc1a1fe1f2bdec"
+        },
+        "paddlex/ops/iou3d_nms/iou3d_cpu.cpp": {
+          "bytes": 8415,
+          "sha256": "014869af3110a9d4aa1569797e12758c62a313c58f87a45092c5f31431c853b8"
+        },
+        "paddlex/ops/iou3d_nms/iou3d_cpu.h": {
+          "bytes": 912,
+          "sha256": "9f8ee94e74c5c9e6ff0388196800874e491a338cdcc2fc4986fbf555de9b27e5"
+        },
+        "paddlex/ops/iou3d_nms/iou3d_nms.cpp": {
+          "bytes": 7631,
+          "sha256": "4cc42557119131a1910da20c20789e02f08ea278cc2cdd6662f55cfe4c7ca66e"
+        },
+        "paddlex/ops/iou3d_nms/iou3d_nms.h": {
+          "bytes": 1317,
+          "sha256": "921c6189e6d1ce3598dd843c3915b403da0202b4d0ca2036b230dcef71202e40"
+        },
+        "paddlex/ops/iou3d_nms/iou3d_nms_api.cpp": {
+          "bytes": 3902,
+          "sha256": "99892a6113b7822313cd1fa49a97f6854dca60fb43d8f391f8ee78db12c99448"
+        },
+        "paddlex/ops/iou3d_nms/iou3d_nms_kernel.cu": {
+          "bytes": 17401,
+          "sha256": "603b22162620910323a01b103da34ed87bdd93e9bba7ca5b547b820752d82173"
+        },
+        "paddlex/ops/voxel/voxelize_op.cc": {
+          "bytes": 7889,
+          "sha256": "6da97cf1f9825553e58c1ae127545873d69e86df0a087d9ac20deac16f6344f0"
+        },
+        "paddlex/ops/voxel/voxelize_op.cu": {
+          "bytes": 14158,
+          "sha256": "102e476615bae556bb83c2c3ba2dfa3c293cc66f184e30547e6778fa52d17044"
+        }
+      }
+    },
+    {
+      "targets": [
+        "vl-cu126",
+        "vl-cu129"
+      ],
+      "dist": "scipy-1.18.0+umi.vl.1.dist-info",
+      "name": "scipy",
+      "version": "1.18.0+umi.vl.1",
+      "kind": "scipy-linker-import-library",
+      "reason": "仅供 GNU 链接器的 PE 导入库；保留 .pyd、DLL 和版面 KMeans 运行闭包。",
+      "files": {
+        "scipy/_cyutility.cp313-win_amd64.dll.a": {
+          "bytes": 1766,
+          "sha256": "39f41c3ea2db5e727afff209eb71241fd8199fecbe4620cf78bcdf04f934357f"
+        },
+        "scipy/_lib/_ccallback_c.cp313-win_amd64.dll.a": {
+          "bytes": 1800,
+          "sha256": "8aaa5f0422fdcfc4a715e44455ca711bccfdfe42517255f3b5a6c742c17fd742"
+        },
+        "scipy/_lib/_fpumode.cp313-win_amd64.dll.a": {
+          "bytes": 1740,
+          "sha256": "064835dba5444349ee8463455bc43f3570009c63aa1aefa64fb77dd0dbf42ac3"
+        },
+        "scipy/_lib/_test_ccallback.cp313-win_amd64.dll.a": {
+          "bytes": 1842,
+          "sha256": "5bcb341b57a6bad340e5e30fccfee7bdfb8d31b7e619fcada327216e528301d1"
+        },
+        "scipy/_lib/_test_deprecation_call.cp313-win_amd64.dll.a": {
+          "bytes": 1946,
+          "sha256": "a52370a662be6216d8ac59766a66b9812931626e9948082c0e392a2d056cadcb"
+        },
+        "scipy/_lib/_test_deprecation_def.cp313-win_amd64.dll.a": {
+          "bytes": 1932,
+          "sha256": "54e2cf650f3126661ca66d92178034a4f3602d9ae91033d13647035cb6171f6f"
+        },
+        "scipy/_lib/_uarray/_uarray.cp313-win_amd64.dll.a": {
+          "bytes": 1722,
+          "sha256": "810335aac62929c4509f827344674b11d5e327459718090057197efb49ed2506"
+        },
+        "scipy/_lib/messagestream.cp313-win_amd64.dll.a": {
+          "bytes": 1812,
+          "sha256": "fabc1fc184c9b291986676cc0eba1a9a5c4114a9d0688508a05969764ad4a0bc"
+        },
+        "scipy/fft/_duccfft/pyduccfft.cp313-win_amd64.dll.a": {
+          "bytes": 1752,
+          "sha256": "c71a9481b429b7ad058bcfb178b1dcf1c44ec4304fb011abf9da96bacab469b9"
+        },
+        "scipy/io/_fast_matrix_market/_fmm_core.cp313-win_amd64.dll.a": {
+          "bytes": 1752,
+          "sha256": "9fa966f41d3f2bd00c52bb8312773dcaf79ebb1d06bf091601cc2cf0af13c052"
+        },
+        "scipy/io/matlab/_mio5_utils.cp313-win_amd64.dll.a": {
+          "bytes": 1782,
+          "sha256": "8802d2af8804015d593785f9bcd0e7ee169e595b4ae6093a1660b86abd375c44"
+        },
+        "scipy/io/matlab/_mio_utils.cp313-win_amd64.dll.a": {
+          "bytes": 1766,
+          "sha256": "d1571f34a91e8b3b4927589d40c7b7dbb1e9fdbd677ca6ead26a3196c0bfb359"
+        },
+        "scipy/io/matlab/_streams.cp313-win_amd64.dll.a": {
+          "bytes": 1740,
+          "sha256": "9a87ed37a817bbe313c7f8929781485dc473784e199c0bf5bd50136fa83d8f43"
+        },
+        "scipy/linalg/_batched_linalg.cp313-win_amd64.dll.a": {
+          "bytes": 1842,
+          "sha256": "874626b6cea2ce94b270672a4bcfdafacc5ca90c254a5611d4d79d5f10ce93f4"
+        },
+        "scipy/linalg/_cythonized_array_utils.cp313-win_amd64.dll.a": {
+          "bytes": 1962,
+          "sha256": "fc2a7ff5745c50c77aafb63f3150d8b38836951f4d315b7a2126712a3f6a041f"
+        },
+        "scipy/linalg/_decomp_interpolative.cp313-win_amd64.dll.a": {
+          "bytes": 1932,
+          "sha256": "d092667abfc15a4ecff778e5bfe1e2a5ab5db501a03c894b35d611af9fddeb13"
+        },
+        "scipy/linalg/_decomp_update.cp313-win_amd64.dll.a": {
+          "bytes": 1826,
+          "sha256": "418e52384257c38c01dfbcceb1c3f03dbd13778304a6ae06131cc05b7cf6993c"
+        },
+        "scipy/linalg/_fblas.cp313-win_amd64.dll.a": {
+          "bytes": 1706,
+          "sha256": "36da7b7ace54353e403d2e809c74036bc560f159582933a90ff668205e13aad4"
+        },
+        "scipy/linalg/_flapack.cp313-win_amd64.dll.a": {
+          "bytes": 1740,
+          "sha256": "9fa0d94b294bcec7ee09020416d9a06f667b1c6946f04eba6aae5e14e7d8c7b1"
+        },
+        "scipy/linalg/_internal_matfuncs.cp313-win_amd64.dll.a": {
+          "bytes": 1886,
+          "sha256": "7d6df6c0c13071a385ade02490856eb1bdd56518442c8e0d4448a8f4b3d91595"
+        },
+        "scipy/linalg/_linalg_pythran.cp313-win_amd64.dll.a": {
+          "bytes": 1842,
+          "sha256": "aec8e0b0452e7c1a2a45fcd0960576d25d086a17d00640c72c1eba2fc9db8c37"
+        },
+        "scipy/linalg/_matfuncs_sqrtm_triu.cp313-win_amd64.dll.a": {
+          "bytes": 1920,
+          "sha256": "2351d8be49b5947a8f652d0d1cc6b21266b6bec50150d7603da33459221117a1"
+        },
+        "scipy/linalg/_solve_toeplitz.cp313-win_amd64.dll.a": {
+          "bytes": 1842,
+          "sha256": "0961caa62eaaaa51d8c313d209fc9feec6a15f355fe50b77c6ab942fc973ae6e"
+        },
+        "scipy/linalg/cython_blas.cp313-win_amd64.dll.a": {
+          "bytes": 1782,
+          "sha256": "4a30dd38a87eb491555727f551264eb6e10478dad21f87661a18f33e0a49218d"
+        },
+        "scipy/linalg/cython_lapack.cp313-win_amd64.dll.a": {
+          "bytes": 1812,
+          "sha256": "d35c63f1ff4175ab8f291b2c5cf1a5252916070d8327e10fb0f4e4ec09a54ba5"
+        },
+        "scipy/sparse/_csparsetools.cp313-win_amd64.dll.a": {
+          "bytes": 1812,
+          "sha256": "c6429cdf62e226f27d93efd2e8f9d8001f2e6a2fd9d84002a106544cee40608c"
+        },
+        "scipy/sparse/_sparsetools.cp313-win_amd64.dll.a": {
+          "bytes": 1800,
+          "sha256": "ddc3b9f857871dde0cf5596dc715d318ca30c7d2d56330954549a1dca6649e55"
+        },
+        "scipy/sparse/csgraph/_flow.cp313-win_amd64.dll.a": {
+          "bytes": 1692,
+          "sha256": "a18e329c602e123ab4cf950eb6e3303b82150e5d2eb141cc8cd0c56a654eddaa"
+        },
+        "scipy/sparse/csgraph/_matching.cp313-win_amd64.dll.a": {
+          "bytes": 1752,
+          "sha256": "9965df3efde71fcaed12264c7c54496500a644218cff00aa76ed20d8196f8365"
+        },
+        "scipy/sparse/csgraph/_min_spanning_tree.cp313-win_amd64.dll.a": {
+          "bytes": 1886,
+          "sha256": "4680bfb04682ce9681b5907781a2f26a07bf86af091075cd2e8ee00326101812"
+        },
+        "scipy/sparse/csgraph/_reordering.cp313-win_amd64.dll.a": {
+          "bytes": 1782,
+          "sha256": "e042a09fdf3a0e3cbf8245d1a5d3ee31fee9f56b276316d018b34189e9ef6a0d"
+        },
+        "scipy/sparse/csgraph/_shortest_path.cp313-win_amd64.dll.a": {
+          "bytes": 1826,
+          "sha256": "8c0dc09d2aa141636f2f861b7c1b123ca9671084fec2f4567d47cea4a8e3e41b"
+        },
+        "scipy/sparse/csgraph/_tools.cp313-win_amd64.dll.a": {
+          "bytes": 1706,
+          "sha256": "28ee9f14da1fac1cc234abd379593ea9109215599c7247e4854de60a9ead901b"
+        },
+        "scipy/sparse/csgraph/_traversal.cp313-win_amd64.dll.a": {
+          "bytes": 1766,
+          "sha256": "503d5b035488ade9e87f7d0798db9ca49c813fabb8009fd6dad25da3ae60c3cc"
+        },
+        "scipy/sparse/linalg/_dsolve/_superlu.cp313-win_amd64.dll.a": {
+          "bytes": 1740,
+          "sha256": "92b21a1b56e84db49633d75f9dbdcb81b5630f5cf056a5a6efd303525cb9a936"
+        },
+        "scipy/sparse/linalg/_eigen/arpack/_arpacklib.cp313-win_amd64.dll.a": {
+          "bytes": 1766,
+          "sha256": "c3bbd5b39eb68e86bf454468c253bd2707a900bab6e722138877a42f8e5625cb"
+        },
+        "scipy/sparse/linalg/_propack.cp313-win_amd64.dll.a": {
+          "bytes": 1740,
+          "sha256": "213593aefbfd49c8f8ec7de108c7c03c0f044701b1ead65f676deb68f75e245d"
+        },
+        "scipy/spatial/_ckdtree.cp313-win_amd64.dll.a": {
+          "bytes": 1740,
+          "sha256": "f9d60996b3c3c3083d9d848012158d86a3947caabe5648f3a8de0071baa84488"
+        },
+        "scipy/spatial/_distance_pybind.cp313-win_amd64.dll.a": {
+          "bytes": 1860,
+          "sha256": "33b2ceb23c012fd1a6b366bf1a5f8cfbd549d7953b0b1415722560ca37f80350"
+        },
+        "scipy/spatial/_distance_wrap.cp313-win_amd64.dll.a": {
+          "bytes": 1826,
+          "sha256": "2d75b2ee22e668f9c504c7c8e7ee16c2ab40c319c76c8e25f24e96300b8a2659"
+        },
+        "scipy/spatial/_hausdorff.cp313-win_amd64.dll.a": {
+          "bytes": 1766,
+          "sha256": "c3fd04dc5a09a9054dc7ccc9c8951d9786aa847e48dc78797d88f86bfbbeb337"
+        },
+        "scipy/spatial/_qhull.cp313-win_amd64.dll.a": {
+          "bytes": 1706,
+          "sha256": "ca9d95843bb519610507772080cce0a1a34050abaafa31c3256a612880097761"
+        },
+        "scipy/spatial/_voronoi.cp313-win_amd64.dll.a": {
+          "bytes": 1740,
+          "sha256": "7fc2d65202ecb81c2b0a8a7f87112841250f4194598ac682eca07e87d5369093"
+        },
+        "scipy/spatial/transform/_rigid_transform_cy.cp313-win_amd64.dll.a": {
+          "bytes": 1902,
+          "sha256": "4264702d2ed180f6b0b6d236f4e5dcc760a66bfea470b7ef91c584a6c2d37c57"
+        },
+        "scipy/spatial/transform/_rotation_cy.cp313-win_amd64.dll.a": {
+          "bytes": 1800,
+          "sha256": "cb71a093fc981a0f0b73e1040205ba2ac2c35344d436de3f851a8a8dc867c6a6"
+        },
+        "scipy/special/_comb.cp313-win_amd64.dll.a": {
+          "bytes": 1692,
+          "sha256": "c2ffa3e9eca3c4282a383e4fbab44eb5e383c5bf096b8523eac18fa8dde17948"
+        },
+        "scipy/special/_ellip_harm_2.cp313-win_amd64.dll.a": {
+          "bytes": 1812,
+          "sha256": "b54d9e614bcee656b403c635cb3b6e983951f362922d40016b4fd3b29a36a64a"
+        },
+        "scipy/special/_gufuncs.cp313-win_amd64.dll.a": {
+          "bytes": 1740,
+          "sha256": "40a40649dd9c29a4909160963c976ba96d6e98b0972d97ff44d8bf72e45b86a4"
+        },
+        "scipy/special/_specfun.cp313-win_amd64.dll.a": {
+          "bytes": 1740,
+          "sha256": "eaa97472a93ae8ea957a6d2fd7972ab77bc51b0d0233a6b83b0d4cfe63810409"
+        },
+        "scipy/special/_special_ufuncs.cp313-win_amd64.dll.a": {
+          "bytes": 1842,
+          "sha256": "f146e0dcdc16055ba4b6e53500374e597a95eecaf70fafebdc989553896ad057"
+        },
+        "scipy/special/_test_internal.cp313-win_amd64.dll.a": {
+          "bytes": 1826,
+          "sha256": "1b06e082549d7dec25ae1b2bcf2294e32ff84a8c777d7def6f8adf6a29a4530e"
+        },
+        "scipy/special/_ufuncs.cp313-win_amd64.dll.a": {
+          "bytes": 1722,
+          "sha256": "85ced749fcd9e14222d42becda6b9fe91791652d13641852ed7be2f0888205bb"
+        },
+        "scipy/special/_ufuncs_cxx.cp313-win_amd64.dll.a": {
+          "bytes": 1782,
+          "sha256": "18acb8dd308bf6fe2e27ce3b05678100f5dcb22c47770bd389da3541c40e2708"
+        },
+        "scipy/special/cython_special.cp313-win_amd64.dll.a": {
+          "bytes": 1826,
+          "sha256": "d97bf3b4d3be6f0e2f472c4e12f6de0d041c624fcc044ef40a8172e58d76fcdf"
+        }
+      }
+    },
+    {
+      "targets": [
+        "vl-cu129"
+      ],
+      "dist": "nvidia_cuda_runtime_cu12-12.9.37.dist-info",
+      "name": "nvidia-cuda-runtime-cu12",
+      "version": "12.9.37",
+      "kind": "cuda-sdk-development",
+      "reason": "CUDA 12.9 SDK 头文件及链接归档；保留 CUDA Runtime DLL、架构和运行许可证。",
+      "files": {
+        "nvidia/cuda_runtime/include/cuda_fp4.h": {
+          "bytes": 14180,
+          "sha256": "9fab28f598e98de19f50950b63269b3bd72de9e20170135ee88175a999dec262"
+        },
+        "nvidia/cuda_runtime/include/cuda_fp4.hpp": {
+          "bytes": 35784,
+          "sha256": "d05895b1b40aa48e2c1fe94309198cff9b0b599268ce4a445fa279941dfe1f42"
+        },
+        "nvidia/cuda_runtime/include/cuda_fp6.h": {
+          "bytes": 14325,
+          "sha256": "870d0daaa39c028b63d0b221917b9e4ca93e0120db196f1050b3cc81c7c4a4ca"
+        },
+        "nvidia/cuda_runtime/include/cuda_fp6.hpp": {
+          "bytes": 57412,
+          "sha256": "1f3a1e2dc95279b0b85802aee26fe1394210f36c28dfa3fce818b80d576c9683"
+        },
+        "nvidia/cuda_runtime/lib/x64/cuda.lib": {
+          "bytes": 161926,
+          "sha256": "99bd9b7964ea87a468f3aad5a31ee816a3773a6a67b09ab11a9744234f1a7e05"
+        },
+        "nvidia/cuda_runtime/lib/x64/cudadevrt.lib": {
+          "bytes": 3121468,
+          "sha256": "b7dcf6ab8095c5d339f022d24cda785af2486336741183ab2544fd8109eea2e3"
+        },
+        "nvidia/cuda_runtime/lib/x64/cudart.lib": {
+          "bytes": 117462,
+          "sha256": "8a211e72ae5b0fb334adad97a13de348428304631b586de67c4697a5b100454d"
+        },
+        "nvidia/cuda_runtime/lib/x64/cudart_static.lib": {
+          "bytes": 2898730,
+          "sha256": "2728004e267c391bede10a84259c9863710dad24d6a80d49f76e9613457b5f16"
+        }
+      }
+    }
+  ]
+}

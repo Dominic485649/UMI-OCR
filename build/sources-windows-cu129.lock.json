@@ -1,0 +1,273 @@
+{
+  "gpuRuntime": {
+    "cuda": "12.9",
+    "notice": "来源及输入身份，不替代新 NVIDIA 运行库及组合许可的公开发布门禁。",
+    "nvidia": [
+      {
+        "bytes": 552611067,
+        "filename": "nvidia_cublas_cu12-12.9.0.13-py3-none-win_amd64.whl",
+        "name": "nvidia-cublas-cu12",
+        "sha256": "a525014e22b8adb79d04b70f69fd53d09c7b851002b3d332cd601da3a37276fd",
+        "url": "https://files.pythonhosted.org/packages/08/79/0cf1ed0ccea47067cc2140ab9bd38100de574824a6dc9e12151fb9b39c59/nvidia_cublas_cu12-12.9.0.13-py3-none-win_amd64.whl",
+        "version": "12.9.0.13"
+      },
+      {
+        "bytes": 3591221,
+        "filename": "nvidia_cuda_runtime_cu12-12.9.37-py3-none-win_amd64.whl",
+        "name": "nvidia-cuda-runtime-cu12",
+        "sha256": "84a750e4d46a32e0b8adc4efdd4021fe49741b1cbbee72421c5400ff9865dd83",
+        "url": "https://files.pythonhosted.org/packages/b8/1c/c6352858f84e5203279300a9fb4f9d7613cbab5fd4afd78613bb9bcdc64c/nvidia_cuda_runtime_cu12-12.9.37-py3-none-win_amd64.whl",
+        "version": "12.9.37"
+      },
+      {
+        "bytes": 767785830,
+        "filename": "nvidia_cudnn_cu12-9.9.0.52-py3-none-win_amd64.whl",
+        "name": "nvidia-cudnn-cu12",
+        "sha256": "d53036b7edad1a85b5d59580defc91e30326746fde21ffc701eb8b4d4695eca1",
+        "url": "https://files.pythonhosted.org/packages/6f/5c/f77147ce7e27a4e9087fb34b0539ff085c68e7093e96ee85576fe31fe064/nvidia_cudnn_cu12-9.9.0.52-py3-none-win_amd64.whl",
+        "version": "9.9.0.52"
+      },
+      {
+        "bytes": 200095584,
+        "filename": "nvidia_cufft_cu12-11.4.0.6-py3-none-win_amd64.whl",
+        "name": "nvidia-cufft-cu12",
+        "sha256": "26cd694ef8472efac5e73466d05d5b356f80eafe849095eb6bf4d7f93390557d",
+        "url": "https://files.pythonhosted.org/packages/4d/fe/b83d984f5f7420e2d43d148fe2379775d6f53d3e0a9057d998b16939ffc8/nvidia_cufft_cu12-11.4.0.6-py3-none-win_amd64.whl",
+        "version": "11.4.0.6"
+      },
+      {
+        "bytes": 68774847,
+        "filename": "nvidia_curand_cu12-10.3.10.19-py3-none-win_amd64.whl",
+        "name": "nvidia-curand-cu12",
+        "sha256": "e8129e6ac40dc123bd948e33d3e11b4aa617d87a583fa2f21b3210e90c743cde",
+        "url": "https://files.pythonhosted.org/packages/e5/98/1bd66fd09cbe1a5920cb36ba87029d511db7cca93979e635fd431ad3b6c0/nvidia_curand_cu12-10.3.10.19-py3-none-win_amd64.whl",
+        "version": "10.3.10.19"
+      },
+      {
+        "bytes": 320275500,
+        "filename": "nvidia_cusolver_cu12-11.7.4.40-py3-none-win_amd64.whl",
+        "name": "nvidia-cusolver-cu12",
+        "sha256": "288993d2c3bd8167baa3f7b581e219175db576a54d2c36ad62b163a07de923c5",
+        "url": "https://files.pythonhosted.org/packages/b6/c6/0e3459479a34e7d7cde75b6990953b0873781eac05edfafcd761fe8918c2/nvidia_cusolver_cu12-11.7.4.40-py3-none-win_amd64.whl",
+        "version": "11.7.4.40"
+      },
+      {
+        "bytes": 362510485,
+        "filename": "nvidia_cusparse_cu12-12.5.9.5-py3-none-win_amd64.whl",
+        "name": "nvidia-cusparse-cu12",
+        "sha256": "228d7ee34c8e3622fa58aa7a53c6f5d05f5d0c6980173c46e308129b66910c88",
+        "url": "https://files.pythonhosted.org/packages/4e/de/d771533939aeea1433a338825190453f9fcbf235370b8e7161522fd89a13/nvidia_cusparse_cu12-12.5.9.5-py3-none-win_amd64.whl",
+        "version": "12.5.9.5"
+      },
+      {
+        "bytes": 277236675,
+        "filename": "nvidia_nvjitlink_cu12-12.9.41-py3-none-win_amd64.whl",
+        "name": "nvidia-nvjitlink-cu12",
+        "sha256": "d7980883fddf331adb635be475b9d7f07272273cd51f6da8adf487571f17da9e",
+        "url": "https://files.pythonhosted.org/packages/a5/69/68ac94d2a75efc6a2e60fda3633c2171c9793f49fcffe1f1d91ece409bed/nvidia_nvjitlink_cu12-12.9.41-py3-none-win_amd64.whl",
+        "version": "12.9.41"
+      }
+    ],
+    "paddle": {
+      "bytes": 809978141,
+      "filename": "paddlepaddle_gpu-3.3.1-cp313-cp313-win_amd64.whl",
+      "sha256": "71aed9d3d77f571eeee2e2deb6b33a06d18d82424bb04a81435480b7418fdab4",
+      "url": "https://paddle-whl.cdn.bcebos.com/stable/cu129/paddlepaddle-gpu/paddlepaddle_gpu-3.3.1-cp313-cp313-win_amd64.whl",
+      "version": "3.3.1"
+    }
+  },
+  "modelBaseUrl": "https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/",
+  "models": [
+    {
+      "license": "Apache-2.0",
+      "license_evidence": "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_doc_ori/blob/d3b95a6dff5fe8a94f2748e12b61cb26818a0df8/README.md",
+      "local_filename": "models/PP-LCNet_x1_0_doc_ori_infer/inference.pdiparams",
+      "model_name": "PP-LCNet_x1_0_doc_ori_infer",
+      "modified": false,
+      "name": "PP-LCNet_x1_0_doc_ori_infer.tar",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "LICENSES/Apache-2.0.txt",
+        "PaddlePaddle attribution"
+      ],
+      "sha256": "282337df5c41f7cdf8dacd5acf71fddfdc10218399f4b318463c17f4eae96c97",
+      "size": 6881280,
+      "upstream_owner": "PaddlePaddle",
+      "upstream_repository": "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_doc_ori",
+      "upstream_revision": "d3b95a6dff5fe8a94f2748e12b61cb26818a0df8",
+      "upstream_weight_sha256": "e8d6e7c5d264507e40e58a655779059d616b20d7441ea22047d829eb3931989c"
+    },
+    {
+      "license": "Apache-2.0",
+      "license_evidence": "https://huggingface.co/PaddlePaddle/UVDoc/tree/16c3f0ea9c2f0c6a57e24160f7eeaa7574613fa3",
+      "local_filename": "models/UVDoc_grid_infer/inference.pdiparams",
+      "model_name": "UVDoc_grid_infer",
+      "modification_notice": "inference.json is transformed by build/tools/derive_uvdoc_grid_model.py to add the grid output contract; inference.pdiparams remains byte-identical to the upstream artifact.",
+      "modified": true,
+      "name": "UVDoc_infer.tar",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "LICENSES/Apache-2.0.txt",
+        "PaddlePaddle attribution",
+        "UVDoc_grid_infer modification notice"
+      ],
+      "sha256": "15d79c6bcbf738b7e132eedff6ed57c7e834c73cbc140a1fff8fd8ab9c2a35b9",
+      "size": 32256000,
+      "upstream_owner": "PaddlePaddle",
+      "upstream_repository": "https://huggingface.co/PaddlePaddle/UVDoc",
+      "upstream_revision": "16c3f0ea9c2f0c6a57e24160f7eeaa7574613fa3",
+      "upstream_weight_sha256": "810488899520e0da843b9bd9769ba4949f1c81e357f0eceb12d4a7da459c3eca"
+    },
+    {
+      "license": "Apache-2.0",
+      "license_evidence": "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_textline_ori/tree/cd237a44b0e359d4fe38310a416203cf7403faa5",
+      "local_filename": "models/PP-LCNet_x1_0_textline_ori_infer/inference.pdiparams",
+      "model_name": "PP-LCNet_x1_0_textline_ori_infer",
+      "modified": false,
+      "name": "PP-LCNet_x1_0_textline_ori_infer.tar",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "LICENSES/Apache-2.0.txt",
+        "PaddlePaddle attribution"
+      ],
+      "sha256": "6171f69605215a85624d650e9079fa45f7c3eaf944296181bcc5395bf3ddc7f6",
+      "size": 6871040,
+      "upstream_owner": "PaddlePaddle",
+      "upstream_repository": "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_textline_ori",
+      "upstream_revision": "cd237a44b0e359d4fe38310a416203cf7403faa5",
+      "upstream_weight_sha256": "0de2bcf996cf553e2b848dd7b1769dafffc6917b1ccdf55c1d8efe7909fbf743"
+    },
+    {
+      "license": "Apache-2.0",
+      "license_evidence": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_det/tree/8e0f56fb2ef86b461d99cfc7ac5c137738985f61",
+      "local_filename": "models/PP-OCRv6_medium_det_infer/inference.pdiparams",
+      "model_name": "PP-OCRv6_medium_det_infer",
+      "modified": false,
+      "name": "PP-OCRv6_medium_det_infer.tar",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "LICENSES/Apache-2.0.txt",
+        "PaddlePaddle attribution"
+      ],
+      "sha256": "144d0621e059566e5086e228829171591c144c2deb07b2dad4962214fbabfcf7",
+      "size": 62279680,
+      "upstream_owner": "PaddlePaddle",
+      "upstream_repository": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_det",
+      "upstream_revision": "8e0f56fb2ef86b461d99cfc7ac5c137738985f61",
+      "upstream_weight_sha256": "85218d2e3d98f5a21c58b4220627be923a97aee5db3cc71f39536ab31ac53960"
+    },
+    {
+      "license": "Apache-2.0",
+      "license_evidence": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_rec/tree/e5a92bcbc5cc1b494628e458d267778f0704fd7c",
+      "local_filename": "models/PP-OCRv6_medium_rec_infer/inference.pdiparams",
+      "model_name": "PP-OCRv6_medium_rec_infer",
+      "modified": false,
+      "name": "PP-OCRv6_medium_rec_infer.tar",
+      "redistribution_allowed": true,
+      "required_notices": [
+        "LICENSES/Apache-2.0.txt",
+        "PaddlePaddle attribution"
+      ],
+      "sha256": "4eecc1c6a4623765042e6fc15446da0da110b7d875b6b72b2d351d2b2dbd4da6",
+      "size": 76851200,
+      "upstream_owner": "PaddlePaddle",
+      "upstream_repository": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_rec",
+      "upstream_revision": "e5a92bcbc5cc1b494628e458d267778f0704fd7c",
+      "upstream_weight_sha256": "1b01c79a914587933f615569e75de54f2e638ebb5d3f3b3c1b38c24ede8c7319"
+    }
+  ],
+  "runtime": [
+    {
+      "name": "python-3.13.16-embed-amd64.zip",
+      "sha256": "97dae5274cc54867065e8d5a3226e48c35017ed332a0fdb0e27d5b5821961297",
+      "size": 11439094,
+      "url": "https://www.python.org/ftp/python/3.13.16/python-3.13.16-embed-amd64.zip"
+    },
+    {
+      "name": "pip-26.1.2-py3-none-any.whl",
+      "sha256": "382ff9f685ee3bc25864f820aa50505825f10f5458ffff07e30a6d96e5715cab",
+      "size": 1813144,
+      "url": "https://files.pythonhosted.org/packages/5d/95/6b5cb3461ea5673ba0995989746db58eb18b91b54dbf331e72f569540946/pip-26.1.2-py3-none-any.whl"
+    }
+  ],
+  "thirdPartySources": [
+    {
+      "component": "ModelScope",
+      "derivationTool": "build/tools/package_modelscope_download.py",
+      "derivedVersion": "1.38.1+umi.download.1",
+      "license": "Apache-2.0",
+      "name": "modelscope-1.38.1.tar.gz",
+      "sha256": "a81f3685b1545f52b415d88a763456416aa65170e622f9dcc02eadb3f8e1cfa0",
+      "size": 4542886,
+      "url": "https://files.pythonhosted.org/packages/33/72/b37f46f8e1900c64485420b210eecda1f758cbd0fe8ade60c5bbf883b25e/modelscope-1.38.1.tar.gz",
+      "version": "1.38.1"
+    },
+    {
+      "checksum_evidence": "SHA-256 Digest header from the official download.qt.io response, checked 2026-11-03",
+      "component": "QtWebEngine",
+      "license": "LGPL-3.0-or-later OR GPL-2.0-or-later OR commercial; Chromium third-party terms",
+      "name": "qtwebengine-everywhere-src-6.11.2.tar.xz",
+      "sha256": "6101c1aa00ff933d1b65ee5d167f76e8d71b9ac5b378b0111277723ebda7c163",
+      "size": 580351104,
+      "url": "https://download.qt.io/official_releases/qt/6.11/6.11.2/submodules/qtwebengine-everywhere-src-6.11.2.tar.xz",
+      "version": "6.11.2"
+    },
+    {
+      "name": "pymupdf-1.28.0.tar.gz",
+      "sha256": "e53f3567403a92da15caa9e7ae0164327fff48817e9f40175367fb9de524258d",
+      "size": 87637751,
+      "url": "https://files.pythonhosted.org/packages/8e/e9/6d6c5d6c0a3551bffd47681a6240caf941727f195b45593cf20ab36f018f/pymupdf-1.28.0.tar.gz"
+    },
+    {
+      "name": "ffmpeg-4.4.4.tar.xz",
+      "sha256": "e80b380d595c809060f66f96a5d849511ef4a76a26b76eacf5778b94c3570309",
+      "size": 9565584,
+      "upstream_revision": "c1738cdff0d3b6426f3e6fd9bf25af7d145ad26f",
+      "url": "https://ffmpeg.org/releases/ffmpeg-4.4.4.tar.xz"
+    },
+    {
+      "component": "certifi",
+      "license": "MPL-2.0",
+      "name": "certifi-2026.6.17.tar.gz",
+      "sha256": "024c88eeec92ca068db80f02b8b07c9cef7b9fe261d1d535abfd5abd6f6af432",
+      "size": 134594,
+      "upstream_repository": "https://github.com/certifi/python-certifi",
+      "upstream_revision": "d0ac52f3d93a514224197c7efb66c41b1beae5d1",
+      "url": "https://files.pythonhosted.org/packages/c9/c7/424b75da314c1045981bd9777432fad05a9e0c69daa4ed7e308bbaffe405/certifi-2026.6.17.tar.gz",
+      "version": "2026.6.17"
+    },
+    {
+      "component": "tqdm",
+      "license": "MPL-2.0 AND MIT",
+      "name": "tqdm-4.68.4.tar.gz",
+      "sha256": "19829c9673638f2a0b8617da4cdcb927e831cd88bcfcb6e78d42a4d1af131520",
+      "size": 792418,
+      "upstream_repository": "https://github.com/tqdm/tqdm",
+      "upstream_revision": "53d096e77c28005b4f9fe1e9d6274ae311bf87e7",
+      "url": "https://files.pythonhosted.org/packages/ae/5f/57ff8b434839e70dab45601284ea413e947a63799891b7553e5960a793a8/tqdm-4.68.4.tar.gz",
+      "version": "4.68.4"
+    },
+    {
+      "component": "validate-pyproject",
+      "license": "MPL-2.0",
+      "name": "validate_pyproject-0.25.tar.gz",
+      "sha256": "e68c12d1cb0d8ddc269ffc42875a81727ddb7865000aa6d2f77d833b55c53f0b",
+      "size": 118662,
+      "upstream_repository": "https://github.com/abravalheri/validate-pyproject",
+      "upstream_revision": "4b2e70d08cb2ccd26d1fba73588de41c7a5d50b7",
+      "url": "https://files.pythonhosted.org/packages/e7/d8/45a82408619c306d0083afcf6142617201b2647a82e9a7d4c902e837274c/validate_pyproject-0.25.tar.gz",
+      "version": "0.25"
+    },
+    {
+      "component": "setuptools",
+      "license": "MIT",
+      "name": "setuptools-83.0.0.tar.gz",
+      "sha256": "025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef",
+      "size": 1154254,
+      "upstream_repository": "https://github.com/pypa/setuptools",
+      "upstream_revision": "6519f728c6f23c992df81a5691ef7655184a20eb",
+      "url": "https://files.pythonhosted.org/packages/34/26/f5d29e25ffdb535afef2d35cdb55b325298f96debd670da4c325e08d70f4/setuptools-83.0.0.tar.gz",
+      "version": "83.0.0"
+    }
+  ]
+}

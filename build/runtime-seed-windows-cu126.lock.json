@@ -1,0 +1,30 @@
+{
+  "format": "umi-reviewed-cu126-runtime-seed-v1",
+  "platform": "windows-x64-cp313",
+  "cudaVersion": "12.6",
+  "requirementsSha256": "5ff92d7b6f6fcada729ea15ff2c65ad90a40339e5b34a268a72a428d6f25515c",
+  "sourcesSha256": "3c67ac4ac1710403ffa60aec342efe0015218ba2ff954326d91e216cdb2e8a93",
+  "baselineReceiptSha256": "b14bc880535b761dbef1940b297368c1edc47e9f7d49de4a0c583adeb0dcb486",
+  "components": {
+    "cuda": {
+      "id": "win32_PaddleOCRv6_CUDA",
+      "version": "3.0.6",
+      "archiveName": "Umi-OCR-Plugin_v3.0.6_Windows_x64_CUDA.tar.xz",
+      "archiveBytes": 1954824344,
+      "archiveSha256": "44d8b20ebad1f5b9133b410912c87c9aa02a9e1a48391143c60821649e8f580c",
+      "runtimeBytes": 3985147709,
+      "layoutSha256": "00202f5fd9d54fd0ba16395838f7720cde227f7ec4c0c0df0efa93b1fdb0e695",
+      "originalRequirementsSha256": "5ff92d7b6f6fcada729ea15ff2c65ad90a40339e5b34a268a72a428d6f25515c"
+    },
+    "vl": {
+      "id": "win32_PaddleOCRVL_1_6",
+      "version": "3.1.4",
+      "archiveName": "Umi-OCR-Plugin_v3.1.4_Windows_x64_PaddleVL.tar.xz",
+      "archiveBytes": 2185447440,
+      "archiveSha256": "c38437c586f29881cf74bd3ce6fda253b3d97141b176d5a2856043458a68a90a",
+      "runtimeBytes": 4745237537,
+      "layoutSha256": "512b366f8c6da7503abac2ce166736bb65d870b3ef62d08c9555bff1da37e952",
+      "originalRequirementsSha256": "f8dfac1cca93dee10a4b309a75f3d2002e7c7ce4b2314c249c8d544601d0d683"
+    }
+  }
+}
